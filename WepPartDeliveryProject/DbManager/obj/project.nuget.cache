@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "dgSpecHash": "cOFMcaWG5PYmvMmf/KQtp+MC/XNXeHBiqL1kqiOvDHRlnXs4H3MmH6CMbRfaFIsFu/OB2FwQKvIe1wD3LKHIyw==",
+  "success": true,
+  "projectFilePath": "E:\\University\\Диплом\\WepPartDeliveryProject\\DbManager\\DbManager.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\jilts\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\5.0.0\\microsoft.bcl.asyncinterfaces.5.0.0.nupkg.sha512",
+    "C:\\Users\\jilts\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\7.0.0\\microsoft.extensions.dependencyinjection.abstractions.7.0.0.nupkg.sha512",
+    "C:\\Users\\jilts\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\7.0.0\\microsoft.extensions.logging.abstractions.7.0.0.nupkg.sha512",
+    "C:\\Users\\jilts\\.nuget\\packages\\microsoft.extensions.options\\7.0.0\\microsoft.extensions.options.7.0.0.nupkg.sha512",
+    "C:\\Users\\jilts\\.nuget\\packages\\microsoft.extensions.primitives\\7.0.0\\microsoft.extensions.primitives.7.0.0.nupkg.sha512",
+    "C:\\Users\\jilts\\.nuget\\packages\\neo4j.driver\\5.5.0\\neo4j.driver.5.5.0.nupkg.sha512",
+    "C:\\Users\\jilts\\.nuget\\packages\\system.valuetuple\\4.5.0\\system.valuetuple.4.5.0.nupkg.sha512"
+  ],
+  "logs": []
+}

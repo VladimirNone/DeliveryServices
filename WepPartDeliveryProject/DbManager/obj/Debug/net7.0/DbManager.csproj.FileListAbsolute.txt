@@ -1,0 +1,12 @@
+E:\University\Диплом\WepPartDeliveryProject\DbManager\bin\Debug\net7.0\DbManager.deps.json
+E:\University\Диплом\WepPartDeliveryProject\DbManager\bin\Debug\net7.0\DbManager.dll
+E:\University\Диплом\WepPartDeliveryProject\DbManager\bin\Debug\net7.0\DbManager.pdb
+E:\University\Диплом\WepPartDeliveryProject\DbManager\obj\Debug\net7.0\DbManager.csproj.AssemblyReference.cache
+E:\University\Диплом\WepPartDeliveryProject\DbManager\obj\Debug\net7.0\DbManager.GeneratedMSBuildEditorConfig.editorconfig
+E:\University\Диплом\WepPartDeliveryProject\DbManager\obj\Debug\net7.0\DbManager.AssemblyInfoInputs.cache
+E:\University\Диплом\WepPartDeliveryProject\DbManager\obj\Debug\net7.0\DbManager.AssemblyInfo.cs
+E:\University\Диплом\WepPartDeliveryProject\DbManager\obj\Debug\net7.0\DbManager.csproj.CoreCompileInputs.cache
+E:\University\Диплом\WepPartDeliveryProject\DbManager\obj\Debug\net7.0\DbManager.dll
+E:\University\Диплом\WepPartDeliveryProject\DbManager\obj\Debug\net7.0\refint\DbManager.dll
+E:\University\Диплом\WepPartDeliveryProject\DbManager\obj\Debug\net7.0\DbManager.pdb
+E:\University\Диплом\WepPartDeliveryProject\DbManager\obj\Debug\net7.0\ref\DbManager.dll

@@ -30,3 +30,13 @@ E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Deb
 E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Debug\net7.0\DbManager.dll
 E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Debug\net7.0\DbManager.pdb
 E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\obj\Debug\net7.0\WepPartDeliveryProject.csproj.CopyComplete
+E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Debug\net7.0\client_app\package-lock.json
+E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Debug\net7.0\client_app\package.json
+E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Debug\net7.0\client_app\public\manifest.json
+E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Debug\net7.0\package-lock.json
+E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Debug\net7.0\Microsoft.AspNetCore.SpaServices.Extensions.dll
+E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Debug\net7.0\client_app\.eslintrc.json
+E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Debug\net7.0\Microsoft.OpenApi.dll
+E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Debug\net7.0\Swashbuckle.AspNetCore.Swagger.dll
+E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Debug\net7.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\obj\Debug\net7.0\WepPartDeliveryProject.MvcApplicationPartsAssemblyInfo.cs

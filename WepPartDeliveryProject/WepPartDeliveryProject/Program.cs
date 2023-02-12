@@ -1,31 +1,29 @@
 using DbManager;
-using DbManager.Neo4j.Implementations;
-using DbManager.Neo4j.Interfaces;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
-using Neo4j.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var services = builder.Services;
-var Configuration = builder.Configuration;
+var configuration = builder.Configuration;
 
-// Register application setting using IOption provider mechanism
-services.Configure<ApplicationSettings>(Configuration.GetSection("ApplicationSettings"));
+services.AddControllers();
+services.AddSwaggerGen();
+
+// Register application setting
+services.Configure<ApplicationSettings>(configuration.GetSection("ApplicationSettings"));
 
 // Fetch settings object from configuration
 var settings = new ApplicationSettings();
-Configuration.GetSection("ApplicationSettings").Bind(settings);
+configuration.GetSection("ApplicationSettings").Bind(settings);
 
-// This is to register your Neo4j Driver Object as a singleton
-services.AddSingleton(GraphDatabase.Driver(settings.Neo4jConnection, AuthTokens.Basic(settings.Neo4jUser, settings.Neo4jPassword)));
+services.AddDbInfrastructure(settings);
 
-// This is your Data Access Wrapper over Neo4j session, that is a helper class for executing parameterized Neo4j Cypher queries in Transactions
-services.AddScoped<INeo4jDataAccess, Neo4jDataAccess>();
 
-// This is the registration for your domain repository class
-//services.AddTransient<IPersonRepository, PersonRepository>();
+// In production, the React files will be served from this directory
+/*services.AddSpaStaticFiles(configuration =>
+{
+    configuration.RootPath = "client_app/build";
+});*/
 
 var app = builder.Build();
 
@@ -42,20 +40,14 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-
-
-app.Map("/time", appBuilder =>
+/*app.UseSpa(spa =>
 {
-    var time = DateTime.Now.ToShortTimeString();
+    spa.Options.SourcePath = "client_app";
 
-    // логгируем данные - выводим на консоль приложения
-    appBuilder.Use(async (context, next) =>
+    if (app.Environment.IsDevelopment())
     {
-        Console.WriteLine($"Time: {time}");
-        await next();   // вызываем следующий middleware
-    });
-
-    appBuilder.Run(async context => await context.Response.WriteAsync($"Time: {time}"));
-});
+        spa.UseReactDevelopmentServer(npmScript: "start");
+    }
+});*/
 
 app.Run();

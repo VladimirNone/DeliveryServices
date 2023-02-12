@@ -55,7 +55,7 @@ namespace DbManager.Neo4j.Implementations
 
                 var result = await _session.ReadTransactionAsync(async tx =>
                 {
-                    T scalar = default(T);
+                    T scalar = default;
 
                     var res = await tx.RunAsync(query, parameters);
 
@@ -84,7 +84,7 @@ namespace DbManager.Neo4j.Implementations
 
                 var result = await _session.WriteTransactionAsync(async tx =>
                 {
-                    T scalar = default(T);
+                    T scalar = default;
 
                     var res = await tx.RunAsync(query, parameters);
 

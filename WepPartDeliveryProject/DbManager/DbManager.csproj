@@ -10,7 +10,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.0" />
-    <PackageReference Include="Neo4j.Driver" Version="5.5.0" />
+    <PackageReference Include="Neo4jClient" Version="5.1.5" />
   </ItemGroup>
 
 </Project>

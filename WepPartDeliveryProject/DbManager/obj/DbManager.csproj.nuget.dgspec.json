@@ -52,9 +52,9 @@
               "target": "Package",
               "version": "[7.0.0, )"
             },
-            "Neo4j.Driver": {
+            "Neo4jClient": {
               "target": "Package",
-              "version": "[5.5.0, )"
+              "version": "[5.1.5, )"
             }
           },
           "imports": [

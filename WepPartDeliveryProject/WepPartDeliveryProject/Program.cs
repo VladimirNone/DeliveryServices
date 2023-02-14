@@ -18,13 +18,6 @@ configuration.GetSection("ApplicationSettings").Bind(settings);
 
 services.AddDbInfrastructure(settings);
 
-
-// In production, the React files will be served from this directory
-/*services.AddSpaStaticFiles(configuration =>
-{
-    configuration.RootPath = "client_app/build";
-});*/
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -39,15 +32,5 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
-/*app.UseSpa(spa =>
-{
-    spa.Options.SourcePath = "client_app";
-
-    if (app.Environment.IsDevelopment())
-    {
-        spa.UseReactDevelopmentServer(npmScript: "start");
-    }
-});*/
 
 app.Run();

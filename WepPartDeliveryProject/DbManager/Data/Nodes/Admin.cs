@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DbManager.Data.Nodes
 {
-    public class Admin: IUser
+    public class Admin: User, INode
     {
     }
 }

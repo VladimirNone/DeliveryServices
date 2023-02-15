@@ -12,7 +12,7 @@ using System.Xml.Linq;
 
 namespace DbManager.Neo4j.Implementations
 {
-    public class GeneralRepository<TEntity> : IRepository<TEntity> where TEntity : IModel
+    public class GeneralRepository<TEntity> : IRepository<TEntity> where TEntity : Model
     {
         private readonly IGraphClient dbContext;
 

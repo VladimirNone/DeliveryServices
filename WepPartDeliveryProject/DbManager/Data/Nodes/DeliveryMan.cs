@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DbManager.Data.Nodes
 {
-    public class DeliveryMan : IUser
+    public class DeliveryMan : User, INode
     {
         public string Name { get; set; }
         public DateTime Born { get; set; }

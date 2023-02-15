@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DbManager.Data.Nodes
 {
-    public class Client : IUser
+    public class Client : User, INode
     {
         public string Name { get; set; }
         public string Address { get; set; }

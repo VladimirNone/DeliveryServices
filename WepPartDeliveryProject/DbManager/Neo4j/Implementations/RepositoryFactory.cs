@@ -24,7 +24,7 @@ namespace DbManager.Neo4j.Implementations
             services = serviceProvider;
         }
 
-        public IRepository<TEntity> GetRepository<TEntity>(bool hasCustomRepository = false) where TEntity : IModel
+        public IRepository<TEntity> GetRepository<TEntity>(bool hasCustomRepository = false) where TEntity : Model
         {
             if (hasCustomRepository)
             {

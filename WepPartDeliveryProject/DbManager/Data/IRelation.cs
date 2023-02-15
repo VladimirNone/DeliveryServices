@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DbManager.Data.Nodes
+namespace DbManager.Data
 {
-    public class KitchenWorker : User, INode
+    public interface IRelation
     {
+        INode NodeFrom { get; }
+        INode NodeTo { get; }
     }
 }

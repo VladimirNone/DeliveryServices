@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace DbManager.Data
 {
-    public abstract class IUser : IModel
+    public abstract class Model
     {
-        public string Login { get; set; }
-        public string PasswordHash { get; set; }
+        public int Id { get; set; }
     }
 }

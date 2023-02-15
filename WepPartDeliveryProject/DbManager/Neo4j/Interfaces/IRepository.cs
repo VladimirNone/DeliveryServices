@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DbManager.Neo4j.Interfaces
 {
-    public interface IRepository<TEntity> where TEntity : IModel
+    public interface IRepository<TEntity> where TEntity : Model
     {
         Task AddNodeAsync(TEntity entity);
         Task<TEntity> GetNodeAsync(int id);

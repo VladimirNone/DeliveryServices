@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DbManager.Data.Nodes
 {
-    public class Kitchen : IModel
+    public class Kitchen : Model, INode
     {
         public string Address { get; set; }
     }

@@ -5,11 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DbManager.Data.Relationships
+namespace DbManager.Data.Relations
 {
-    public class PreperedBy : IModel
+    public class OrderedBy : Model, IRelation
     {
         public Order Order { get; set; }
-        public Kitchen Kitchen { get; set; }
+        public Client Client { get; set; }
+
+        public INode NodeFrom => Client;
+
+        public INode NodeTo => Order;
     }
 }

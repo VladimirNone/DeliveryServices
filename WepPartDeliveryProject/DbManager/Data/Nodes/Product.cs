@@ -9,7 +9,7 @@ namespace DbManager.Data.Nodes
     /// <summary>
     /// Продаваемое блюдо (напиток, товар)
     /// </summary>
-    public class Product : IModel
+    public class Product : Model, INode
     {
         public string Name { get; set; }
         public string Description { get; set; }

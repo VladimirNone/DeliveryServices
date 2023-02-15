@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DbManager.Data.Relationships;
+using DbManager.Data.Relations;
 
 namespace DbManager.Data.Nodes
 {
-    public class Order : IModel
+    public class Order : Model, INode
     {
         public double Price { get; set; }
 

@@ -1,4 +1,5 @@
 ﻿using DbManager.Data.Nodes;
+using DbManager.Data.Relations;
 using DbManager.Neo4j.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,8 +20,11 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet]
         public async Task<IActionResult> CreateClient()
         {
-            var genRepo = _repositoryFactory.GetRepository<Client>();
-            var res = await genRepo.GetNodeAsync(1);
+            var orderRepo = _repositoryFactory.GetRepository<Order>();
+            var order = await orderRepo.GetNodeAsync(3);
+            var clientRepo = _repositoryFactory.GetRepository<Client>();
+            var client = await clientRepo.GetNodeAsync(1);
+            await orderRepo.RelateExistingNodes<OrderedBy, Client>(order, new OrderedBy() { SomeText = "SomeTextik"}, client, true);
             return Ok();
         }
     }

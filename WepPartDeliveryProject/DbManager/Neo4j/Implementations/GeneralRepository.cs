@@ -3,6 +3,7 @@ using DbManager.Data.Nodes;
 using DbManager.Neo4j.Interfaces;
 using Neo4j.Driver;
 using Neo4jClient;
+using Neo4jClient.Cypher;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,11 +22,6 @@ namespace DbManager.Neo4j.Implementations
             dbContext = DbContext;
         }
 
-        class Friends
-        {
-            public int Age { get; set; }
-        }
-
         public async Task AddNodeAsync(TEntity entity)
         {
             await dbContext.Cypher
@@ -36,6 +32,19 @@ namespace DbManager.Neo4j.Implementations
                 {
                     id = entity.Id,
                     newEntity = entity
+                })
+                .ExecuteWithoutResultsAsync();
+        }
+
+        public async Task UpdateNodeAsync(TEntity entity)
+        {
+            await dbContext.Cypher
+                .Match($"(entity:{entity.GetType().Name} {{Id: $id}})")
+                .Set("entity = $updatedEntity")
+                .WithParams(new
+                {
+                    id = entity.Id,
+                    updatedEntity = entity
                 })
                 .ExecuteWithoutResultsAsync();
         }
@@ -56,6 +65,13 @@ namespace DbManager.Neo4j.Implementations
             return res.First();
         }
 
+        private TEntity GetEntityFromNeo4jNode(ICypherResultItem result)
+        {
+            var res = result.As<TEntity>();
+            res.Id = result.Id();
+            return res;
+        }
+
         public async Task<List<TEntity>> GetNodesAsync()
         {
             var res = await dbContext.Cypher
@@ -66,45 +82,17 @@ namespace DbManager.Neo4j.Implementations
             return res.ToList();
         }
 
-        private async Task Test()
+        public async Task DeleteNodeWithRelations(TEntity entity)
         {
-            /*Merge(user: User { Id: 458 })
-            on CREATE
-            SET user.Name = 'Jim'*/
-            var lisa = new Client { Id = 456, Name = "Lisa" };
-            var jim = new Client { Id = 457, Name = "Jim" };
-            /*                */
-
-            /*match (client1:User {Id:456}), (client2:User {Id:457})
-            create(client1) -[:FRIENDS { age: 2}]->(client2)
-            return client1, client2*/
-            /*                await dbContext.Cypher
-                                .Match("(lisa:User {Id:$lId})", "(jim:User {Id:$jId})")
-                                .WithParams(new
-                                {
-                                    lId = lisa.Id,
-                                    jId = jim.Id,
-                                })
-                                .Create("(lisa)-[:FRIENDS]->(jim)")
-                                .ExecuteWithoutResultsAsync();*/
-
-            /*                match(client1: User { Id: 12345})-[fr: FRIENDS]->(client2: User { Id: 458})
-                            set fr.age = 4
-                            return client1, client2*/
-            var res = await dbContext.Cypher
-            .Match("(lisa:User {Id:$lId})-[fr:FRIENDS]->(jim:User {Id:$jId})")
-                                .WithParams(new
-                                {
-                                    lId = lisa.Id,
-                                    jId = jim.Id,
-                                    age = 7
-                                })
-            .Return(fr => new
-            {
-                User = fr.As<Friends>(),
-            })
-            .ResultsAsync;
-            throw new NotImplementedException();
+            await dbContext.Cypher
+                .Match($"(entity:{entity.GetType().Name} {{Id: $id}})-[rOut]->()")
+                .Match($"(entity)<-[rIn]-()")
+                .WithParams(new
+                {
+                    id = entity.Id,
+                })
+                .Delete("rOut, rIn, entity")
+                .ExecuteWithoutResultsAsync();
         }
     }
 }

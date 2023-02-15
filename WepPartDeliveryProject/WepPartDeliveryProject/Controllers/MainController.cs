@@ -20,7 +20,7 @@ namespace WepPartDeliveryProject.Controllers
         public async Task<IActionResult> CreateClient()
         {
             var genRepo = _repositoryFactory.GetRepository<Client>();
-            await genRepo.AddNodeAsync(new Client() { Id = 1, Name = "Koli", Address = "The walk street" });
+            var res = await genRepo.GetNodeAsync(1);
             return Ok();
         }
     }

@@ -1,0 +1,44 @@
+﻿Merge(user: User { Id: 458 })
+on CREATE
+SET user.Name = 'Jim'
+var lisa = new Client { Id = 456, Name = "Lisa" };
+var jim = new Client { Id = 457, Name = "Jim" };
+
+/*match (client1:User {Id:456}), (client2:User {Id:457})
+create(client1) -[:FRIENDS { age: 2}]->(client2)
+return client1, client2*/
+                await dbContext.Cypher
+                    .Match("(lisa:User {Id:$lId})", "(jim:User {Id:$jId})")
+                    .WithParams(new
+                    {
+                        lId = lisa.Id,
+                        jId = jim.Id,
+                    })
+                    .Create("(lisa)-[:FRIENDS]->(jim)")
+                    .ExecuteWithoutResultsAsync();
+
+                match(client1: User { Id: 12345})-[fr: FRIENDS]->(client2: User { Id: 458})
+                set fr.age = 4
+                return client1, client2
+            var res = await dbContext.Cypher
+            .Match("(lisa:User {Id:$lId})-[fr:FRIENDS]->(jim:User {Id:$jId})")
+                                .WithParams(new
+                                {
+                                    lId = lisa.Id,
+                                    jId = jim.Id,
+                                    age = 7
+                                })
+            .Return(fr => new
+            {
+                User = fr.As<Friends>(),
+            })
+            .ResultsAsync;
+
+//Поиск юзера, вычисление количества его друзей, заполнение существующего поля Id результатом подсчета количетва друзей
+
+MATCH(user: User)
+WHERE user.Id = 456
+WITH user,
+size([p= (user) -[:FRIENDS]->(:User) | p]) as numberOfFriends
+RETURN apoc.map.setKey(user, 'Id', numberOfFriends)
+

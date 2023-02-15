@@ -8,6 +8,6 @@ namespace DbManager.Data
 {
     public abstract class Model
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
     }
 }

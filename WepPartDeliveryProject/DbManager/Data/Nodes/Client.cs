@@ -8,6 +8,7 @@ namespace DbManager.Data.Nodes
 {
     public class Client : IUser
     {
-
+        public string Name { get; set; }
+        public string Address { get; set; }
     }
 }

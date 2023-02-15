@@ -44,6 +44,10 @@
               "target": "Package",
               "version": "[7.0.0, )"
             },
+            "Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions": {
+              "target": "Package",
+              "version": "[7.0.2, )"
+            },
             "Microsoft.Extensions.Logging.Abstractions": {
               "target": "Package",
               "version": "[7.0.0, )"
@@ -51,10 +55,6 @@
             "Microsoft.Extensions.Options": {
               "target": "Package",
               "version": "[7.0.0, )"
-            },
-            "Neo4j.Driver": {
-              "target": "Package",
-              "version": "[5.5.0, )"
             },
             "Neo4jClient": {
               "target": "Package",
@@ -129,7 +129,7 @@
               "target": "Package",
               "version": "[5.5.0, )"
             },
-            "Swashbuckle.AspNetCore.SwaggerGen": {
+            "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.5.0, )"
             }

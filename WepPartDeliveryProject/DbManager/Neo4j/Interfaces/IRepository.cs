@@ -1,4 +1,5 @@
 ﻿using DbManager.Data;
+using Neo4j.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +8,10 @@ using System.Threading.Tasks;
 
 namespace DbManager.Neo4j.Interfaces
 {
-    public interface IRepository<T> where T : IModel
+    public interface IRepository<TEntity> where TEntity : IModel
     {
-
+        Task AddNodeAsync(TEntity entity);
+        Task<TEntity> GetNodeAsync(int id);
+        Task<List<TEntity>> GetNodesAsync();
     }
 }

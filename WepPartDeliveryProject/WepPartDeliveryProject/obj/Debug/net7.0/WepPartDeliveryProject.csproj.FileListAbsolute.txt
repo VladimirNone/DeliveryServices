@@ -40,3 +40,7 @@ E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Deb
 E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Debug\net7.0\Swashbuckle.AspNetCore.Swagger.dll
 E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Debug\net7.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\obj\Debug\net7.0\WepPartDeliveryProject.MvcApplicationPartsAssemblyInfo.cs
+E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Debug\net7.0\Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions.dll
+E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Debug\net7.0\Neo4jClient.dll
+E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Debug\net7.0\Newtonsoft.Json.dll
+E:\University\Диплом\WepPartDeliveryProject\WepPartDeliveryProject\bin\Debug\net7.0\Swashbuckle.AspNetCore.SwaggerUI.dll

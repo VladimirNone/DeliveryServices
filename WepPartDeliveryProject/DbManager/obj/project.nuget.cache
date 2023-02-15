@@ -1,12 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "Ykz89NbzXuYFzvGbveK+VB/+DrvR2D5QXmMwZBfMN4LuyIiWSu67zmrQLHFos21vK4xEo66p1TqEsz3Sc2ejPQ==",
+  "dgSpecHash": "ciNFOklt+PBRxxnY5WBAXCSKJ4vcRJZcyJltLpSLH4CCs3K0nFQC9t3qO1UCN9/jrqKMjSfb2Bftdm1jgSFClw==",
   "success": true,
   "projectFilePath": "E:\\University\\Диплом\\WepPartDeliveryProject\\DbManager\\DbManager.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\jilts\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\5.0.0\\microsoft.bcl.asyncinterfaces.5.0.0.nupkg.sha512",
     "C:\\Users\\jilts\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
     "C:\\Users\\jilts\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\7.0.0\\microsoft.extensions.dependencyinjection.abstractions.7.0.0.nupkg.sha512",
+    "C:\\Users\\jilts\\.nuget\\packages\\microsoft.extensions.diagnostics.healthchecks.abstractions\\7.0.2\\microsoft.extensions.diagnostics.healthchecks.abstractions.7.0.2.nupkg.sha512",
     "C:\\Users\\jilts\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\7.0.0\\microsoft.extensions.logging.abstractions.7.0.0.nupkg.sha512",
     "C:\\Users\\jilts\\.nuget\\packages\\microsoft.extensions.options\\7.0.0\\microsoft.extensions.options.7.0.0.nupkg.sha512",
     "C:\\Users\\jilts\\.nuget\\packages\\microsoft.extensions.primitives\\7.0.0\\microsoft.extensions.primitives.7.0.0.nupkg.sha512",

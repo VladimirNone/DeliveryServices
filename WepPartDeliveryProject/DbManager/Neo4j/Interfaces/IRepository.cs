@@ -24,7 +24,7 @@ namespace DbManager.Neo4j.Interfaces
         /// <param name="id">Node id</param>
         /// <returns>Node with specified id</returns>
         /// <exception cref="Exception">Count of items with specified id don't equels 1.</exception>
-        Task<TNode> GetNodeAsync(int id);
+        Task<TNode> GetNodeAsync(Guid id);
 
         /// <summary>
         /// Get all nodes TNode type

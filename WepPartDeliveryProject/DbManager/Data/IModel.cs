@@ -8,6 +8,6 @@ namespace DbManager.Data
 {
     public interface IModel
     {
-        public long Id { get; set; }
+        public Guid Id { get; set; }
     }
 }

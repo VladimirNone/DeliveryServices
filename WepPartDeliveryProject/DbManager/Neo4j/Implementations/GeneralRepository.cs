@@ -15,7 +15,7 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task AddNodeAsync(TNode newNode)
         {
-            //Тут нужно генерить Guid Id узла
+            newNode.Id = Guid.NewGuid();
             await dbContext.Cypher
                 .Merge($"(newNode:{typeof(TNode).Name} {{Id: $id}})")
                 .OnCreate()
@@ -41,7 +41,7 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
-        public async Task<TNode> GetNodeAsync(int id)
+        public async Task<TNode> GetNodeAsync(Guid id)
         {
             var res = await dbContext.Cypher
                 .Match($"(newNode:{typeof(TNode).Name} {{Id: $id}})")
@@ -85,7 +85,7 @@ namespace DbManager.Neo4j.Implementations
             where TRelatedNode : INode
         {
             var direction = GetDirection<IRelation>(relationInEntity);
-            //и тут нужно генерить Guid Id связи
+            relation.Id = Guid.NewGuid();
             //и возможно каждый из узлов отправить в addnode, на тот случай, если они не существуют
             //в теории, если у узла значения в Id, то он не существует. Даже на фронт будет отправляться с Id
             await dbContext.Cypher

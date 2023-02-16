@@ -8,6 +8,6 @@ namespace DbManager.Data
 {
     public abstract class Model : IModel
     {
-        public long Id { get; set; }
+        public Guid Id { get; set; }
     }
 }

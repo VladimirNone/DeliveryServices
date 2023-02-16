@@ -15,12 +15,6 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task AddNodeAsync(TNode newNode)
         {
-            await AddNodeAsync<TNode>(newNode);
-        }
-
-        //Allow to create node, that don't use type TNode
-        private async Task AddNodeAsync<TUniversalNode> (TUniversalNode newNode) where TUniversalNode: INode
-        {
             newNode.Id = Guid.NewGuid();
             await dbContext.Cypher
                 .Merge($"(newNode:{typeof(TNode).Name} {{Id: $id}})")
@@ -93,10 +87,6 @@ namespace DbManager.Neo4j.Implementations
             var direction = GetDirection<IRelation>(relationInEntity);
             relation.Id = Guid.NewGuid();
 
-            await AddNodeAsync(node);
-            await AddNodeAsync(otherNode);
-
-            //в теории, если у узла нет значения в Id, то он не существует. Даже на фронт будет отправляться с Id
             await dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $entityId}}), (otherNode:{typeof(TRelatedNode).Name} {{Id: $otherNodeId}})")
                 .Create($"(node){direction}(otherNode)")

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DbManager.Data.Relations
 {
-    public class Delivered : Model, IRelation
+    public class DeliveredBy : Model, IRelation
     {
         public Order Order { get; set; }
         public DeliveryMan DeliveryMan { get; set; }

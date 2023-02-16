@@ -12,8 +12,6 @@ namespace DbManager.Data.Relations
         public Order Order { get; set; }
         public Client Client { get; set; }
 
-        public string SomeText { get; set; }
-
         public INode NodeFrom => Client;
 
         public INode NodeTo => Order;

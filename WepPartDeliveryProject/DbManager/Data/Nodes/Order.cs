@@ -11,6 +11,9 @@ namespace DbManager.Data.Nodes
     {
         public double Price { get; set; }
 
-        public List<OrderedProduct> OrderedObjects { get; set; }
+        public List<OrderedProduct>? OrderedObjects { get; set; }
+        public DeliveredBy DeliveredMan { get; set; }
+        public OrderedBy Client { get; set; }
+        public PreparedBy Kitchen { get; set; }
     }
 }

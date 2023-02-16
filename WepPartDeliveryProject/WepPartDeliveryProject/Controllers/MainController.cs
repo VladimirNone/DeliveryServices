@@ -20,12 +20,17 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("create")]
         public async Task<IActionResult> CreateClient()
         {
-/*            var orderRepo = _repositoryFactory.GetRepository<Order>();
-            var order = await orderRepo.GetNodeAsync(3);
+            var orderRepo = _repositoryFactory.GetRepository<Order>();
             var clientRepo = _repositoryFactory.GetRepository<Client>();
-            var client = await clientRepo.GetNodeAsync(1);
-            await orderRepo.RelateNodes<OrderedBy, Client>(order, new OrderedBy() { SomeText = "SomeTextik"}, client, true);*/
-            return Ok();
+
+            var order = await orderRepo.GetNodeAsync(Guid.Parse("3b76d755-ae98-4706-b1c5-8f0a901c7ba2"));
+
+            /*            
+                        var order = await orderRepo.GetNodeAsync(3);
+                        
+                        var client = await clientRepo.GetNodeAsync(1);
+                        await orderRepo.RelateNodes<OrderedBy, Client>(order, new OrderedBy() { SomeText = "SomeTextik"}, client, true);*/
+            return Ok(order);
         }
 
         [HttpGet("update")]

@@ -12,9 +12,9 @@ namespace DbManager.Data.Relations
         public Product OrderedItem { get; set; }
         public Order Order { get; set; }
 
-        public INode NodeFrom => OrderedItem;
+        public INode NodeFrom => Order;
 
-        public INode NodeTo => Order;
+        public INode NodeTo => OrderedItem;
 
         public int Count { get; set; }
     }

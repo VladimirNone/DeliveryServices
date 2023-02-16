@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DbManager.Data.Relations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,8 @@ namespace DbManager.Data.Nodes
         public string Name { get; set; }
         public string Description { get; set; }
         public double Price { get; set; }
-        public string PathToMainImage { get; set; }
+        public string? PathToMainImage { get; set; }
+
+        public List<OrderedProduct>? Orders { get; set; }
     }
 }

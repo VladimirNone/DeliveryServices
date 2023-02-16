@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DbManager.Data.Relations
 {
-    public class PreperedBy : Model, IRelation
+    public class PreparedBy : Model, IRelation
     {
         public Order Order { get; set; }
         public Kitchen Kitchen { get; set; }

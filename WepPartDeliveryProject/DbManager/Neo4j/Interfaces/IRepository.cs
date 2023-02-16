@@ -64,7 +64,7 @@ namespace DbManager.Neo4j.Interfaces
             where TRelatedNode : INode;
 
         /// <summary>
-        /// Relate two existing nodes
+        /// Relate two nodes. If nodes don't exist, they will be created
         /// </summary>
         /// <typeparam name="TRelation">The type of added relation</typeparam>
         /// <typeparam name="TRelatedNode">the type of node, which will be related</typeparam>

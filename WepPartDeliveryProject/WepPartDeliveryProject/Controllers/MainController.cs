@@ -24,7 +24,7 @@ namespace WepPartDeliveryProject.Controllers
             var order = await orderRepo.GetNodeAsync(3);
             var clientRepo = _repositoryFactory.GetRepository<Client>();
             var client = await clientRepo.GetNodeAsync(1);
-            await orderRepo.RelateExistingNodes<OrderedBy, Client>(order, new OrderedBy() { SomeText = "SomeTextik"}, client, true);
+            await orderRepo.RelateNodes<OrderedBy, Client>(order, new OrderedBy() { SomeText = "SomeTextik"}, client, true);
             return Ok();
         }
     }

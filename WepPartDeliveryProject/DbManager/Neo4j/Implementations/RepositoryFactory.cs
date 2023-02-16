@@ -2,11 +2,6 @@
 using DbManager.Neo4j.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Neo4jClient;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DbManager.Neo4j.Implementations
 {
@@ -24,7 +19,7 @@ namespace DbManager.Neo4j.Implementations
             services = serviceProvider;
         }
 
-        public IRepository<TEntity> GetRepository<TEntity>(bool hasCustomRepository = false) where TEntity : Model, INode
+        public IRepository<TEntity> GetRepository<TEntity>(bool hasCustomRepository = false) where TEntity : INode
         {
             if (hasCustomRepository)
             {

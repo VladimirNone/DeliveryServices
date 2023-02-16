@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DbManager.Data
 {
-    public interface INode
+    public interface INode : IModel
     {
     }
 }

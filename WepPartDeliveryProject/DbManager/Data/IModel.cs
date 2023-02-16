@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace DbManager.Data
 {
-    public interface IRelation : IModel
+    public interface IModel
     {
-        INode NodeFrom { get; }
-        INode NodeTo { get; }
+        public long Id { get; set; }
     }
 }

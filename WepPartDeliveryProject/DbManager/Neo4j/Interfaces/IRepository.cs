@@ -1,14 +1,8 @@
 ﻿using DbManager.Data;
-using Neo4j.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DbManager.Neo4j.Interfaces
 {
-    public interface IRepository<TNode> where TNode : Model
+    public interface IRepository<TNode> where TNode : INode
     {
         /// <summary>
         /// Add node with properties to DB. If node with such id already exist in DB, then node won't added to DB
@@ -43,7 +37,19 @@ namespace DbManager.Neo4j.Interfaces
         /// </summary>
         /// <param name="node">The node, which will be deleted</param>
         /// <returns></returns>
-        Task DeleteNodeWithRelations(TNode node);
+        Task DeleteNodeWithAllRelations(TNode node);
+
+        Task<TRelation> GetRelationNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, bool relationInEntity = false)
+            where TRelation : IRelation
+            where TRelatedNode : INode;
+
+        Task UpdateRelationNodesAsync<TRelation, TRelatedNode>(TNode node, TRelation updatedRelation, TRelatedNode relatedNode, bool relationInEntity = false)
+            where TRelation : IRelation
+            where TRelatedNode : INode;
+
+        Task DeleteRelationNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, bool relationInEntity = false)
+            where TRelation : IRelation
+            where TRelatedNode : INode;
 
         /// <summary>
         /// Get relations and related nodes
@@ -55,7 +61,7 @@ namespace DbManager.Neo4j.Interfaces
         /// <returns>If target node don't have related nodes, will be returned empty lists</returns>
         Task<(List<TRelation>, List<TRelatedNode>)> GetRelatedNodesAsync<TRelation, TRelatedNode>(TNode node, bool relationInEntity)
             where TRelation : IRelation
-            where TRelatedNode : Model, Data.INode;
+            where TRelatedNode : INode;
 
         /// <summary>
         /// Relate two existing nodes
@@ -67,8 +73,8 @@ namespace DbManager.Neo4j.Interfaces
         /// <param name="otherNode">The second node</param>
         /// <param name="relationInEntity">determines the direction of relation</param>
         /// <returns></returns>
-        Task RelateExistingNodes<TRelation, TRelatedNode>(TNode node, TRelation relation, TRelatedNode otherNode, bool relationInEntity = false)
+        Task RelateNodes<TRelation, TRelatedNode>(TNode node, TRelation relation, TRelatedNode otherNode, bool relationInEntity = false)
             where TRelation : IRelation
-            where TRelatedNode : Model, Data.INode;
+            where TRelatedNode : INode;
     }
 }

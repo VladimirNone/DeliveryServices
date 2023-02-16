@@ -1,19 +1,10 @@
 ﻿using DbManager.Data;
-using DbManager.Data.Nodes;
 using DbManager.Neo4j.Interfaces;
-using Neo4j.Driver;
 using Neo4jClient;
-using Neo4jClient.Cypher;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace DbManager.Neo4j.Implementations
 {
-    public class GeneralRepository<TNode> : IRepository<TNode> where TNode : Model
+    public class GeneralRepository<TNode> : IRepository<TNode> where TNode : INode
     {
         private readonly IGraphClient dbContext;
 
@@ -24,6 +15,7 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task AddNodeAsync(TNode newNode)
         {
+            //Тут нужно генерить Guid Id узла
             await dbContext.Cypher
                 .Merge($"(newNode:{typeof(TNode).Name} {{Id: $id}})")
                 .OnCreate()
@@ -75,7 +67,7 @@ namespace DbManager.Neo4j.Implementations
             return res.ToList();
         }
 
-        public async Task DeleteNodeWithRelations(TNode node)
+        public async Task DeleteNodeWithAllRelations(TNode node)
         {
             await dbContext.Cypher
                 .Match($"(newNode:{typeof(TNode).Name} {{Id: $id}})-[rOut]->()")
@@ -88,18 +80,18 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
-        public async Task RelateExistingNodes<TRelation, TRelatedNode>(TNode node, TRelation relation, TRelatedNode otherNode, bool relationInEntity = false)
+        public async Task RelateNodes<TRelation, TRelatedNode>(TNode node, TRelation relation, TRelatedNode otherNode, bool relationInEntity = false)
             where TRelation : IRelation
-            where TRelatedNode : Model, Data.INode
+            where TRelatedNode : INode
         {
-            var direction = $"-[relation:{typeof(TRelation).Name.ToUpper()}]->";
-            if (relationInEntity)
-                direction = $"<-[relation:{typeof(TRelation).Name.ToUpper()}]-";
-
+            var direction = GetDirection<IRelation>(relationInEntity);
+            //и тут нужно генерить Guid Id связи
+            //и возможно каждый из узлов отправить в addnode, на тот случай, если они не существуют
+            //в теории, если у узла значения в Id, то он не существует. Даже на фронт будет отправляться с Id
             await dbContext.Cypher
-                .Match($"(newNode:{typeof(TNode).Name} {{Id: $entityId}}), (otherNode:{typeof(TRelatedNode).Name} {{Id: $otherNodeId}})")
-                .Create($"(newNode){direction}(otherNode)")
-                .Set("relation=$newRelation")
+                .Match($"(node:{typeof(TNode).Name} {{Id: $entityId}}), (otherNode:{typeof(TRelatedNode).Name} {{Id: $otherNodeId}})")
+                .Create($"(node){direction}(otherNode)")
+                .Set("updatedRelation=$newRelation")
                 .WithParams(new
                 {
                     entityId = node.Id,
@@ -109,22 +101,57 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
-        public async Task<(List<TRelation>,List<TRelatedNode>)> GetRelatedNodesAsync<TRelation,TRelatedNode>(TNode node, bool relationInEntity = false) 
-            where TRelation: IRelation
-            where TRelatedNode: Model, Data.INode
+        public async Task UpdateRelationNodesAsync<TRelation, TRelatedNode>(TNode node, TRelation updatedRelation, TRelatedNode relatedNode, bool relationInEntity = false)
+            where TRelation : IRelation
+            where TRelatedNode : INode
         {
-            var direction = $"-[relations:{typeof(TRelation).Name.ToUpper()}]->";
-            if (relationInEntity)
-                direction = $"<-[relations:{typeof(TRelation).Name.ToUpper()}]-";
+            var direction = GetDirection<IRelation>(relationInEntity);
+
+            await dbContext.Cypher
+                .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name} {{Id: $relatedNodeId}})")
+                .Set("relation=$updatedRelation")
+                .WithParams(new
+                {
+                    id = node.Id,
+                    relatedNodeId = relatedNode.Id,
+                    updatedRelation
+                })
+                .ExecuteWithoutResultsAsync();
+        }
+
+        public async Task<TRelation> GetRelationNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, bool relationInEntity = false)
+            where TRelation : IRelation
+            where TRelatedNode : INode
+        {
+            var direction = GetDirection<IRelation>(relationInEntity);
 
             var res = await dbContext.Cypher
-                .Match($"(newNode:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name})")
+                .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name} {{Id: $relatedNodeId}})")
+                .WithParams(new
+                {
+                    id = node.Id,
+                    relatedNodeId = relatedNode.Id,
+                })
+                .Return(relation => relation.As<TRelation>())
+                .ResultsAsync;
+
+            return res.First();
+        }
+
+        public async Task<(List<TRelation>,List<TRelatedNode>)> GetRelatedNodesAsync<TRelation,TRelatedNode>(TNode node, bool relationInEntity = false) 
+            where TRelation: IRelation
+            where TRelatedNode: INode
+        {
+            var direction = GetDirection<IRelation>(relationInEntity);
+
+            var res = await dbContext.Cypher
+                .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name})")
                 .WithParams(new
                 {
                     id = node.Id,
                 })
-                .Return((relations, relatedNode) => new { 
-                    nodeRelations = relations.CollectAs<TRelation>(), 
+                .Return((relation, relatedNode) => new { 
+                    nodeRelations = relation.CollectAs<TRelation>(), 
                     relationNodes = relatedNode.CollectAs<TRelatedNode>() 
                 })
                 .ResultsAsync;
@@ -132,6 +159,36 @@ namespace DbManager.Neo4j.Implementations
             var fRes = res.Single();
 
             return (fRes.nodeRelations.ToList<TRelation>(), fRes.relationNodes.ToList<TRelatedNode>());
+        }
+
+        public async Task DeleteRelationNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, bool relationInEntity = false)
+            where TRelation : IRelation
+            where TRelatedNode : INode
+        {
+            var direction = GetDirection<IRelation>();
+
+            await dbContext.Cypher
+                .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name} {{Id: $relatedNodeId}})")
+                .Delete("relation")
+                .WithParams(new
+                {
+                    id = node.Id,
+                    relatedNodeId = relatedNode.Id,
+                })
+                .ExecuteWithoutResultsAsync();
+        }
+
+        /// <summary>
+        /// Get string with directed updatedRelation. Relation has name "updatedRelation"
+        /// </summary>
+        /// <typeparam name="TRelation">Type of updatedRelation. Used name of type for named updatedRelation</typeparam>
+        /// <param name="relationInEntity">Relation input in node or output</param>
+        /// <returns>String with directed updatedRelation</returns>
+        private string GetDirection<TRelation>(bool relationInEntity = false) where TRelation : IRelation
+        {
+            var direction = $"-[relation:{typeof(TRelation).Name.ToUpper()}]-";
+
+            return relationInEntity ? "<" + direction: direction + ">";
         }
     }
 }

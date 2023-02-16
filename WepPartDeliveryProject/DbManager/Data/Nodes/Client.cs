@@ -1,4 +1,5 @@
 ﻿using DbManager.Data.Relations;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace DbManager.Data.Nodes
         public string Name { get; set; }
         public string Address { get; set; }
 
-        public List<OrderedBy>? ClientOrders { get; set; }
+        [JsonIgnore]
+        public List<Ordered>? ClientOrders { get; set; }
     }
 }

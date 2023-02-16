@@ -8,7 +8,7 @@ namespace DbManager.Data
 {
     public interface IRelation : IModel
     {
-        INode NodeFrom { get; }
-        INode NodeTo { get; }
+        INode NodeFrom { get; set; }
+        INode NodeTo { get; set; }
     }
 }

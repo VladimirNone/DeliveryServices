@@ -44,13 +44,14 @@ namespace DbManager.Neo4j.Implementations
         public async Task<TNode> GetNodeAsync(Guid id)
         {
             var res = await dbContext.Cypher
-                .Match($"(newNode:{typeof(TNode).Name} {{Id: $id}})")
+                .Match($"(entity:{typeof(TNode).Name} {{Id: $id}})")
                 .WithParams(new
                 {
                     id,
                 })
                 .Return(entity => entity.As<TNode>())
                 .ResultsAsync;
+
             if (res.Count() != 1)
                 throw new Exception("Count of items with Id don't equels 1. Type: " + typeof(TNode).Name);
 
@@ -80,17 +81,21 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
-        public async Task RelateNodes<TRelation, TRelatedNode>(TNode node, TRelation relation, TRelatedNode otherNode, bool relationInEntity = false)
+        public async Task RelateNodes<TRelation>(TRelation relation)
             where TRelation : IRelation
-            where TRelatedNode : INode
         {
-            var direction = GetDirection<IRelation>(relationInEntity);
+            var relationInEntity = relation.NodeTo.GetType() == typeof(TNode);
+
+            (var node, var otherNode) = (relation.NodeTo, relation.NodeFrom);
+
+            var direction = GetDirection(relation.GetType().Name.ToUpper(), relationInEntity);
+
             relation.Id = Guid.NewGuid();
 
             await dbContext.Cypher
-                .Match($"(node:{typeof(TNode).Name} {{Id: $entityId}}), (otherNode:{typeof(TRelatedNode).Name} {{Id: $otherNodeId}})")
+                .Match($"(node:{node.GetType().Name} {{Id: $entityId}}), (otherNode:{otherNode.GetType().Name} {{Id: $otherNodeId}})")
                 .Create($"(node){direction}(otherNode)")
-                .Set("updatedRelation=$newRelation")
+                .Set("relation=$newRelation")
                 .WithParams(new
                 {
                     entityId = node.Id,
@@ -100,29 +105,32 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
-        public async Task UpdateRelationNodesAsync<TRelation, TRelatedNode>(TNode node, TRelation updatedRelation, TRelatedNode relatedNode, bool relationInEntity = false)
+        public async Task UpdateRelationNodesAsync<TRelation>(TRelation updatedRelation)
             where TRelation : IRelation
-            where TRelatedNode : INode
         {
-            var direction = GetDirection<IRelation>(relationInEntity);
+            var relationInEntity = updatedRelation.NodeTo.GetType() == typeof(TNode);
+
+            (var node, var otherNode) = (updatedRelation.NodeTo, updatedRelation.NodeFrom);
+
+            var direction = GetDirection(updatedRelation.GetType().Name.ToUpper(), relationInEntity);
 
             await dbContext.Cypher
-                .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name} {{Id: $relatedNodeId}})")
+                .Match($"(node:{node.GetType().Name} {{Id: $id}}){direction}(relatedNode:{otherNode.GetType().Name} {{Id: $relatedNodeId}})")
                 .Set("relation=$updatedRelation")
                 .WithParams(new
                 {
                     id = node.Id,
-                    relatedNodeId = relatedNode.Id,
+                    relatedNodeId = otherNode.Id,
                     updatedRelation
                 })
                 .ExecuteWithoutResultsAsync();
         }
 
-        public async Task<TRelation> GetRelationNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, bool relationInEntity = false)
+        public async Task<TRelation> GetRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, bool relationInEntity = false)
             where TRelation : IRelation
             where TRelatedNode : INode
         {
-            var direction = GetDirection<IRelation>(relationInEntity);
+            var direction = GetDirection(typeof(TRelation).Name.ToUpper(), relationInEntity);
 
             var res = await dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name} {{Id: $relatedNodeId}})")
@@ -134,14 +142,17 @@ namespace DbManager.Neo4j.Implementations
                 .Return(relation => relation.As<TRelation>())
                 .ResultsAsync;
 
+            if (res.Count() != 1)
+                throw new Exception("");
+
             return res.First();
         }
 
-        public async Task<(List<TRelation>,List<TRelatedNode>)> GetRelatedNodesAsync<TRelation,TRelatedNode>(TNode node, bool relationInEntity = false) 
+        public async Task<List<TRelation>> GetRelatedNodesAsync<TRelation,TRelatedNode>(TNode node, bool relationInEntity = false) 
             where TRelation: IRelation
             where TRelatedNode: INode
         {
-            var direction = GetDirection<IRelation>(relationInEntity);
+            var direction = GetDirection(typeof(TRelation).Name.ToUpper(), relationInEntity);
 
             var res = await dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name})")
@@ -156,15 +167,27 @@ namespace DbManager.Neo4j.Implementations
                 .ResultsAsync;
 
             var fRes = res.Single();
+            if(fRes.nodeRelations.Count() != fRes.relationNodes.Count())
+                throw new Exception("");
 
-            return (fRes.nodeRelations.ToList<TRelation>(), fRes.relationNodes.ToList<TRelatedNode>());
+            //А могу ли я быть уверен, что связь - узел идет 1 к 1?
+            var relations = fRes.nodeRelations.ToList();
+            var relatedNodes = fRes.relationNodes.ToList();
+
+            for (int i = 0; i < relations.Count; i++)
+            {
+                relations[i].NodeFrom = relationInEntity ? node : relatedNodes[i];
+                relations[i].NodeTo = relationInEntity ? node : relatedNodes[i];
+            }
+
+            return relations;
         }
 
-        public async Task DeleteRelationNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, bool relationInEntity = false)
+        public async Task DeleteRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, bool relationInEntity = false)
             where TRelation : IRelation
             where TRelatedNode : INode
         {
-            var direction = GetDirection<IRelation>();
+            var direction = GetDirection(typeof(TRelation).Name.ToUpper(), relationInEntity);
 
             await dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name} {{Id: $relatedNodeId}})")
@@ -178,14 +201,14 @@ namespace DbManager.Neo4j.Implementations
         }
 
         /// <summary>
-        /// Get string with directed updatedRelation. Relation has name "updatedRelation"
+        /// Get string with directed relation. Relation has name type of "relation"
         /// </summary>
-        /// <typeparam name="TRelation">Type of updatedRelation. Used name of type for named updatedRelation</typeparam>
+        /// <param name="relation"></param>
         /// <param name="relationInEntity">Relation input in node or output</param>
-        /// <returns>String with directed updatedRelation</returns>
-        private string GetDirection<TRelation>(bool relationInEntity = false) where TRelation : IRelation
+        /// <returns>String with directed relation</returns>
+        private string GetDirection(string nameRelation, bool relationInEntity = false)
         {
-            var direction = $"-[relation:{typeof(TRelation).Name.ToUpper()}]-";
+            var direction = $"-[relation:{nameRelation}]-";
 
             return relationInEntity ? "<" + direction: direction + ">";
         }

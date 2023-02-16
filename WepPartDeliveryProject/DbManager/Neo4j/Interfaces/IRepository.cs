@@ -39,15 +39,15 @@ namespace DbManager.Neo4j.Interfaces
         /// <returns></returns>
         Task DeleteNodeWithAllRelations(TNode node);
 
-        Task<TRelation> GetRelationNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, bool relationInEntity = false)
+        Task<TRelation> GetRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, bool relationInEntity = false)
             where TRelation : IRelation
             where TRelatedNode : INode;
 
-        Task UpdateRelationNodesAsync<TRelation, TRelatedNode>(TNode node, TRelation updatedRelation, TRelatedNode relatedNode, bool relationInEntity = false)
-            where TRelation : IRelation
-            where TRelatedNode : INode;
+        Task UpdateRelationNodesAsync<TRelation>(TRelation updatedRelation)
+            where TRelation : IRelation;
+        
 
-        Task DeleteRelationNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, bool relationInEntity = false)
+        Task DeleteRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, bool relationInEntity = false)
             where TRelation : IRelation
             where TRelatedNode : INode;
 
@@ -55,14 +55,13 @@ namespace DbManager.Neo4j.Interfaces
         /// Get relations and related nodes
         /// </summary>
         /// <typeparam name="TRelation">The type of searched relation</typeparam>
-        /// <typeparam name="TRelatedNode">The type of related nodes</typeparam>
         /// <param name="node">node, which have related nodes</param>
         /// <param name="relationInEntity">determines the direction of relation</param>
         /// <returns>If target node don't have related nodes, will be returned empty lists</returns>
-        Task<(List<TRelation>, List<TRelatedNode>)> GetRelatedNodesAsync<TRelation, TRelatedNode>(TNode node, bool relationInEntity)
+        Task<List<TRelation>> GetRelatedNodesAsync<TRelation, TRelatedNode>(TNode node, bool relationInEntity = false)
             where TRelation : IRelation
             where TRelatedNode : INode;
-
+        
         /// <summary>
         /// Relate two existing nodes
         /// </summary>
@@ -73,8 +72,7 @@ namespace DbManager.Neo4j.Interfaces
         /// <param name="otherNode">The second node</param>
         /// <param name="relationInEntity">determines the direction of relation</param>
         /// <returns></returns>
-        Task RelateNodes<TRelation, TRelatedNode>(TNode node, TRelation relation, TRelatedNode otherNode, bool relationInEntity = false)
-            where TRelation : IRelation
-            where TRelatedNode : INode;
+        Task RelateNodes<TRelation>(TRelation relation)
+            where TRelation : IRelation;
     }
 }

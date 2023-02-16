@@ -1,4 +1,5 @@
 ﻿using DbManager.Data.Nodes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +10,21 @@ namespace DbManager.Data.Relations
 {
     public class PreparedBy : Model, IRelation
     {
+        [JsonIgnore]
         public Order Order { get; set; }
+        [JsonIgnore]
         public Kitchen Kitchen { get; set; }
-
-        public INode NodeFrom => Kitchen;
-
-        public INode NodeTo => Order;
+        [JsonIgnore]
+        public INode NodeFrom
+        {
+            get => Kitchen;
+            set => Kitchen = (Kitchen)value;
+        }
+        [JsonIgnore]
+        public INode NodeTo
+        {
+            get => Order;
+            set => Order = (Order)value;
+        }
     }
 }

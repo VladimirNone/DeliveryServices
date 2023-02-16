@@ -1,4 +1,5 @@
 ﻿using DbManager.Data.Relations;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace DbManager.Data.Nodes
     {
         public string Address { get; set; }
 
+        [JsonIgnore]
         public List<PreparedBy>? PreparedOrders { get; set; }
     }
 }

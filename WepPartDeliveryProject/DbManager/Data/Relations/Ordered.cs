@@ -1,24 +1,19 @@
 ﻿using DbManager.Data.Nodes;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DbManager.Data.Relations
 {
-    public class DeliveredBy : Model, IRelation
+    public class Ordered : Model, IRelation
     {
         [JsonIgnore]
         public Order Order { get; set; }
         [JsonIgnore]
-        public DeliveryMan DeliveryMan { get; set; }
+        public Client Client { get; set; }
         [JsonIgnore]
         public INode NodeFrom
         {
-            get => DeliveryMan;
-            set => DeliveryMan = (DeliveryMan)value;
+            get => Client;
+            set => Client = (Client)value;
         }
         [JsonIgnore]
         public INode NodeTo

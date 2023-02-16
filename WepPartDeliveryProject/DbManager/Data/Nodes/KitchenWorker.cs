@@ -1,4 +1,5 @@
 ﻿using DbManager.Data.Relations;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace DbManager.Data.Nodes
 {
     public class KitchenWorker : User, INode
     {
-
+        [JsonIgnore]
         public WorkedIn? Kitchen { get; set; }
     }
 }

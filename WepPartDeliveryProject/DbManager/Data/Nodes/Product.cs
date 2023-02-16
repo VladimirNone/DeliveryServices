@@ -1,4 +1,5 @@
 ﻿using DbManager.Data.Relations;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace DbManager.Data.Nodes
         public double Price { get; set; }
         public string? PathToMainImage { get; set; }
 
+        [JsonIgnore]
         public List<OrderedProduct>? Orders { get; set; }
     }
 }

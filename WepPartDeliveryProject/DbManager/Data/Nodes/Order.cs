@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DbManager.Data.Relations;
+using Newtonsoft.Json;
 
 namespace DbManager.Data.Nodes
 {
@@ -11,9 +12,13 @@ namespace DbManager.Data.Nodes
     {
         public double Price { get; set; }
 
+        [JsonIgnore]
         public List<OrderedProduct>? OrderedObjects { get; set; }
-        public DeliveredBy DeliveredMan { get; set; }
-        public OrderedBy Client { get; set; }
-        public PreparedBy Kitchen { get; set; }
+        [JsonIgnore]
+        public DeliveredBy? DeliveredMan { get; set; }
+        [JsonIgnore]
+        public Ordered Client { get; set; }
+        [JsonIgnore]
+        public PreparedBy? Kitchen { get; set; }
     }
 }

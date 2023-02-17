@@ -23,12 +23,12 @@ namespace WepPartDeliveryProject.Controllers
             var orderRepo = _repositoryFactory.GetRepository<Order>();
             var clientRepo = _repositoryFactory.GetRepository<Client>();
 
-            var order = await orderRepo.GetNodeAsync(Guid.Parse("3b76d755-ae98-4706-b1c5-8f0a901c7ba2"));
+            var order = await orderRepo.GetNodeAsync(Guid.Parse("3b76d755-ae98-4706-b1c5-8f0a901c7ba3"));
             var client = await clientRepo.GetNodeAsync(Guid.Parse("ed885ac7-9ba0-4aec-996a-ce7a0451fdea"));
 
             var orderedBy = await orderRepo.GetRelationOfNodesAsync<Ordered, Client>(order, client, true);
 
-            /*            
+            /*
             var order = await orderRepo.GetNodeAsync(3);
                         
             var client = await clientRepo.GetNodeAsync(1);

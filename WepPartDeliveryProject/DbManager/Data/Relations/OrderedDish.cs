@@ -8,10 +8,12 @@ using Newtonsoft.Json;
 
 namespace DbManager.Data.Relations
 {
-    public class OrderedProduct : Model, IRelation
+    public class OrderedDish : Model, IRelation
     {
+        public int Count { get; set; }
+
         [JsonIgnore]
-        public Product OrderedItem { get; set; }
+        public Dish OrderedItem { get; set; }
         [JsonIgnore]
         public Order Order { get; set; }
         [JsonIgnore]
@@ -24,9 +26,7 @@ namespace DbManager.Data.Relations
         public INode NodeTo
         {
             get => OrderedItem;
-            set => OrderedItem = (Product)value;
+            set => OrderedItem = (Dish)value;
         }
-
-        public int Count { get; set; }
     }
 }

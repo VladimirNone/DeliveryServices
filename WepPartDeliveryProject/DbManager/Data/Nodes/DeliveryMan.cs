@@ -10,8 +10,7 @@ namespace DbManager.Data.Nodes
 {
     public class DeliveryMan : User, INode
     {
-        public string Name { get; set; }
-        public DateTime Born { get; set; }
+        public int MaxWeight { get; set; }
 
         [JsonIgnore]
         public List<DeliveredBy>? DeliveredOrders { get; set; }

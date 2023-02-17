@@ -11,14 +11,18 @@ namespace DbManager.Data.Nodes
     /// <summary>
     /// Продаваемое блюдо (напиток, товар)
     /// </summary>
-    public class Product : Model, INode
+    public class Dish : Model, INode
     {
         public string Name { get; set; }
         public string Description { get; set; }
         public double Price { get; set; }
-        public string? PathToMainImage { get; set; }
+        public int Weight { get; set; }
+        /// <summary>
+        /// Images of product. First image is main
+        /// </summary>
+        public List<string>? PathToMainImages { get; set; }
 
         [JsonIgnore]
-        public List<OrderedProduct>? Orders { get; set; }
+        public List<OrderedDish>? Orders { get; set; }
     }
 }

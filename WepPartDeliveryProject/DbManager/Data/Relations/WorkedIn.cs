@@ -10,6 +10,8 @@ namespace DbManager.Data.Relations
 {
     public class WorkedIn : Model, IRelation
     {
+        public DateTime? GotJob { get; set; }
+
         [JsonIgnore]
         public Kitchen Kitchen { get; set; }
         [JsonIgnore]

@@ -12,7 +12,8 @@ namespace DbManager.Data.Nodes
     {
         public string Address { get; set; }
 
+
         [JsonIgnore]
-        public List<PreparedBy>? PreparedOrders { get; set; }
+        public List<CookedBy>? PreparedOrders { get; set; }
     }
 }

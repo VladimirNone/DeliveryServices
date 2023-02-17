@@ -10,6 +10,8 @@ namespace DbManager.Data.Nodes
 {
     public class KitchenWorker : User, INode
     {
+        public string JobTitle { get; set; }
+
         [JsonIgnore]
         public WorkedIn? Kitchen { get; set; }
     }

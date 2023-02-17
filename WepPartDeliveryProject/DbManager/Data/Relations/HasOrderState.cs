@@ -3,25 +3,23 @@ using Newtonsoft.Json;
 
 namespace DbManager.Data.Relations
 {
-    public class Ordered : Model, IRelation
+    public class HasOrderState : Model, IRelation
     {
-        public DateTime? WasOrdered { get; set; }
-
         [JsonIgnore]
         public Order Order { get; set; }
         [JsonIgnore]
-        public Client Client { get; set; }
+        public OrderState State { get; set; }
         [JsonIgnore]
         public INode NodeFrom
         {
-            get => Client;
-            set => Client = (Client)value;
+            get => Order;
+            set => Order = (Order)value;
         }
         [JsonIgnore]
         public INode NodeTo
         {
-            get => Order;
-            set => Order = (Order)value;
+            get => State;
+            set => State = (OrderState)value;
         }
     }
 }

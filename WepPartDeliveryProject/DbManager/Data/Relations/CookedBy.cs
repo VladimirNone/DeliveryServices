@@ -8,8 +8,12 @@ using System.Threading.Tasks;
 
 namespace DbManager.Data.Relations
 {
-    public class PreparedBy : Model, IRelation
+    public class CookedBy : Model, IRelation
     {
+        public DateTime? EnteredToQueue { get; set; }
+        public DateTime? WasCooked { get; set; }
+        public DateTime? TakenByDeliveryMan { get; set; }
+
         [JsonIgnore]
         public Order Order { get; set; }
         [JsonIgnore]

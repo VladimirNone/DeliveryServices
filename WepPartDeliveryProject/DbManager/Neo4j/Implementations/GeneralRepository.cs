@@ -4,7 +4,8 @@ using Neo4jClient;
 
 namespace DbManager.Neo4j.Implementations
 {
-    public class GeneralRepository<TNode> : IRepository<TNode> where TNode : INode
+    public class GeneralRepository<TNode> : IRepository<TNode> 
+        where TNode : INode
     {
         private readonly IGraphClient dbContext;
 
@@ -53,7 +54,7 @@ namespace DbManager.Neo4j.Implementations
                 .ResultsAsync;
 
             if (res.Count() != 1)
-                throw new Exception("Count of items with Id don't equels 1. Type: " + typeof(TNode).Name);
+                throw new Exception($"Count of nodes with such Id don't equels 1. Type: {typeof(TNode).Name}");
 
             return res.First();
         }
@@ -143,7 +144,7 @@ namespace DbManager.Neo4j.Implementations
                 .ResultsAsync;
 
             if (res.Count() != 1)
-                throw new Exception("");
+                throw new Exception($"Nodes don't have relation ({typeof(TNode).Name})-[{typeof(TRelation).Name.ToUpper()})]-({typeof(TRelatedNode).Name})");
 
             return res.First();
         }
@@ -162,13 +163,13 @@ namespace DbManager.Neo4j.Implementations
                 })
                 .Return((relation, relatedNode) => new { 
                     nodeRelations = relation.CollectAs<TRelation>(), 
-                    relationNodes = relatedNode.CollectAs<TRelatedNode>() 
+                    relationNodes = relatedNode.CollectAs<TRelatedNode>()
                 })
                 .ResultsAsync;
 
             var fRes = res.Single();
             if(fRes.nodeRelations.Count() != fRes.relationNodes.Count())
-                throw new Exception("");
+                throw new Exception($"Count of nodes don't equals count of relation. (Relations){fRes.nodeRelations.Count()}!=(Nodes){fRes.relationNodes.Count()}");
 
             //А могу ли я быть уверен, что связь - узел идет 1 к 1?
             var relations = fRes.nodeRelations.ToList();
@@ -201,14 +202,14 @@ namespace DbManager.Neo4j.Implementations
         }
 
         /// <summary>
-        /// Get string with directed relation. Relation has name type of "relation"
+        /// Get string with directed relation. Relation has name type of "relation" + addToRelName
         /// </summary>
-        /// <param name="relation"></param>
+        /// <param name="nameRelation">Name of the relation in DB</param>
         /// <param name="relationInEntity">Relation input in node or output</param>
         /// <returns>String with directed relation</returns>
-        private string GetDirection(string nameRelation, bool relationInEntity = false)
+        protected string GetDirection(string nameRelation, bool relationInEntity = false, string addToRelName = "")
         {
-            var direction = $"-[relation:{nameRelation}]-";
+            var direction = $"-[relation{addToRelName}:{nameRelation}]-";
 
             return relationInEntity ? "<" + direction: direction + ">";
         }

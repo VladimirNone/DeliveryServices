@@ -11,14 +11,19 @@ namespace DbManager.Data.Nodes
     public class Order : Model, INode
     {
         public double Price { get; set; }
+        public int SumWeight { get; set; }
+
+        public string DeliveryAddress { get; set; }
+        public string ReasonForCancellation { get; set; }
 
         [JsonIgnore]
-        public List<OrderedProduct>? OrderedObjects { get; set; }
+        public List<OrderedDish>? OrderedObjects { get; set; }
         [JsonIgnore]
         public DeliveredBy? DeliveredMan { get; set; }
         [JsonIgnore]
         public Ordered Client { get; set; }
         [JsonIgnore]
-        public PreparedBy? Kitchen { get; set; }
+        public CookedBy? Kitchen { get; set; }
+
     }
 }

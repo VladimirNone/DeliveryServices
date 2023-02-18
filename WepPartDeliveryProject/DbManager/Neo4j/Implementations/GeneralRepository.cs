@@ -4,10 +4,10 @@ using Neo4jClient;
 
 namespace DbManager.Neo4j.Implementations
 {
-    public class GeneralRepository<TNode> : IRepository<TNode> 
+    public class GeneralRepository<TNode> : IGeneralRepository<TNode> 
         where TNode : INode
     {
-        private readonly IGraphClient dbContext;
+        protected readonly IGraphClient dbContext;
 
         public GeneralRepository(IGraphClient DbContext)
         {
@@ -202,15 +202,16 @@ namespace DbManager.Neo4j.Implementations
         }
 
         /// <summary>
-        /// Get string with directed relation. Relation has name type of "relation" + addToRelName
+        /// Get string with directed relation. Relation has name type of "relation" + relationInstanceName
         /// </summary>
         /// <param name="nameRelation">Name of the relation in DB</param>
         /// <param name="relationInEntity">Relation input in node or output</param>
+        /// <param name="relationInstanceName">Name of relation instance</param>
         /// <returns>String with directed relation</returns>
-        protected string GetDirection(string nameRelation, bool relationInEntity = false, string addToRelName = "")
+        protected string GetDirection(string nameRelation, bool relationInEntity = false, string relationInstanceName = "relation")
         {
-            var direction = $"-[relation{addToRelName}:{nameRelation}]-";
-
+            var direction = $"-[{relationInstanceName}:{nameRelation}]-";
+            
             return relationInEntity ? "<" + direction: direction + ">";
         }
     }

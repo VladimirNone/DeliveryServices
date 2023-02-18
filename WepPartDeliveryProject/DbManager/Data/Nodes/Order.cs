@@ -14,7 +14,19 @@ namespace DbManager.Data.Nodes
         public int SumWeight { get; set; }
 
         public string DeliveryAddress { get; set; }
-        public string ReasonForCancellation { get; set; }
+        public string? ReasonForCancellation { get; set; }
+
+        //Order don't exist
+        public DateTime? WasOrdered { get; set; }
+        //Order in "kitchen queue" stage (WasOrdered - StartCook)
+        public DateTime? StartCook { get; set; }
+        //Order in "cooked" stage (StartCook - WasCooked)
+        public DateTime? WasCooked { get; set; }
+        //Order in "wait delivery man" stage (WasCooked - TakenByDeliveryMan)
+        public DateTime? TakenByDeliveryMan { get; set; }
+        //Order in "delivered" stage (TakenByDeliveryMan - WasDelivered)
+        public DateTime? WasDelivered { get; set; }
+        //Order in "closed" stage 
 
         [JsonIgnore]
         public List<OrderedDish>? OrderedObjects { get; set; }

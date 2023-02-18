@@ -1,132 +1,164 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="DbManager.Data.Model" Collapsed="true">
-    <Position X="16.25" Y="0.5" Width="1.5" />
+  <Class Name="DbManager.Data.Model">
+    <Position X="17.75" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Data\Model.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="DbManager.Data.User" Collapsed="true">
-    <Position X="23" Y="1.75" Width="1.5" />
+  <Class Name="DbManager.Data.User">
+    <Position X="23.25" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAA=</HashCode>
+      <HashCode>AACAAAAAAAAAAAAIAAAAQAQAAAAAAAAAAAAQAAAAAAA=</HashCode>
       <FileName>Data\User.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="DbManager.Data.Nodes.Admin" Collapsed="true">
-    <Position X="19.75" Y="3.25" Width="1.5" />
+  <Class Name="DbManager.Data.Nodes.Admin">
+    <Position X="20" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Data\Nodes\Admin.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="DbManager.Data.Nodes.Client" Collapsed="true">
-    <Position X="22" Y="3.25" Width="1.5" />
+  <Class Name="DbManager.Data.Nodes.Client">
+    <Position X="24.75" Y="4.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAEAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAEAA=</HashCode>
+      <HashCode>AAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAA=</HashCode>
       <FileName>Data\Nodes\Client.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="DbManager.Data.Nodes.DeliveryMan" Collapsed="true">
-    <Position X="24.25" Y="3.25" Width="1.5" />
+  <Class Name="DbManager.Data.Nodes.DeliveryMan">
+    <Position X="26.75" Y="4.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAIAAAAAASAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAACAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Data\Nodes\DeliveryMan.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="DbManager.Data.Nodes.Kitchen" Collapsed="true">
-    <Position X="15.25" Y="1.75" Width="1.5" />
+  <Class Name="DbManager.Data.Nodes.Dish">
+    <Position X="13.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAQAgAAAAAAAAAAQAACAAAAAAAAAAAIAAAAA=</HashCode>
+      <FileName>Data\Nodes\Dish.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Data.Nodes.Kitchen">
+    <Position X="29" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAAAAA=</HashCode>
       <FileName>Data\Nodes\Kitchen.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="DbManager.Data.Nodes.KitchenWorker" Collapsed="true">
-    <Position X="26.5" Y="3.25" Width="1.5" />
+  <Class Name="DbManager.Data.Nodes.KitchenWorker">
+    <Position X="22.25" Y="4.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAA=</HashCode>
       <FileName>Data\Nodes\KitchenWorker.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="DbManager.Data.Nodes.Order" Collapsed="true">
-    <Position X="4" Y="1.75" Width="1.5" />
+  <Class Name="DbManager.Data.Nodes.Order">
+    <Position X="4.25" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAgQAAAAAAAAAAAAAAAAAAAAAAAIAAgAAAAAQ=</HashCode>
+      <HashCode>gAAAAAAAgQAAAAAAACCAAAAAAAAAAAAAAIAAgAAAAAQ=</HashCode>
       <FileName>Data\Nodes\Order.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="DbManager.Data.Nodes.Product" Collapsed="true">
-    <Position X="8.5" Y="1.75" Width="1.5" />
+  <Class Name="DbManager.Data.Nodes.OrderState">
+    <Position X="8.75" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAEAAAAAAQAgAAAAAAAAAEQAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Data\Nodes\Product.cs</FileName>
+      <HashCode>AAEAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAIAAA=</HashCode>
+      <FileName>Data\Nodes\OrderState.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="DbManager.Data.Relations.DeliveredBy" Collapsed="true">
-    <Position X="13" Y="1.75" Width="1.5" />
+  <Class Name="DbManager.Data.Relations.CookedBy">
+    <Position X="15.5" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>QAEAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <HashCode>QAEAAAAAgAAQAAAAAABAAAAACAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>Data\Relations\CookedBy.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Data.Relations.DeliveredBy">
+    <Position X="31.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAEAAAAAAACQAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
       <FileName>Data\Relations\DeliveredBy.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="DbManager.Data.Relations.Ordered" Collapsed="true">
-    <Position X="17.5" Y="1.75" Width="1.5" />
+  <Class Name="DbManager.Data.Relations.HasOrderState">
+    <Position X="2" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>QAEAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ=</HashCode>
+      <HashCode>QAEAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>Data\Relations\HasOrderState.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Data.Relations.Ordered">
+    <Position X="6.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAEAAAAAAQAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ=</HashCode>
       <FileName>Data\Relations\Ordered.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="DbManager.Data.Relations.OrderedProduct" Collapsed="true">
-    <Position X="28.75" Y="1.75" Width="1.5" />
+  <Class Name="DbManager.Data.Relations.OrderedDish">
+    <Position X="11" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>QAEAAAAAAAAQAAAAAAAAAAQAAAAAAAAAAAAAAAAACAA=</HashCode>
-      <FileName>Data\Relations\OrderedProduct.cs</FileName>
+      <FileName>Data\Relations\OrderedDish.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="DbManager.Data.Relations.PreparedBy" Collapsed="true">
-    <Position X="6.25" Y="1.75" Width="1.5" />
+  <Class Name="DbManager.Data.Relations.ReviewedBy">
+    <Position X="17.75" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>QAEAAAAAgAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Data\Relations\PreparedBy.cs</FileName>
+      <HashCode>QAEAAAAABAAQAAAAQAAAAAAAAAAAAAAAAQCAAAAAAAA=</HashCode>
+      <FileName>Data\Relations\ReviewedBy.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="DbManager.Data.Relations.WorkedIn" Collapsed="true">
-    <Position X="10.75" Y="1.75" Width="1.5" />
+  <Class Name="DbManager.Data.Relations.WorkedIn">
+    <Position X="33.5" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>QAAAAAAAgAAQAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>QAAAAAAAgAAQAAAAAAAAAAAAAAAgAACAAAAAAAAAAAA=</HashCode>
       <FileName>Data\Relations\WorkedIn.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Interface Name="DbManager.Data.IModel" Collapsed="true">
-    <Position X="4" Y="3.5" Width="1.5" />
+  <Interface Name="DbManager.Data.IModel">
+    <Position X="1.75" Y="4" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Data\IModel.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="DbManager.Data.INode" Collapsed="true">
-    <Position X="2.75" Y="4.75" Width="1.5" />
+  <Interface Name="DbManager.Data.INode">
+    <Position X="0.5" Y="5.75" Width="1.5" />
+    <InheritanceLine Type="DbManager.Data.IModel" FixedToPoint="true">
+      <Path>
+        <Point X="2.5" Y="5.103" />
+        <Point X="2.5" Y="5.375" />
+        <Point X="1.25" Y="5.375" />
+        <Point X="1.25" Y="5.75" />
+      </Path>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Data\INode.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="DbManager.Data.IRelation" Collapsed="true">
-    <Position X="5" Y="4.75" Width="1.5" />
+  <Interface Name="DbManager.Data.IRelation">
+    <Position X="2.75" Y="5.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>QAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Data\IRelation.cs</FileName>

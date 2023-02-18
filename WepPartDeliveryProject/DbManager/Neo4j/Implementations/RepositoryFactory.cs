@@ -19,11 +19,11 @@ namespace DbManager.Neo4j.Implementations
             services = serviceProvider;
         }
 
-        public IRepository<TEntity> GetRepository<TEntity>(bool hasCustomRepository = false) where TEntity : INode
+        public IGeneralRepository<TEntity> GetRepository<TEntity>(bool hasCustomRepository = false) where TEntity : INode
         {
             if (hasCustomRepository)
             {
-                var repo = services.GetService<IRepository<TEntity>>();
+                var repo = services.GetService<IGeneralRepository<TEntity>>();
                 if(repo != null)
                 {
                     return repo;
@@ -37,7 +37,7 @@ namespace DbManager.Neo4j.Implementations
                 repositories.Add(typeEntity, generalRepo);
             }
 
-            return (IRepository<TEntity>)repositories[typeEntity];
+            return (IGeneralRepository<TEntity>)repositories[typeEntity];
         }
     }
 }

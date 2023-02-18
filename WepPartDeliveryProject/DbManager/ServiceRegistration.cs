@@ -3,6 +3,8 @@ using DbManager.Neo4j.Interfaces;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Neo4jClient;
+using DbManager.Data.Nodes;
+using System.Collections;
 
 namespace DbManager
 {
@@ -14,6 +16,7 @@ namespace DbManager
             services.AddSingleton<IGraphClient, BoltGraphClient>(op => {
                     var graphClient = new BoltGraphClient(settings.Neo4jConnection, settings.Neo4jUser, settings.Neo4jPassword);
                     graphClient.ConnectAsync().Wait();
+                    SetStandartData(graphClient);
                     return graphClient;
                 });
 
@@ -21,6 +24,19 @@ namespace DbManager
 
             // This is the registration for domain repository class
             //services.AddTransient<IPersonRepository, PersonRepository>();
+        }
+
+        private static void SetStandartData(IGraphClient graphClient)
+        {
+            OrderState.OrderStatesFromDb =
+                graphClient.Cypher
+                .Match($"(orderStates:{typeof(OrderState).Name})")
+                .Return(orderStates => orderStates.CollectAs<OrderState>())
+                .OrderBy("orderStates.NumberOfStage")
+                .ResultsAsync
+                .Result
+                .Single()
+                .ToDictionary(h => h.NumberOfStage);
         }
     }
 }

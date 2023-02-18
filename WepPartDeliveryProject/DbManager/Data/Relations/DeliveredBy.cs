@@ -10,8 +10,6 @@ namespace DbManager.Data.Relations
 {
     public class DeliveredBy : Model, IRelation
     {
-        public DateTime? WasDelivered { get; set; }
-
         [JsonIgnore]
         public Order Order { get; set; }
         [JsonIgnore]

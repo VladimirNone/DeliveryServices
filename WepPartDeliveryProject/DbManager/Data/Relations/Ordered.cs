@@ -5,7 +5,6 @@ namespace DbManager.Data.Relations
 {
     public class Ordered : Model, IRelation
     {
-        public DateTime? WasOrdered { get; set; }
 
         [JsonIgnore]
         public Order Order { get; set; }

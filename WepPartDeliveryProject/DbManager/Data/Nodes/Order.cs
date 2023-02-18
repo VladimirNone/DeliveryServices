@@ -12,7 +12,6 @@ namespace DbManager.Data.Nodes
     {
         public double Price { get; set; }
         public int SumWeight { get; set; }
-
         public string DeliveryAddress { get; set; }
         public string? ReasonForCancellation { get; set; }
 

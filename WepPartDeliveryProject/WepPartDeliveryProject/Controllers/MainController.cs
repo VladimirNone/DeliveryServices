@@ -1,6 +1,7 @@
 ﻿using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Neo4j.Interfaces;
+using DbManager.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,9 +13,11 @@ namespace WepPartDeliveryProject.Controllers
     {
         private readonly IRepositoryFactory _repositoryFactory;
 
-        public MainController(IRepositoryFactory repositoryFactory)
+        public MainController(IRepositoryFactory repositoryFactory, IPasswordService passService)
         {
             _repositoryFactory = repositoryFactory;
+            var res = passService.GetPasswordHash("12345");
+            var resBool = passService.CheckPassword("12346", res);
         }
 
         [HttpGet("create")]

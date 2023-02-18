@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Neo4jClient;
 using DbManager.Data.Nodes;
 using System.Collections;
+using DbManager.Services;
 
 namespace DbManager
 {
@@ -15,8 +16,8 @@ namespace DbManager
             // This is to register Neo4j Client Object as a singleton
             services.AddSingleton<IGraphClient, BoltGraphClient>(op => {
                     var graphClient = new BoltGraphClient(settings.Neo4jConnection, settings.Neo4jUser, settings.Neo4jPassword);
-                    graphClient.ConnectAsync().Wait();
-                    SetStandartData(graphClient);
+                    //graphClient.ConnectAsync().Wait();
+                    //SetStandartData(graphClient);
                     return graphClient;
                 });
 
@@ -24,6 +25,7 @@ namespace DbManager
 
             // This is the registration for domain repository class
             //services.AddTransient<IPersonRepository, PersonRepository>();
+            services.AddTransient<IPasswordService, PasswordService>();
         }
 
         private static void SetStandartData(IGraphClient graphClient)

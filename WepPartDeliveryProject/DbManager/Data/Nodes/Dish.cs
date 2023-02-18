@@ -20,7 +20,7 @@ namespace DbManager.Data.Nodes
         /// <summary>
         /// Images of product. First image is main
         /// </summary>
-        public List<string>? PathToMainImages { get; set; }
+        public string? DirectoryWithImages { get; set; }
 
         [JsonIgnore]
         public List<OrderedDish>? Orders { get; set; }

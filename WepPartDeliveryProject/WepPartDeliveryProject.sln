@@ -5,7 +5,9 @@ VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WepPartDeliveryProject", "WepPartDeliveryProject\WepPartDeliveryProject.csproj", "{9F2E4041-878B-4BD9-BF9D-DE409DA4AC9F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbManager", "DbManager\DbManager.csproj", "{9EA1DC5F-F985-42F4-B939-593F72E886A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbManager", "DbManager\DbManager.csproj", "{9EA1DC5F-F985-42F4-B939-593F72E886A7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestsForProject", "TestsForProject\TestsForProject.csproj", "{6D3A6550-8AC0-40E3-A2F9-033E55182A96}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{9EA1DC5F-F985-42F4-B939-593F72E886A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9EA1DC5F-F985-42F4-B939-593F72E886A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9EA1DC5F-F985-42F4-B939-593F72E886A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D3A6550-8AC0-40E3-A2F9-033E55182A96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D3A6550-8AC0-40E3-A2F9-033E55182A96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D3A6550-8AC0-40E3-A2F9-033E55182A96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D3A6550-8AC0-40E3-A2F9-033E55182A96}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

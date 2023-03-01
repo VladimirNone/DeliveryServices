@@ -25,7 +25,7 @@ namespace DbManager.Neo4j.Implementations
                 {
                     id = newNode.Id,
                     newEntity = newNode
-                })
+                })  
                 .ExecuteWithoutResultsAsync();
         }
 
@@ -199,6 +199,20 @@ namespace DbManager.Neo4j.Implementations
                     relatedNodeId = relatedNode.Id,
                 })
                 .ExecuteWithoutResultsAsync();
+        }
+
+        public async Task<List<TNode>> GetNodesWithoutRelation<TRelation>()
+        {
+            var directionIn = GetDirection(typeof(TRelation).Name.ToUpper()); 
+            var directionOut = GetDirection(typeof(TRelation).Name.ToUpper(), false, "relation1");
+
+            var result = await dbContext.Cypher
+                .Match($"(node:{typeof(TNode).Name})")
+                .Where($"not (node){directionIn}() and not (node){directionOut}()")
+                .Return(node => node.CollectAs<TNode>())
+                .ResultsAsync;
+
+            return result.Single().ToList();
         }
 
         /// <summary>

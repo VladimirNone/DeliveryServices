@@ -98,5 +98,12 @@ namespace DbManager.Neo4j.Interfaces
         /// <returns></returns>
         Task RelateNodes<TRelation>(TRelation relation)
             where TRelation : IRelation;
+
+        /// <summary>
+        /// Get all nodes, which haven't specified relation
+        /// </summary>
+        /// <typeparam name="TRelation">The type of relation, which nodes haven't to use</typeparam>
+        /// <returns>Nodes, which haven't related using specified relation</returns>
+        Task<List<TNode>> GetNodesWithoutRelation<TRelation>();
     }
 }

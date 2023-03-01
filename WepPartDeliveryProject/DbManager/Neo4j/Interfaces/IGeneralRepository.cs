@@ -1,13 +1,17 @@
-﻿using DbManager.Data;
+﻿ using DbManager.Data;
 
 namespace DbManager.Neo4j.Interfaces
 {
+    /// <summary>
+    /// General interface for repository
+    /// </summary>
+    /// <typeparam name="TNode"></typeparam>
     public interface IGeneralRepository<TNode> where TNode : INode
     {
         /// <summary>
         /// Add node with properties to DB. If node with such id already exist in DB, then node won't added to DB
         /// </summary>
-        /// <param name="entity">New node</param>
+        /// <param name="node">New node</param>
         /// <returns></returns>
         Task AddNodeAsync(TNode node);
 
@@ -75,7 +79,7 @@ namespace DbManager.Neo4j.Interfaces
             where TRelatedNode : INode;
 
         /// <summary>
-        /// Get related nodes as List<IRelation>
+        /// Get related nodes as List
         /// </summary>
         /// <typeparam name="TRelation">The type of searched relation</typeparam>
         /// <typeparam name="TRelatedNode">The type of related nodes</typeparam>

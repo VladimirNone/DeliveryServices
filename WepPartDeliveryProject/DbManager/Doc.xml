@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DbManager</name>
+    </assembly>
+    <members>
+        <member name="T:DbManager.Data.Nodes.Dish">
+            <summary>
+            Продаваемое блюдо (напиток, товар)
+            </summary>
+        </member>
+        <member name="P:DbManager.Data.Nodes.Dish.DirectoryWithImages">
+            <summary>
+            Images of product. First image is main
+            </summary>
+        </member>
+        <member name="M:DbManager.Neo4j.Implementations.GeneralRepository`1.GetDirection(System.String,System.Boolean,System.String)">
+            <summary>
+            Get string with directed relation. Relation has name type of "relation" + relationInstanceName
+            </summary>
+            <param name="nameRelation">Name of the relation in DB</param>
+            <param name="relationInEntity">Relation input in node or output</param>
+            <param name="relationInstanceName">Name of relation instance</param>
+            <returns>String with directed relation</returns>
+        </member>
+        <member name="T:DbManager.Neo4j.Interfaces.IGeneralRepository`1">
+            <summary>
+            General interface for repository
+            </summary>
+            <typeparam name="TNode"></typeparam>
+        </member>
+        <member name="M:DbManager.Neo4j.Interfaces.IGeneralRepository`1.AddNodeAsync(`0)">
+            <summary>
+            Add node with properties to DB. If node with such id already exist in DB, then node won't added to DB
+            </summary>
+            <param name="entity">New node</param>
+            <returns></returns>
+        </member>
+        <member name="M:DbManager.Neo4j.Interfaces.IGeneralRepository`1.UpdateNodeAsync(`0)">
+            <summary>
+            Update existing node
+            </summary>
+            <param name="node">The node, which will be updated</param>
+            <returns></returns>
+        </member>
+        <member name="M:DbManager.Neo4j.Interfaces.IGeneralRepository`1.GetNodeAsync(System.Guid)">
+            <summary>
+            Get the node with the specified id. If DB return count of nodes != 1, then function throw Exception
+            </summary>
+            <param name="id">Node id</param>
+            <returns>Node with specified id</returns>
+            <exception cref="T:System.Exception">Count of items with specified id don't equels 1.</exception>
+        </member>
+        <member name="M:DbManager.Neo4j.Interfaces.IGeneralRepository`1.GetNodesAsync">
+            <summary>
+            Get all nodes TNode type
+            </summary>
+            <returns>List of TNode type</returns>
+        </member>
+        <member name="M:DbManager.Neo4j.Interfaces.IGeneralRepository`1.DeleteNodeWithAllRelations(`0)">
+            <summary>
+            Delete existing node
+            </summary>
+            <param name="node">The node, which will be deleted</param>
+            <returns></returns>
+        </member>
+        <member name="M:DbManager.Neo4j.Interfaces.IGeneralRepository`1.GetRelationOfNodesAsync``2(`0,``1,System.Boolean)">
+            <summary>
+            Get relation between two nodes
+            </summary>
+            <typeparam name="TRelation">The type of relation</typeparam>
+            <typeparam name="TRelatedNode">Type of related nodes</typeparam>
+            <param name="node">The first node</param>
+            <param name="relatedNode">The second node</param>
+            <param name="relationInEntity">Determines the direction of relation</param>
+            <returns></returns>
+        </member>
+        <member name="M:DbManager.Neo4j.Interfaces.IGeneralRepository`1.UpdateRelationNodesAsync``1(``0)">
+            <summary>
+            Update realtion of two existing nodes
+            </summary>
+            <typeparam name="TRelation">The type of updated relation</typeparam>
+            <param name="updatedRelation">The relation, which will be used for update data</param>
+            <returns></returns>
+        </member>
+        <member name="M:DbManager.Neo4j.Interfaces.IGeneralRepository`1.DeleteRelationOfNodesAsync``2(`0,``1,System.Boolean)">
+            <summary>
+            Delete relation between two nodes
+            </summary>
+            <typeparam name="TRelation">The type of relation</typeparam>
+            <typeparam name="TRelatedNode">Type of related nodes</typeparam>
+            <param name="node">The first node</param>
+            <param name="relatedNode">The second node</param>
+            <param name="relationInEntity">Determines the direction of relation</param>
+            <returns></returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:DbManager.Neo4j.Interfaces.IGeneralRepository`1.GetRelatedNodesAsync``2(`0,System.Boolean)" -->
+        <member name="M:DbManager.Neo4j.Interfaces.IGeneralRepository`1.RelateNodes``1(``0)">
+            <summary>
+            Relate two existing nodes
+            </summary>
+            <typeparam name="TRelation">The type of added relation</typeparam>
+            <param name="relation">The relation, which will be related nodes</param>
+            <returns></returns>
+        </member>
+        <member name="T:DbManager.Neo4j.Interfaces.IOrderRepository">
+            <summary>
+            Interface for repository, which work with nodes Order
+            </summary>
+        </member>
+        <member name="T:DbManager.Neo4j.Interfaces.IRepositoryFactory">
+            <summary>
+            Factory for IGeneralRepository, it uses for work with neo4j database
+            </summary>
+        </member>
+        <member name="M:DbManager.Neo4j.Interfaces.IRepositoryFactory.GetRepository``1(System.Boolean)">
+            <summary>
+            Get repository for work with database nodes
+            </summary>
+            <typeparam name="TEntity">Type node from database</typeparam>
+            <param name="hasCustomRepository">Return custom repository if it register as service</param>
+            <returns>IGeneralRepository for work with database</returns>
+        </member>
+        <member name="T:DbManager.Services.IPasswordService">
+            <summary>
+            Service for generate argon2i hash
+            </summary>
+        </member>
+        <member name="M:DbManager.Services.IPasswordService.GetPasswordHash(System.String,System.String)">
+            <summary>
+            Get Argon2i hash from password
+            </summary>
+            <param name="salt">string, which will be used as salt</param>
+            <param name="password">string, which will be hashed</param>
+            <returns></returns>
+        </member>
+        <member name="M:DbManager.Services.IPasswordService.CheckPassword(System.String,System.String,System.Byte[])">
+            <summary>
+            Equels hash password with old hash from Db
+            </summary>
+            <param name="salt">string, which will be used as salt</param>
+            <param name="password">string, which will be hashed</param>
+            <param name="hashFromDb">hash old password</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

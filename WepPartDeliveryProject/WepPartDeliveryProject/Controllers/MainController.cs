@@ -16,8 +16,8 @@ namespace WepPartDeliveryProject.Controllers
         public MainController(IRepositoryFactory repositoryFactory, IPasswordService passService)
         {
             _repositoryFactory = repositoryFactory;
-            var res = passService.GetPasswordHash("12345");
-            var resBool = passService.CheckPassword("12346", res);
+            var res = passService.GetPasswordHash("salt","12345");
+            var resBool = passService.CheckPassword("salt", "12346", res);
         }
 
         [HttpGet("create")]

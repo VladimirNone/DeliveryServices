@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace DbManager.Neo4j.Interfaces
 {
+    /// <summary>
+    /// Interface for repository, which work with nodes Order
+    /// </summary>
     public interface IOrderRepository : IGeneralRepository<Order>
     {
         Task<List<Order>> GetOrdersByState(string kitchenId, string orderStateId);

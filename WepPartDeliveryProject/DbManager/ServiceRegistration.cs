@@ -34,11 +34,10 @@ namespace DbManager
                 graphClient.Cypher
                 .Match($"(orderStates:{typeof(OrderState).Name})")
                 .Return(orderStates => orderStates.CollectAs<OrderState>())
-                .OrderBy("orderStates.NumberOfStage")
                 .ResultsAsync
                 .Result
                 .Single()
-                .ToDictionary(h => h.NumberOfStage);
+                .ToDictionary(h => h.NameOfState);
         }
     }
 }

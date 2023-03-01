@@ -14,6 +14,8 @@ namespace DbManager.Data.Nodes
         public int SumWeight { get; set; }
         public string DeliveryAddress { get; set; }
         public string? ReasonForCancellation { get; set; }
+        //Order in "cancelled" stage
+        public DateTime? WasCancelled { get; set; } 
 
         //Order don't exist
         public DateTime? WasOrdered { get; set; }

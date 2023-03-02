@@ -9,11 +9,18 @@ namespace DbManager.Neo4j.Interfaces
     public interface IGeneralRepository<TNode> where TNode : INode
     {
         /// <summary>
-        /// Add node with properties to DB. If node with such id already exist in DB, then node won't added to DB
+        /// Add node with properties to DB. Generate new Id. If node with such id already exist in DB, then node won't added to DB
         /// </summary>
         /// <param name="node">New node</param>
         /// <returns></returns>
         Task AddNodeAsync(TNode node);
+
+        /// <summary>
+        /// Add nodes with properties to DB. Generate new Id for each nodes. If node with such id already exist in DB, then node won't added to DB
+        /// </summary>
+        /// <param name="newNodes">List of new nodes</param>
+        /// <returns></returns>
+        Task AddNodesAsync(List<TNode> newNodes);
 
         /// <summary>
         /// Update existing node
@@ -96,7 +103,7 @@ namespace DbManager.Neo4j.Interfaces
         /// <typeparam name="TRelation">The type of added relation</typeparam>
         /// <param name="relation">The relation, which will be related nodes</param>
         /// <returns></returns>
-        Task RelateNodes<TRelation>(TRelation relation)
+        Task RelateNodesAsync<TRelation>(TRelation relation)
             where TRelation : IRelation;
 
         /// <summary>

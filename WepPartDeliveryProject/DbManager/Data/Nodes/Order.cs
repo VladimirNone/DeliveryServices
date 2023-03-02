@@ -21,7 +21,7 @@ namespace DbManager.Data.Nodes
         public DateTime? WasOrdered { get; set; }
         //Order in "kitchen queue" stage (WasOrdered - StartCook)
         public DateTime? StartCook { get; set; }
-        //Order in "cooked" stage (StartCook - WasCooked)
+        //Order in "cooking" stage (StartCook - WasCooked)
         public DateTime? WasCooked { get; set; }
         //Order in "wait delivery man" stage (WasCooked - TakenByDeliveryMan)
         public DateTime? TakenByDeliveryMan { get; set; }

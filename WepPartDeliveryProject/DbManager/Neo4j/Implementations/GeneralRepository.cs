@@ -29,6 +29,14 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
+        public async Task AddNodesAsync(List<TNode> newNodes)
+        {
+            foreach (var item in newNodes)
+            {
+                await AddNodeAsync(item);
+            }
+        }
+
         public async Task UpdateNodeAsync(TNode node)
         {
             await dbContext.Cypher
@@ -82,7 +90,7 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
-        public async Task RelateNodes<TRelation>(TRelation relation)
+        public async Task RelateNodesAsync<TRelation>(TRelation relation)
             where TRelation : IRelation
         {
             var relationInEntity = relation.NodeTo.GetType() == typeof(TNode);

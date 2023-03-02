@@ -5,7 +5,7 @@ namespace DbManager.Data.Nodes
 {
     public class Client : User, INode
     {
-        public float Bonuses { get; set; }
+        public double Bonuses { get; set; }
 
         [JsonIgnore]
         public List<Ordered>? ClientOrders { get; set; }

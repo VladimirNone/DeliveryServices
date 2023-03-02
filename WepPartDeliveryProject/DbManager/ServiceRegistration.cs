@@ -6,6 +6,7 @@ using Neo4jClient;
 using DbManager.Data.Nodes;
 using System.Collections;
 using DbManager.Services;
+using DbManager.Neo4j.DataGenerator;
 
 namespace DbManager
 {
@@ -16,19 +17,24 @@ namespace DbManager
             // This is to register Neo4j Client Object as a singleton
             services.AddSingleton<IGraphClient, BoltGraphClient>(op => {
                     var graphClient = new BoltGraphClient(settings.Neo4jConnection, settings.Neo4jUser, settings.Neo4jPassword);
-                    //graphClient.ConnectAsync().Wait();
-                    //SetStandartData(graphClient);
+                    graphClient.ConnectAsync().Wait();
+                    //LoadStandartData(graphClient);
                     return graphClient;
                 });
 
             services.AddSingleton<IRepositoryFactory, RepositoryFactory>();
 
+            services.AddTransient<IPasswordService, PasswordService>();
+
+            services.AddTransient<DataGenerator>();
+            services.AddSingleton<GeneratorService>();
+
             // This is the registration for domain repository class
             //services.AddTransient<IPersonRepository, PersonRepository>();
-            services.AddTransient<IPasswordService, PasswordService>();
+
         }
 
-        private static void SetStandartData(IGraphClient graphClient)
+        private static void LoadStandartData(IGraphClient graphClient)
         {
             OrderState.OrderStatesFromDb =
                 graphClient.Cypher

@@ -48,7 +48,9 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task MoveOrderToNextStage(Order order)
         {
-            throw new NotImplementedException();
+            var orderRelatoins = await GetRelatedNodesAsync<HasOrderState, OrderState>(order);
+            var orderState = orderRelatoins.First();
+
         }
     }
 }

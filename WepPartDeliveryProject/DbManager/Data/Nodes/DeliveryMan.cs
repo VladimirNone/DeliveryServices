@@ -1,10 +1,5 @@
 ﻿using DbManager.Data.Relations;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Neo4jClient;
 
 namespace DbManager.Data.Nodes
 {
@@ -12,7 +7,7 @@ namespace DbManager.Data.Nodes
     {
         public int MaxWeight { get; set; }
 
-        [JsonIgnore]
+        [Neo4jIgnore]
         public List<DeliveredBy>? DeliveredOrders { get; set; }
     }
 }

@@ -39,12 +39,12 @@ namespace DbManager.Neo4j.DataGenerator
         public List<OrderState> GenerateOrderStates()
             => new List<OrderState> 
             {
-                new OrderState() { Id = Guid.NewGuid(), NumberOfStage = 1, NameOfState = "В очереди заказов", DescriptionForClient = "Заказ был получен и в текущий момент находится в очереди заказов на кухне"},
-                new OrderState() { Id = Guid.NewGuid(), NumberOfStage = 2, NameOfState = "Готовится", DescriptionForClient = "Блюда готовятся на кухне"},
-                new OrderState() { Id = Guid.NewGuid(), NumberOfStage = 3, NameOfState = "В ожидании курьера", DescriptionForClient = "Заказ собран и ожидает когда его заберет курьер"},
-                new OrderState() { Id = Guid.NewGuid(), NumberOfStage = 4, NameOfState = "Доставляется", DescriptionForClient = "Заказ находится у курьера, который его доставляет"},
-                new OrderState() { Id = Guid.NewGuid(), NumberOfStage = 5, NameOfState = "Завершен", DescriptionForClient = "Заказ был завершен"},
-                new OrderState() { Id = Guid.NewGuid(), NumberOfStage = 6, NameOfState = "Отменён", DescriptionForClient = "Заказ был отменен"},
+                new OrderState() { Id = Guid.NewGuid(), NumberOfStage = (int)OrderStateEnum.InQueue, NameOfState = "В очереди заказов", DescriptionForClient = "Заказ был получен и в текущий момент находится в очереди заказов на кухне"},
+                new OrderState() { Id = Guid.NewGuid(), NumberOfStage = (int)OrderStateEnum.Cooking, NameOfState = "Готовится", DescriptionForClient = "Блюда готовятся на кухне"},
+                new OrderState() { Id = Guid.NewGuid(), NumberOfStage = (int)OrderStateEnum.WaitDeliveryMan, NameOfState = "В ожидании курьера", DescriptionForClient = "Заказ собран и ожидает когда его заберет курьер"},
+                new OrderState() { Id = Guid.NewGuid(), NumberOfStage = (int)OrderStateEnum.Delivering, NameOfState = "Доставляется", DescriptionForClient = "Заказ находится у курьера, который его доставляет"},
+                new OrderState() { Id = Guid.NewGuid(), NumberOfStage = (int)OrderStateEnum.Finished, NameOfState = "Завершен", DescriptionForClient = "Заказ был завершен"},
+                new OrderState() { Id = Guid.NewGuid(), NumberOfStage = (int)OrderStateEnum.Cancelled, NameOfState = "Отменён", DescriptionForClient = "Заказ был отменен"},
             };
 
         public List<CookedBy> GenerateRelationsCookedBy(int count, List<Order> orders, List<Kitchen> kitchens)
@@ -54,46 +54,7 @@ namespace DbManager.Neo4j.DataGenerator
             => ObjectGenerator.GenerateDeliveredBy(orders, deliveryMen).Generate(count);
 
         public List<HasOrderState> GenerateRelationsHasOrderState(int count, List<Order> orders, List<OrderState> orderStates)
-        {
-            var relations = ObjectGenerator.GenerateHasOrderState(orders, orderStates).Generate(count);
-
-            //Генерация создает рандомную связь между заказом и состоянием заказа, но при этом время создается для каждого состояния
-            //по этой причине, "чистим" не нужное время, чтобы оно соотвестовало состоянию
-            //Например, если состояние готовится, то данные должны находиться только в StartCook и WasOrdered
-            for (int i = 0; i < relations.Count; i++)
-            {
-                //если заказ отменен, то он мог быть отменен на любой стадии, кроме последней (Завершен - 5)
-                var stage = relations[i].State.NumberOfStage == 6 ? Random.Shared.Next(1,5) : relations[i].State.NumberOfStage;
-
-                if (stage <= 5)
-                {
-                    relations[i].Order.WasCancelled = null;
-                    relations[i].Order.ReasonForCancellation = null;
-
-                    if (stage <= 4)
-                    {
-                        relations[i].Order.WasDelivered = null;
-
-                        if (stage <= 3)
-                        {
-                            relations[i].Order.TakenByDeliveryMan = null;
-
-                            if (stage <= 2)
-                            {
-                                relations[i].Order.WasCooked= null;
-
-                                if (stage <= 1)
-                                {
-                                    relations[i].Order.StartCook = null;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return relations;
-        }
+            => ObjectGenerator.GenerateHasOrderState(orders, orderStates).Generate(count);
 
         public List<Ordered> GenerateRelationsOrdered(int count, List<Order> orders, List<Client> client)
             => ObjectGenerator.GenerateOrdered(orders, client).Generate(count);
@@ -106,8 +67,11 @@ namespace DbManager.Neo4j.DataGenerator
 
             for (int i = 0; i < relations.Count; i++)
             {
-                relations[i].Order.SumWeight += relations[i].OrderedItem.Weight * relations[i].Count;
-                relations[i].Order.Price += relations[i].OrderedItem.Price * relations[i].Count;
+                var orderItem = (Order)relations[i].NodeFrom;
+                var dishItem = (Dish)relations[i].NodeTo;
+
+                orderItem.SumWeight += dishItem.Weight * relations[i].Count;
+                orderItem.Price += dishItem.Price * relations[i].Count;
             }
             return relations;
         }

@@ -10,5 +10,8 @@ namespace DbManager.Data
     {
         INode NodeFrom { get; set; }
         INode NodeTo { get; set; }
+
+        Guid NodeFromId { get; set; }
+        Guid NodeToId { get; set; }
     }
 }

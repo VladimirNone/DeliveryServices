@@ -27,12 +27,7 @@ namespace DbManager.Neo4j.DataGenerator
         public static Faker<Order> GenerateOrder()
             => new Faker<Order>("ru")
                 .RuleFor(h => h.Id, g => Guid.NewGuid())
-                .RuleFor(h => h.DeliveryAddress, g => g.Address.StreetAddress())
-                .RuleFor(h => h.WasOrdered, g => g.Date.Between(DateTime.Parse("2015.05.05"), DateTime.Parse("2015.06.05")))
-                .RuleFor(h => h.StartCook, (g, o) => g.Date.Between(o.WasOrdered.Value, o.WasOrdered.Value.AddHours(1)))
-                .RuleFor(h => h.WasCooked, (g, o) => g.Date.Between(o.StartCook.Value, o.StartCook.Value.AddHours(1)))
-                .RuleFor(h => h.TakenByDeliveryMan, (g, o) => g.Date.Between(o.WasCooked.Value, o.WasCooked.Value.AddMinutes(30)))
-                .RuleFor(h => h.WasDelivered, (g, o) => g.Date.Between(o.TakenByDeliveryMan.Value, o.TakenByDeliveryMan.Value.AddHours(1)));
+                .RuleFor(h => h.DeliveryAddress, g => g.Address.StreetAddress());
 
         public static Faker<Kitchen> GenerateKitchen()
             => new Faker<Kitchen>("ru")
@@ -82,29 +77,30 @@ namespace DbManager.Neo4j.DataGenerator
 
         public static Faker<OrderedDish> GenerateOrderedDish(List<Order> orders, List<Dish> dishes)
             => new Faker<OrderedDish>("ru")
-                .RuleFor(h => h.OrderedItem, g => g.Random.ListItem(dishes))
-                .RuleFor(h => h.Order, g => g.Random.ListItem(orders))
+                .RuleFor(h => h.NodeTo, g => g.Random.ListItem(dishes))
+                .RuleFor(h => h.NodeFrom, g => g.Random.ListItem(orders))
                 .RuleFor(h => h.Count, g => g.Random.Number(1, 10));
 
         public static Faker<CookedBy> GenerateCookedBy(List<Order> orders, List<Kitchen> kitchens)
             => new Faker<CookedBy>("ru")
-                .RuleFor(h => h.Kitchen, g => g.Random.ListItem(kitchens))
-                .RuleFor(h => h.Order, g => g.Random.ListItemWithRemove(orders));
+                .RuleFor(h => h.NodeFrom, g => g.Random.ListItem(kitchens))
+                .RuleFor(h => h.NodeTo, g => g.Random.ListItemWithRemove(orders));
 
         public static Faker<DeliveredBy> GenerateDeliveredBy(List<Order> orders, List<DeliveryMan> deliveryMen)
             => new Faker<DeliveredBy>("ru")
-                .RuleFor(h => h.DeliveryMan, g => g.Random.ListItem(deliveryMen))
-                .RuleFor(h => h.Order, g => g.Random.ListItemWithRemove(orders));
+                .RuleFor(h => h.NodeFrom, g => g.Random.ListItem(deliveryMen))
+                .RuleFor(h => h.NodeTo, g => g.Random.ListItemWithRemove(orders));
 
         public static Faker<HasOrderState> GenerateHasOrderState(List<Order> orders, List<OrderState> states)
             => new Faker<HasOrderState>("ru")
-                .RuleFor(h => h.State, g => g.Random.ListItem(states))
-                .RuleFor(h => h.Order, g => g.Random.ListItemWithRemove(orders));
+                .RuleFor(h => h.TimeStartState, g => g.Date.Between(new DateTime(1980, 10, 10), new DateTime(2003, 10, 10)))
+                .RuleFor(h => h.NodeTo, g => g.Random.ListItem(states))
+                .RuleFor(h => h.NodeFrom, g => g.Random.ListItemWithRemove(orders));
 
         public static Faker<Ordered> GenerateOrdered(List<Order> orders, List<Client> clients)
             => new Faker<Ordered>("ru")
-                .RuleFor(h => h.Client, g => g.Random.ListItem(clients))
-                .RuleFor(h => h.Order, g => g.Random.ListItemWithRemove(orders));
+                .RuleFor(h => h.NodeFrom, g => g.Random.ListItem(clients))
+                .RuleFor(h => h.NodeTo, g => g.Random.ListItemWithRemove(orders));
 
         /// <summary>
         /// Предпологается, что на вход идут только завершенные или отмененные заказы  
@@ -115,15 +111,15 @@ namespace DbManager.Neo4j.DataGenerator
         public static Faker<ReviewedBy> GenerateReviewedBy(List<Order> orders, List<Client> reviewers)
             => new Faker<ReviewedBy>("ru")
                 .RuleFor(h => h.ClientRating, g => g.Random.Int(1, 10))
-                .RuleFor(h => h.Reviewer, g => g.Random.ListItem(reviewers))
-                .RuleFor(h => h.Order, g => g.Random.ListItemWithRemove(orders))
-                .RuleFor(h => h.TimeCreated, (g, o) => g.Date.Between(o.Order.WasDelivered.Value, DateTime.Now))
+                .RuleFor(h => h.NodeFrom, g => g.Random.ListItem(reviewers))
+                .RuleFor(h => h.NodeTo, g => g.Random.ListItemWithRemove(orders))
+                //.RuleFor(h => h.TimeCreated, (g, o) => g.Date.Between(o.Order.WasDelivered.Value, DateTime.Now))
                 .RuleFor(h => h.Review, g => g.Lorem.Paragraph());
 
         public static Faker<WorkedIn> GenerateWorkedIn(List<Kitchen> kitchens, List<KitchenWorker> kitchenWorkers)
             => new Faker<WorkedIn>("ru")
                 .RuleFor(h => h.GotJob, g => g.Date.Between(new DateTime(2010, 10, 10), DateTime.Now))
-                .RuleFor(h => h.Kitchen, g => g.Random.ListItem(kitchens))
-                .RuleFor(h => h.KitchenWorker, g => g.Random.ListItemWithRemove(kitchenWorkers));
+                .RuleFor(h => h.NodeTo, g => g.Random.ListItem(kitchens))
+                .RuleFor(h => h.NodeFrom, g => g.Random.ListItemWithRemove(kitchenWorkers));
     }
 }

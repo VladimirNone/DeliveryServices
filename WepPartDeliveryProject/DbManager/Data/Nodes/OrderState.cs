@@ -1,9 +1,5 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Neo4jClient;
+using Newtonsoft.Json;
 
 namespace DbManager.Data.Nodes
 {
@@ -19,9 +15,10 @@ namespace DbManager.Data.Nodes
         /// OrderState - state from DB
         /// </summary>
         [JsonIgnore]
+        [Neo4jIgnore]
         public static Dictionary<string, OrderState> OrderStatesFromDb = new Dictionary<string, OrderState>();
 
-        [JsonIgnore]
+        [Neo4jIgnore]
         public List<Order> Orders { get; set; } 
     }
 }

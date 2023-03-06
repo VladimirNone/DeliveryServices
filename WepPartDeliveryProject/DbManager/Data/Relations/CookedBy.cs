@@ -1,4 +1,5 @@
 ﻿using DbManager.Data.Nodes;
+using Neo4jClient;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -8,24 +9,10 @@ using System.Threading.Tasks;
 
 namespace DbManager.Data.Relations
 {
-    public class CookedBy : Model, IRelation
+    /// <summary>
+    /// Kitchen -> Order
+    /// </summary>
+    public class CookedBy : Relation<Kitchen, Order>
     {
-
-        [JsonIgnore]
-        public Order Order { get; set; }
-        [JsonIgnore]
-        public Kitchen Kitchen { get; set; }
-        [JsonIgnore]
-        public INode NodeFrom
-        {
-            get => Kitchen;
-            set => Kitchen = (Kitchen)value;
-        }
-        [JsonIgnore]
-        public INode NodeTo
-        {
-            get => Order;
-            set => Order = (Order)value;
-        }
     }
 }

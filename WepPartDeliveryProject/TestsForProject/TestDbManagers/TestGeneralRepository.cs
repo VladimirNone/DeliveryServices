@@ -29,7 +29,7 @@ namespace TestsForProject.TestDbManagers
             //Test Orders
             List<Order> _orders = new List<Order>()
             {
-                new Order(){Id = Guid.NewGuid(), SumWeight = 1500, Price = 850.6, Kitchen = new CookedBy(), WasOrdered = DateTime.Parse("2015.05.05"), StartCook = DateTime.Parse("2015.05.06"), DeliveryAddress = "address" }
+                new Order(){Id = Guid.NewGuid(), SumWeight = 1500, Price = 850.6, Kitchen = new CookedBy() }
             };
 
             //Add to db data

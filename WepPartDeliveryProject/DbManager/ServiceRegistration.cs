@@ -7,6 +7,7 @@ using DbManager.Data.Nodes;
 using System.Collections;
 using DbManager.Services;
 using DbManager.Neo4j.DataGenerator;
+using DbManager.Neo4j;
 
 namespace DbManager
 {

@@ -1,5 +1,5 @@
 ﻿using DbManager.Data.Relations;
-using Newtonsoft.Json;
+using Neo4jClient;
 
 namespace DbManager.Data.Nodes
 {
@@ -7,7 +7,7 @@ namespace DbManager.Data.Nodes
     {
         public double Bonuses { get; set; }
 
-        [JsonIgnore]
+        [Neo4jIgnore]
         public List<Ordered>? ClientOrders { get; set; }
     }
 }

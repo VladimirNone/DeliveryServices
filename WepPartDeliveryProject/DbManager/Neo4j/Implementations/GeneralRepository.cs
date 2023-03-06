@@ -93,22 +93,18 @@ namespace DbManager.Neo4j.Implementations
         public async Task RelateNodesAsync<TRelation>(TRelation relation)
             where TRelation : IRelation
         {
-            var relationInEntity = relation.NodeTo.GetType() == typeof(TNode);
-
-            (var node, var otherNode) = (relation.NodeTo, relation.NodeFrom);
-
-            var direction = GetDirection(relation.GetType().Name.ToUpper(), relationInEntity);
+            var direction = GetDirection(relation.GetType().Name.ToUpper());
 
             relation.Id = Guid.NewGuid();
 
             await dbContext.Cypher
-                .Match($"(node:{node.GetType().Name} {{Id: $entityId}}), (otherNode:{otherNode.GetType().Name} {{Id: $otherNodeId}})")
+                .Match($"(node:{relation.NodeFrom.GetType().Name} {{Id: $entityId}}), (otherNode:{relation.NodeTo.GetType().Name} {{Id: $otherNodeId}})")
                 .Create($"(node){direction}(otherNode)")
                 .Set("relation=$newRelation")
                 .WithParams(new
                 {
-                    entityId = node.Id,
-                    otherNodeId = otherNode.Id,
+                    entityId = relation.NodeFrom.Id,
+                    otherNodeId = relation.NodeTo.Id,
                     newRelation = relation
                 })
                 .ExecuteWithoutResultsAsync();
@@ -117,19 +113,15 @@ namespace DbManager.Neo4j.Implementations
         public async Task UpdateRelationNodesAsync<TRelation>(TRelation updatedRelation)
             where TRelation : IRelation
         {
-            var relationInEntity = updatedRelation.NodeTo.GetType() == typeof(TNode);
-
-            (var node, var otherNode) = (updatedRelation.NodeTo, updatedRelation.NodeFrom);
-
-            var direction = GetDirection(updatedRelation.GetType().Name.ToUpper(), relationInEntity);
+            var direction = GetDirection(updatedRelation.GetType().Name.ToUpper());
 
             await dbContext.Cypher
-                .Match($"(node:{node.GetType().Name} {{Id: $id}}){direction}(relatedNode:{otherNode.GetType().Name} {{Id: $relatedNodeId}})")
+                .Match($"(node:{updatedRelation.NodeFrom.GetType().Name} {{Id: $id}}){direction}(relatedNode:{updatedRelation.NodeTo.GetType().Name} {{Id: $relatedNodeId}})")
                 .Set("relation=$updatedRelation")
                 .WithParams(new
                 {
-                    id = node.Id,
-                    relatedNodeId = otherNode.Id,
+                    id = updatedRelation.NodeFrom.Id,
+                    relatedNodeId = updatedRelation.NodeTo.Id,
                     updatedRelation
                 })
                 .ExecuteWithoutResultsAsync();

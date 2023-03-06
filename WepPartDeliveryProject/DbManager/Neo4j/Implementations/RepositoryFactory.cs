@@ -17,6 +17,9 @@ namespace DbManager.Neo4j.Implementations
         {
             dbContext = neo4jData;
             services = serviceProvider;
+
+            var res = neo4jData.JsonConverters;
+            var count = res.Count;
         }
 
         public IGeneralRepository<TEntity> GetRepository<TEntity>(bool hasCustomRepository = false) where TEntity : INode

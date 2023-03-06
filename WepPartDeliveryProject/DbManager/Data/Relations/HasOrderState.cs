@@ -1,25 +1,15 @@
 ﻿using DbManager.Data.Nodes;
-using Newtonsoft.Json;
+using Neo4jClient;
 
 namespace DbManager.Data.Relations
 {
-    public class HasOrderState : Model, IRelation
+    /// <summary>
+    /// Order -> OrderState
+    /// </summary>
+    public class HasOrderState : Relation<Order, OrderState>
     {
-        [JsonIgnore]
-        public Order Order { get; set; }
-        [JsonIgnore]
-        public OrderState State { get; set; }
-        [JsonIgnore]
-        public INode NodeFrom
-        {
-            get => Order;
-            set => Order = (Order)value;
-        }
-        [JsonIgnore]
-        public INode NodeTo
-        {
-            get => State;
-            set => State = (OrderState)value;
-        }
+        public DateTime TimeStartState { get; set; }
+        public string? Comments { get; set; }
+
     }
 }

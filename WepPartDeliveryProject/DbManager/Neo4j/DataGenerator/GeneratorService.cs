@@ -1,4 +1,5 @@
 ﻿
+using DbManager.Data;
 using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Neo4j.Interfaces;
@@ -51,12 +52,14 @@ namespace DbManager.Neo4j.DataGenerator
             var ordereds = _dataGenerator.GenerateRelationsOrdered(orders.Count, new List<Order>(orders), clients);
             var reviewedBies = new List<ReviewedBy>();
 
+            var finishedOrders = hasOrderStates.Where(h => ((OrderState)h.NodeTo).NumberOfStage == (int)OrderStateEnum.Finished).Select(h => (Order)h.NodeFrom).ToList();
+
             //Генерируем связь ReviewedBy между клиентами и ИХ заказами. Генерация только для завершенных заказов
             foreach (var client in clients)
             {
                 var orderedOrders = ordereds
-                    .Where(h=>h.Client.Id == client.Id && h.Order.WasDelivered != null)
-                    .Select(h=>h.Order)
+                    .Where(h=>h.NodeFrom.Id == client.Id && finishedOrders.Contains((Order)h.NodeTo))
+                    .Select(h=>(Order)h.NodeTo)
                     .ToList();
 
                 reviewedBies.AddRange(_dataGenerator

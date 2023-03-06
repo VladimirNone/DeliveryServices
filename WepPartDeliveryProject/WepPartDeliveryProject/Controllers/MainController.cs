@@ -26,7 +26,18 @@ namespace WepPartDeliveryProject.Controllers
         public async Task<IActionResult> CreateClient()
         {
 
-            var orders = _dataGenerator.GenerateOrders(5);
+            //var orders = _dataGenerator.GenerateOrders(5);
+/*            var order = new Order();
+            await _repositoryFactory.GetRepository<Order>().AddNodeAsync(order);
+            order = await _repositoryFactory.GetRepository<Order>().GetNodeAsync(order.Id);
+            
+            var client = new Client();
+            await _repositoryFactory.GetRepository<Client>().AddNodeAsync(client);
+            client = await _repositoryFactory.GetRepository<Client>().GetNodeAsync(client.Id);
+            
+            var relations = new Ordered() { NodeFrom = client, NodeTo = order };
+            await _repositoryFactory.GetRepository<Order>().RelateNodesAsync(relations);*/
+            
 
 /*            var orderRepo = _repositoryFactory.GetRepository<Order>();
             var clientRepo = _repositoryFactory.GetRepository<Client>();
@@ -40,7 +51,7 @@ namespace WepPartDeliveryProject.Controllers
             var client = await clientRepo.GetNodeAsync(1);
             await orderRepo.RelateNodesAsync<Ordered, Client>(order, new Ordered() { SomeText = "SomeTextik"}, client, true);*/
 
-            return Ok(orders);
+            return Ok();
         }
 
         [HttpGet("update")]

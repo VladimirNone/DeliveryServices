@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DbManager.Data.Relations;
+﻿using DbManager.Data.Relations;
+using Neo4jClient;
 using Newtonsoft.Json;
 
 namespace DbManager.Data.Nodes
@@ -14,28 +10,29 @@ namespace DbManager.Data.Nodes
         public int SumWeight { get; set; }
         public string DeliveryAddress { get; set; }
         public string? ReasonForCancellation { get; set; }
-        //Order in "cancelled" stage
-        public DateTime? WasCancelled { get; set; } 
 
-        //Order don't exist
-        public DateTime? WasOrdered { get; set; }
-        //Order in "kitchen queue" stage (WasOrdered - StartCook)
-        public DateTime? StartCook { get; set; }
-        //Order in "cooking" stage (StartCook - WasCooked)
-        public DateTime? WasCooked { get; set; }
-        //Order in "wait delivery man" stage (WasCooked - TakenByDeliveryMan)
-        public DateTime? TakenByDeliveryMan { get; set; }
-        //Order in "delivered" stage (TakenByDeliveryMan - WasDelivered)
-        public DateTime? WasDelivered { get; set; }
-        //Order in "closed" stage 
+        [Neo4jIgnore]
+        public List<HasOrderState> Story { get; set; } = new List<HasOrderState>();
 
-        [JsonIgnore]
+        public string StoryJson
+        {
+            get
+            {
+                return JsonConvert.SerializeObject(Story, Formatting.Indented);
+            }
+            set
+            {
+                Story = JsonConvert.DeserializeObject<List<HasOrderState>>(value);
+            }
+        }
+
+        [Neo4jIgnore]
         public List<OrderedDish>? OrderedObjects { get; set; }
-        [JsonIgnore]
+        [Neo4jIgnore]
         public DeliveredBy? DeliveredMan { get; set; }
-        [JsonIgnore]
+        [Neo4jIgnore]
         public Ordered Client { get; set; }
-        [JsonIgnore]
+        [Neo4jIgnore]
         public CookedBy? Kitchen { get; set; }
 
     }

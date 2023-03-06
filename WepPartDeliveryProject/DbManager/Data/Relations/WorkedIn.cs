@@ -1,32 +1,13 @@
 ﻿using DbManager.Data.Nodes;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Neo4jClient;
 
 namespace DbManager.Data.Relations
 {
-    public class WorkedIn : Model, IRelation
+    /// <summary>
+    /// KitchenWorker -> Kitchen
+    /// </summary>
+    public class WorkedIn : Relation<KitchenWorker, Kitchen>
     {
         public DateTime? GotJob { get; set; }
-
-        [JsonIgnore]
-        public Kitchen Kitchen { get; set; }
-        [JsonIgnore]
-        public KitchenWorker KitchenWorker { get; set; }
-        [JsonIgnore]
-        public INode NodeFrom
-        {
-            get => KitchenWorker;
-            set => KitchenWorker = (KitchenWorker)value;
-        }
-        [JsonIgnore]
-        public INode NodeTo
-        {
-            get => Kitchen;
-            set => Kitchen = (Kitchen)value;
-        }
     }
 }

@@ -93,18 +93,23 @@ namespace DbManager.Neo4j.Implementations
         public async Task RelateNodesAsync<TRelation>(TRelation relation)
             where TRelation : IRelation
         {
+            if(relation.NodeFromId == null || relation.NodeToId == null)
+            { 
+                throw new Exception("NodeFromId or NodeToId is null. Method RelateNodesAsync where TRelation is " + typeof(TRelation));
+            }
+
             var direction = GetDirection(relation.GetType().Name.ToUpper());
 
             relation.Id = Guid.NewGuid();
 
             await dbContext.Cypher
-                .Match($"(node:{relation.NodeFrom.GetType().Name} {{Id: $entityId}}), (otherNode:{relation.NodeTo.GetType().Name} {{Id: $otherNodeId}})")
+                .Match($"(node: {{Id: $entityId}}), (otherNode: {{Id: $otherNodeId}})")
                 .Create($"(node){direction}(otherNode)")
                 .Set("relation=$newRelation")
                 .WithParams(new
                 {
-                    entityId = relation.NodeFrom.Id,
-                    otherNodeId = relation.NodeTo.Id,
+                    entityId = relation.NodeFromId,
+                    otherNodeId = relation.NodeToId,
                     newRelation = relation
                 })
                 .ExecuteWithoutResultsAsync();
@@ -116,12 +121,12 @@ namespace DbManager.Neo4j.Implementations
             var direction = GetDirection(updatedRelation.GetType().Name.ToUpper());
 
             await dbContext.Cypher
-                .Match($"(node:{updatedRelation.NodeFrom.GetType().Name} {{Id: $id}}){direction}(relatedNode:{updatedRelation.NodeTo.GetType().Name} {{Id: $relatedNodeId}})")
+                .Match($"(node: {{Id: $id}}){direction}(relatedNode: {{Id: $relatedNodeId}})")
                 .Set("relation=$updatedRelation")
                 .WithParams(new
                 {
-                    id = updatedRelation.NodeFrom.Id,
-                    relatedNodeId = updatedRelation.NodeTo.Id,
+                    id = updatedRelation.NodeFromId,
+                    relatedNodeId = updatedRelation.NodeToId,
                     updatedRelation
                 })
                 .ExecuteWithoutResultsAsync();

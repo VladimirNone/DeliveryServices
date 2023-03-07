@@ -27,31 +27,29 @@ namespace WepPartDeliveryProject.Controllers
         {
 
             //var orders = _dataGenerator.GenerateOrders(5);
-/*            var order = new Order();
-            await _repositoryFactory.GetRepository<Order>().AddNodeAsync(order);
-            order = await _repositoryFactory.GetRepository<Order>().GetNodeAsync(order.Id);
-            
+            var order = new Order();
+            await _repositoryFactory.GetRepository<Order>().GetNodeAsync(Guid.Parse("ace18ceb-e1af-422c-ba7f-c850f5639b1e"));
+
             var client = new Client();
-            await _repositoryFactory.GetRepository<Client>().AddNodeAsync(client);
-            client = await _repositoryFactory.GetRepository<Client>().GetNodeAsync(client.Id);
-            
+            await _repositoryFactory.GetRepository<Client>().GetNodeAsync(Guid.Parse("b818ca9c-fc22-4638-beca-138462fcf10c"));
+
             var relations = new Ordered() { NodeFrom = client, NodeTo = order };
-            await _repositoryFactory.GetRepository<Order>().RelateNodesAsync(relations);*/
-            
+            await _repositoryFactory.GetRepository<Order>().RelateNodesAsync(relations);
 
-/*            var orderRepo = _repositoryFactory.GetRepository<Order>();
-            var clientRepo = _repositoryFactory.GetRepository<Client>();
 
-            var order = await orderRepo.GetNodeAsync(Guid.Parse("3b76d755-ae98-4706-b1c5-8f0a901c7ba3"));
-            var client = await clientRepo.GetNodeAsync(Guid.Parse("ed885ac7-9ba0-4aec-996a-ce7a0451fdea"));
+            /*            var orderRepo = _repositoryFactory.GetRepository<Order>();
+                        var clientRepo = _repositoryFactory.GetRepository<Client>();
 
-            var orderedBy = await orderRepo.GetRelationOfNodesAsync<Ordered, Client>(order, client, true);*/
+                        var order = await orderRepo.GetNodeAsync(Guid.Parse("3b76d755-ae98-4706-b1c5-8f0a901c7ba3"));
+                        var client = await clientRepo.GetNodeAsync(Guid.Parse("ed885ac7-9ba0-4aec-996a-ce7a0451fdea"));
+
+                        var orderedBy = await orderRepo.GetRelationOfNodesAsync<Ordered, Client>(order, client, true);*/
 
             /*var order = await orderRepo.GetNodeAsync(3);
             var client = await clientRepo.GetNodeAsync(1);
             await orderRepo.RelateNodesAsync<Ordered, Client>(order, new Ordered() { SomeText = "SomeTextik"}, client, true);*/
 
-            return Ok();
+            return Ok(relations);
         }
 
         [HttpGet("update")]

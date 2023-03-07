@@ -29,8 +29,8 @@ namespace DbManager.Data
             }
         }
 
-        public Guid NodeFromId { get; set; }
-        public Guid NodeToId { get; set; }
+        public Guid? NodeFromId { get; set; }
+        public Guid? NodeToId { get; set; }
 
     }
 }

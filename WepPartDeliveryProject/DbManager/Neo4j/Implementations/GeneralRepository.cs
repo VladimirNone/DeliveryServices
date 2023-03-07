@@ -103,7 +103,7 @@ namespace DbManager.Neo4j.Implementations
             relation.Id = Guid.NewGuid();
 
             await dbContext.Cypher
-                .Match($"(node: {{Id: $entityId}}), (otherNode: {{Id: $otherNodeId}})")
+                .Match($"(node {{Id: $entityId}}), (otherNode {{Id: $otherNodeId}})")
                 .Create($"(node){direction}(otherNode)")
                 .Set("relation=$newRelation")
                 .WithParams(new
@@ -121,7 +121,7 @@ namespace DbManager.Neo4j.Implementations
             var direction = GetDirection(updatedRelation.GetType().Name.ToUpper());
 
             await dbContext.Cypher
-                .Match($"(node: {{Id: $id}}){direction}(relatedNode: {{Id: $relatedNodeId}})")
+                .Match($"(node {{Id: $id}}){direction}(relatedNode {{Id: $relatedNodeId}})")
                 .Set("relation=$updatedRelation")
                 .WithParams(new
                 {

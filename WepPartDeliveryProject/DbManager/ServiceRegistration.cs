@@ -19,7 +19,8 @@ namespace DbManager
             services.AddSingleton<IGraphClient, BoltGraphClient>(op => {
                     var graphClient = new BoltGraphClient(settings.Neo4jConnection, settings.Neo4jUser, settings.Neo4jPassword);
                     graphClient.ConnectAsync().Wait();
-                    //LoadStandartData(graphClient);
+                    graphClient.OperationCompleted += GraphClient_OperationLogger;
+                    LoadStandartData(graphClient);
                     return graphClient;
                 });
 
@@ -33,6 +34,11 @@ namespace DbManager
             // This is the registration for domain repository class
             //services.AddTransient<IPersonRepository, PersonRepository>();
 
+        }
+
+        private static void GraphClient_OperationLogger(object sender, OperationCompletedEventArgs e)
+        {
+            
         }
 
         private static void LoadStandartData(IGraphClient graphClient)

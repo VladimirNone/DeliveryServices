@@ -17,11 +17,11 @@ namespace DbManager.Data.Nodes
         {
             get
             {
-                return JsonConvert.SerializeObject(Story, Formatting.Indented);
+                return JsonConvert.SerializeObject(Story, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore});
             }
             set
             {
-                Story = JsonConvert.DeserializeObject<List<HasOrderState>>(value);
+                Story = JsonConvert.DeserializeObject<List<HasOrderState>>(value, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
             }
         }
 

@@ -94,6 +94,7 @@ namespace DbManager.Neo4j.DataGenerator
         public static Faker<HasOrderState> GenerateHasOrderState(List<Order> orders, List<OrderState> states)
             => new Faker<HasOrderState>("ru")
                 .RuleFor(h => h.TimeStartState, g => g.Date.Between(new DateTime(1980, 10, 10), new DateTime(2003, 10, 10)))
+                .RuleFor(h => h.Comment, g => g.Random.Bool() ? g.Lorem.Sentence() : null)
                 .RuleFor(h => h.NodeTo, g => g.Random.ListItem(states))
                 .RuleFor(h => h.NodeFrom, g => g.Random.ListItemWithRemove(orders));
 
@@ -113,7 +114,7 @@ namespace DbManager.Neo4j.DataGenerator
                 .RuleFor(h => h.ClientRating, g => g.Random.Int(1, 10))
                 .RuleFor(h => h.NodeFrom, g => g.Random.ListItem(reviewers))
                 .RuleFor(h => h.NodeTo, g => g.Random.ListItemWithRemove(orders))
-                //.RuleFor(h => h.TimeCreated, (g, o) => g.Date.Between(o.Order.WasDelivered.Value, DateTime.Now))
+                .RuleFor(h => h.TimeCreated, (g, o) => g.Date.Between(((Order)o.NodeTo).Story.Last().TimeStartState, ((Order)o.NodeTo).Story.Last().TimeStartState.AddHours(3)))
                 .RuleFor(h => h.Review, g => g.Lorem.Paragraph());
 
         public static Faker<WorkedIn> GenerateWorkedIn(List<Kitchen> kitchens, List<KitchenWorker> kitchenWorkers)

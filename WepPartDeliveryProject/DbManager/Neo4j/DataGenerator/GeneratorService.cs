@@ -50,6 +50,35 @@ namespace DbManager.Neo4j.DataGenerator
             var deliveredBies = _dataGenerator.GenerateRelationsDeliveredBy(orders.Count, new List<Order>(orders), deliveryMen);
             var hasOrderStates = _dataGenerator.GenerateRelationsHasOrderState(orders.Count, new List<Order>(orders), orderStates);
             var ordereds = _dataGenerator.GenerateRelationsOrdered(orders.Count, new List<Order>(orders), clients);
+            
+            //Генерируем связь OrderedDish. Количество связей будет меньше, т.к. удаляются дублируемые
+            var orderedDishes = _dataGenerator.GenerateRelationsOrderedDish(orders.Count * mediumCountDishesInOrder, orders, dishes);
+            
+            //связываем узлы
+            foreach (var item in workedIns)
+                await _repoFactory.GetRepository<Kitchen>().RelateNodesAsync(item);
+
+            //В цикле все, т.к. при генерации учитывается, что эти связи идут 1 к 2
+            for (int i = 0; i < orders.Count; i++)
+            {
+                await orderRepo.RelateNodesAsync(cookedBies[i]);
+                await orderRepo.RelateNodesAsync(deliveredBies[i]);
+                await orderRepo.RelateNodesAsync(hasOrderStates[i]);
+                await orderRepo.RelateNodesAsync(ordereds[i]);
+            }
+            //Создаем историю для заказов. Создаются рандомные связи с состояниями до последнего
+            hasOrderStates = _dataGenerator.GenerateOrderStory(hasOrderStates, orderStates);
+
+            for (int i = 0; i < orders.Count; i++)
+            {
+                //обновляем узлы Order, т.к. появились привязанные заказы
+                await orderRepo.UpdateNodeAsync(orders[i]);
+            }
+
+            foreach (var item in orderedDishes)
+                await orderRepo.RelateNodesAsync(item);
+
+            //Создание отзыва в самом конце, т.к. время ее создания зависит от времени завершения заказа
             var reviewedBies = new List<ReviewedBy>();
 
             var finishedOrders = hasOrderStates.Where(h => ((OrderState)h.NodeTo).NumberOfStage == (int)OrderStateEnum.Finished).Select(h => (Order)h.NodeFrom).ToList();
@@ -58,32 +87,13 @@ namespace DbManager.Neo4j.DataGenerator
             foreach (var client in clients)
             {
                 var orderedOrders = ordereds
-                    .Where(h=>h.NodeFrom.Id == client.Id && finishedOrders.Contains((Order)h.NodeTo))
-                    .Select(h=>(Order)h.NodeTo)
+                    .Where(h => h.NodeFrom.Id == client.Id && finishedOrders.Contains((Order)h.NodeTo))
+                    .Select(h => (Order)h.NodeTo)
                     .ToList();
 
                 reviewedBies.AddRange(_dataGenerator
                     .GenerateRelationsReviewedBy(orderedOrders.Count, new List<Order>(orderedOrders), new List<Client>() { client }));
             }
-            //Генерируем связь OrderedDish. Количество связей будет меньше, т.к. удаляются дублируемые
-            var orderedDishes = _dataGenerator.GenerateRelationsOrderedDish(orders.Count * mediumCountDishesInOrder, orders, dishes);
-            
-            //связываем узлы
-            foreach (var item in workedIns)
-                await _repoFactory.GetRepository<Kitchen>().RelateNodesAsync(item);
-
-            for (int i = 0; i < orders.Count; i++)
-            {
-                //обновляем узлы Order, т.к. появились привязанные заказы
-                await orderRepo.UpdateNodeAsync(orders[i]);
-                await orderRepo.RelateNodesAsync(cookedBies[i]);
-                await orderRepo.RelateNodesAsync(deliveredBies[i]);
-                await orderRepo.RelateNodesAsync(hasOrderStates[i]);
-                await orderRepo.RelateNodesAsync(ordereds[i]);
-            }
-
-            foreach (var item in orderedDishes)
-                await orderRepo.RelateNodesAsync(item);
 
             foreach (var item in reviewedBies)
                 await orderRepo.RelateNodesAsync(item);

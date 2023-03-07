@@ -1,4 +1,10 @@
-﻿Merge(user: User { Id: 458 })
+﻿//Вывести заказы, у которых заказно больше 5 видов блюд
+match (o:Order)-[:ORDEREDDISH]-(d:Dish)
+with o,d,count{(o)-[:ORDEREDDISH]-(:Dish)} as cnt
+where cnt > 5
+return o,d
+
+Merge(user: User { Id: 458 })
 on CREATE
 SET user.Name = 'Jim'
 var lisa = new Client { Id = 456, Name = "Lisa" };

@@ -1,4 +1,5 @@
-﻿using DbManager.Data;
+﻿using Bogus;
+using DbManager.Data;
 using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Services;
@@ -55,6 +56,41 @@ namespace DbManager.Neo4j.DataGenerator
 
         public List<HasOrderState> GenerateRelationsHasOrderState(int count, List<Order> orders, List<OrderState> orderStates)
             => ObjectGenerator.GenerateHasOrderState(orders, orderStates).Generate(count);
+
+        public List<HasOrderState> GenerateOrderStory(List<HasOrderState> currentOrderStates, List<OrderState> orderStates)
+        {
+            foreach (var curOrderState in currentOrderStates)
+            {
+                var order = (Order)curOrderState.NodeFrom;
+                var state = (OrderState)curOrderState.NodeTo;
+                var faker = new Faker("ru");
+                var previousStageTimeStart = faker.Date.Between(new DateTime(2022, 10, 10), new DateTime(2023, 5, 5));
+
+                for (int i = 0, j = 1; j < state.NumberOfStage; i++, j = (int)Math.Pow(2,i))
+                {
+                    var orderStoryState = new HasOrderState()
+                    {
+                        TimeStartState = faker.Date.Between(previousStageTimeStart, previousStageTimeStart.AddHours(1)),
+                        Comment = faker.Lorem.Sentence(),
+                        Id = Guid.NewGuid(),
+                        NodeFromId = order.Id,
+                        NodeToId = orderStates[i].Id,
+                    };
+                    order.Story.Add(orderStoryState);
+                    previousStageTimeStart = orderStoryState.TimeStartState;
+                }
+
+                order.Story.Add(new HasOrderState()
+                {
+                    TimeStartState = faker.Date.Between(previousStageTimeStart, previousStageTimeStart.AddHours(1)),
+                    Comment = faker.Lorem.Sentence(),
+                    Id = curOrderState.Id,
+                    NodeFromId = order.Id,
+                    NodeToId = state.Id,
+                });
+            }
+            return currentOrderStates;
+        }
 
         public List<Ordered> GenerateRelationsOrdered(int count, List<Order> orders, List<Client> client)
             => ObjectGenerator.GenerateOrdered(orders, client).Generate(count);

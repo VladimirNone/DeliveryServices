@@ -2,10 +2,10 @@
 
 namespace DbManager.Data
 {
-    public class Relation<TFrom, TTo> : Model, IRelation where TFrom : INode where TTo : INode
+    public class Relation<TFrom, TTo> : Model, IRelation where TFrom : class, INode where TTo : class, INode
     {
-        private TFrom _nodeFrom;
-        private TTo _nodeTo;
+        private TFrom? _nodeFrom;
+        private TTo? _nodeTo;
 
         [Neo4jIgnore]
         public INode NodeFrom

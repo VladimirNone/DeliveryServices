@@ -9,7 +9,7 @@ namespace DbManager.Data.Relations
     public class HasOrderState : Relation<Order, OrderState>
     {
         public DateTime TimeStartState { get; set; }
-        public string? Comments { get; set; }
+        public string? Comment { get; set; }
 
     }
 }

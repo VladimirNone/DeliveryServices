@@ -26,7 +26,8 @@ namespace DbManager.Neo4j.Implementations
         public async Task<List<Order>> GetOrdersByState(Guid kitchenId, Guid orderStateId)
         {
             var directionInOrder = GetDirection(typeof(CookedBy).Name.ToUpper(), false);
-            var directionInOrderState = GetDirection(typeof(HasOrderState).Name.ToUpper(), true);
+            var directionInOrderState = GetDirection(typeof(HasOrderState).Name.ToUpper(), true, "relation1");
+
 
             var res = await dbContext.Cypher
                 .Match(
@@ -45,6 +46,7 @@ namespace DbManager.Neo4j.Implementations
 
             return res.Single().ToList();
         }
+
 
         public async Task MoveOrderToNextStage(Order order)
         {

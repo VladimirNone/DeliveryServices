@@ -8,6 +8,7 @@ using System.Collections;
 using DbManager.Services;
 using DbManager.Neo4j.DataGenerator;
 using DbManager.Neo4j;
+using Neo4j.Driver;
 
 namespace DbManager
 {
@@ -32,13 +33,12 @@ namespace DbManager
             services.AddSingleton<GeneratorService>();
 
             // This is the registration for domain repository class
-            //services.AddTransient<IPersonRepository, PersonRepository>();
-
+            services.AddTransient<IGeneralRepository<Order>, OrderRepository>();
         }
 
         private static void GraphClient_OperationLogger(object sender, OperationCompletedEventArgs e)
         {
-            
+            var k = e.QueryText;
         }
 
         private static void LoadStandartData(IGraphClient graphClient)
@@ -50,7 +50,7 @@ namespace DbManager
                 .ResultsAsync
                 .Result
                 .Single()
-                .ToDictionary(h => h.NameOfState);
+                .ToList();
         }
     }
 }

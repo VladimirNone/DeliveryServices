@@ -40,8 +40,8 @@ namespace DbManager.Neo4j.Implementations
         public async Task UpdateNodeAsync(TNode node)
         {
             await dbContext.Cypher
-                .Match($"(newNode:{typeof(TNode).Name} {{Id: $id}})")
-                .Set("newNode = $updatedEntity")
+                .Match($"(updateNode:{typeof(TNode).Name} {{Id: $id}})")
+                .Set("updateNode = $updatedEntity")
                 .WithParams(new
                 {
                     id = node.Id,
@@ -67,11 +67,19 @@ namespace DbManager.Neo4j.Implementations
             return res.First();
         }
 
-        public async Task<List<TNode>> GetNodesAsync()
+        public async Task<List<TNode>> GetNodesAsync(int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
         {
-            var res = await dbContext.Cypher
-                .Match($"(newNode:{typeof(TNode).Name})")
-                .Return(entity => entity.As<TNode>())
+            for (int i = 0; i < orderByProperty.Length; i++)
+                orderByProperty[i] = "entity." + orderByProperty[i];
+            
+            var query = dbContext.Cypher
+                .Match($"(entity:{typeof(TNode).Name})")
+                .Return(entity => entity.As<TNode>());
+            if (orderByProperty != null)
+                query = query.OrderBy(orderByProperty);
+            var res = await query
+                .Skip(skipCount)
+                .Limit(limitCount)
                 .ResultsAsync;
 
             return res.ToList();
@@ -80,13 +88,13 @@ namespace DbManager.Neo4j.Implementations
         public async Task DeleteNodeWithAllRelations(TNode node)
         {
             await dbContext.Cypher
-                .Match($"(newNode:{typeof(TNode).Name} {{Id: $id}})-[rOut]->()")
-                .Match($"(newNode)<-[rIn]-()")
+                .Match($"(entity:{typeof(TNode).Name} {{Id: $id}})-[rOut]->()")
+                .Match($"(entity)<-[rIn]-()")
                 .WithParams(new
                 {
                     id = node.Id,
                 })
-                .Delete("rOut, rIn, newNode")
+                .Delete("rOut, rIn, entity")
                 .ExecuteWithoutResultsAsync();
         }
 

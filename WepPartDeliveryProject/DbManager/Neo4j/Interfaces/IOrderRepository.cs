@@ -1,4 +1,5 @@
-﻿using DbManager.Data.Nodes;
+﻿using DbManager.Data;
+using DbManager.Data.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +13,9 @@ namespace DbManager.Neo4j.Interfaces
     /// </summary>
     public interface IOrderRepository : IGeneralRepository<Order>
     {
-        Task<List<Order>> GetOrdersByState(string kitchenId, string orderStateId);
+        Task<List<Order>> GetOrdersByState(string kitchenId, string nameOfState);
+        Task<List<Order>> GetOrdersByState(string kitchenId, OrderStateEnum orderState);
         Task<List<Order>> GetOrdersByState(Guid kitchenId, Guid orderStateId);
-        Task MoveOrderToNextStage(Order order);
+        Task MoveOrderToNextStage(string orderId, string comment);
     }
 }

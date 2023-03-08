@@ -37,7 +37,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-await app.Services.GetService<GeneratorService>().GenerateAll();
+//await app.Services.GetService<GeneratorService>().GenerateAll();
 
 app.UseSwagger();
 app.UseSwaggerUI(options =>

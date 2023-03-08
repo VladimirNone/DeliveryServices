@@ -41,7 +41,7 @@ namespace DbManager.Neo4j.Interfaces
         /// Get all nodes TNode type
         /// </summary>
         /// <returns>List of TNode type</returns>
-        Task<List<TNode>> GetNodesAsync();
+        Task<List<TNode>> GetNodesAsync(int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
 
         /// <summary>
         /// Delete existing node

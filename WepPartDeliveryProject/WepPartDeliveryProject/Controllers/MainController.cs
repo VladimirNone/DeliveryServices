@@ -1,4 +1,5 @@
-﻿using DbManager.Data.Nodes;
+﻿using DbManager.Data;
+using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Neo4j.DataGenerator;
 using DbManager.Neo4j.Interfaces;
@@ -25,16 +26,19 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("create")]
         public async Task<IActionResult> CreateClient()
         {
+            var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>(true);
 
-            //var orders = _dataGenerator.GenerateOrders(5);
-            var order = new Order();
-            await _repositoryFactory.GetRepository<Order>().GetNodeAsync(Guid.Parse("ace18ceb-e1af-422c-ba7f-c850f5639b1e"));
+            var orders = await orderRepo.GetNodesAsync(0,5, "Price","SumWeight");
 
-            var client = new Client();
-            await _repositoryFactory.GetRepository<Client>().GetNodeAsync(Guid.Parse("b818ca9c-fc22-4638-beca-138462fcf10c"));
+            var ordersInQueue = await orderRepo.GetOrdersByState("31301ccc-cef5-469e-a339-ac750bac486e", OrderStateEnum.InQueue);
+            var ordersCooking = await orderRepo.GetOrdersByState("31301ccc-cef5-469e-a339-ac750bac486e", OrderStateEnum.Cooking);
 
-            var relations = new Ordered() { NodeFrom = client, NodeTo = order };
-            await _repositoryFactory.GetRepository<Order>().RelateNodesAsync(relations);
+            var orderToNextStage = ordersInQueue.First();
+            await orderRepo.MoveOrderToNextStage(orderToNextStage.Id.ToString(), null);
+
+            var ordersInQueue1 = await orderRepo.GetOrdersByState("31301ccc-cef5-469e-a339-ac750bac486e", OrderStateEnum.InQueue);
+            var ordersCooking1 = await orderRepo.GetOrdersByState("31301ccc-cef5-469e-a339-ac750bac486e", OrderStateEnum.Cooking);
+            
 
 
             /*            var orderRepo = _repositoryFactory.GetRepository<Order>();
@@ -49,7 +53,7 @@ namespace WepPartDeliveryProject.Controllers
             var client = await clientRepo.GetNodeAsync(1);
             await orderRepo.RelateNodesAsync<Ordered, Client>(order, new Ordered() { SomeText = "SomeTextik"}, client, true);*/
 
-            return Ok(relations);
+            return Ok();
         }
 
         [HttpGet("update")]

@@ -18,41 +18,60 @@ namespace DbManager.Neo4j.Implementations
         {
         }
 
-        public async Task<List<Order>> GetOrdersByState(string kitchenId, string orderStateId)
+        public async Task<List<Order>> GetOrdersByState(string kitchenId, string nameOfState)
         {
-            return await GetOrdersByState(Guid.Parse(kitchenId), Guid.Parse(orderStateId));
+            return await GetOrdersByState(Guid.Parse(kitchenId),OrderState.OrderStatesFromDb.Single(h=>h.NameOfState == nameOfState).Id);
+        }
+
+        public async Task<List<Order>> GetOrdersByState(string kitchenId, OrderStateEnum orderState)
+        {
+            return await GetOrdersByState(Guid.Parse(kitchenId), OrderState.OrderStatesFromDb.Single(h => (OrderStateEnum)h.NumberOfStage == orderState).Id);
         }
 
         public async Task<List<Order>> GetOrdersByState(Guid kitchenId, Guid orderStateId)
         {
-            var directionInOrder = GetDirection(typeof(CookedBy).Name.ToUpper(), false);
-            var directionInOrderState = GetDirection(typeof(HasOrderState).Name.ToUpper(), true, "relation1");
-
+            var directionInOrderCB = GetDirection(typeof(CookedBy).Name.ToUpper(), false, "");
+            var directionInOrderHOS = GetDirection(typeof(HasOrderState).Name.ToUpper(), false, "");
 
             var res = await dbContext.Cypher
                 .Match(
                     $"(kitchen:{typeof(Kitchen).Name} {{Id: $kitchenId}})" +
-                    $"{directionInOrder}" +
+                    $"{directionInOrderCB}" +
                     $"(orders:{typeof(Order).Name})" +
-                    $"{directionInOrderState}" +
-                    $"(orderState:{typeof(OrderState)} {{Id: $orderStateId}})")
+                    $"{directionInOrderHOS}" +
+                    $"(orderState:{typeof(OrderState).Name} {{Id: $orderStateId}})")
                 .WithParams(new
                     {
                         kitchenId,
                         orderStateId,
-                })
+                    })
                 .Return(orders => orders.CollectAs<Order>())
                 .ResultsAsync;
 
-            return res.Single().ToList();
+            return res.Count() == 0 ? new List<Order>(): res.SingleOrDefault().ToList();
         }
 
 
-        public async Task MoveOrderToNextStage(Order order)
+        public async Task MoveOrderToNextStage(string orderId, string comment)
         {
-            var orderRelatoins = await GetRelatedNodesAsync<HasOrderState, OrderState>(order);
-            var orderState = orderRelatoins.First();
+            var order = await GetNodeAsync(Guid.Parse(orderId));
+            var orderHasState = order.Story.Last();
+            var orderState = OrderState.OrderStatesFromDb.Single(h => h.Id == orderHasState.NodeToId);
+            if ((OrderStateEnum)orderState.NumberOfStage == OrderStateEnum.Cancelled)
+                return;
 
+            await DeleteRelationOfNodesAsync<HasOrderState, OrderState>(order, orderState);
+            var newOrderState = new HasOrderState() 
+            {
+                Comment = comment, 
+                NodeFromId = order.Id, 
+                NodeToId = OrderState.OrderStatesFromDb.Single(h => h.NumberOfStage == orderState.NumberOfStage * 2).Id, 
+                TimeStartState = DateTime.Now 
+            };
+
+            order.Story.Add(newOrderState);
+            await RelateNodesAsync(newOrderState);
+            await UpdateNodeAsync(order);
         }
     }
 }

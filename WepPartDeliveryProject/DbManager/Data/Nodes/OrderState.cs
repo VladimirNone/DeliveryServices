@@ -16,7 +16,7 @@ namespace DbManager.Data.Nodes
         /// </summary>
         [JsonIgnore]
         [Neo4jIgnore]
-        public static Dictionary<string, OrderState> OrderStatesFromDb = new Dictionary<string, OrderState>();
+        public static List<OrderState> OrderStatesFromDb = new List<OrderState>();
 
         [Neo4jIgnore]
         public List<Order> Orders { get; set; } 

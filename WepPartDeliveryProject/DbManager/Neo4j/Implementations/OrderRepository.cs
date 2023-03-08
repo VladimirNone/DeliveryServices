@@ -30,6 +30,9 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<List<Order>> GetOrdersByState(Guid kitchenId, Guid orderStateId, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
         {
+            for (int i = 0; i < orderByProperty.Length; i++)
+                orderByProperty[i] = "orders." + orderByProperty[i];
+
             var directionInOrderCB = GetDirection(typeof(CookedBy).Name);
             var directionInOrderHOS = GetDirection(typeof(HasOrderState).Name);
 

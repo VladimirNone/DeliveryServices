@@ -142,6 +142,9 @@ namespace DbManager.Neo4j.Implementations
             where TRelation : IRelation
             where TRelatedNode : INode
         {
+            for (int i = 0; i < orderByProperty.Length; i++)
+                orderByProperty[i] = "relation." + orderByProperty[i];
+
             var direction = GetDirection(typeof(TRelation).Name, "relation");
 
             var res = await dbContext.Cypher
@@ -161,11 +164,15 @@ namespace DbManager.Neo4j.Implementations
             return res.First();
         }
 
-        public async Task<List<TRelation>> GetRelatedNodesAsync<TRelation,TRelatedNode>(TNode node, bool relationInEntity = false) 
+        public async Task<List<TRelation>> GetRelatedNodesAsync<TRelation, TRelatedNode>(TNode node, int? skipCount = null, int? limitCount = null, params string[] orderByProperty) 
             where TRelation: IRelation
             where TRelatedNode: INode
         {
+            for (int i = 0; i < orderByProperty.Length; i++)
+                orderByProperty[i] = "relation." + orderByProperty[i];
+
             var direction = GetDirection(typeof(TRelation).Name, "relation");
+            var typeNodeFrom = typeof(TRelation).BaseType.GenericTypeArguments[0];
 
             var res = await dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name})")
@@ -173,25 +180,21 @@ namespace DbManager.Neo4j.Implementations
                 {
                     id = node.Id,
                 })
-                .Return((relation, relatedNode) => new { 
-                    nodeRelations = relation.CollectAs<TRelation>(), 
-                    relationNodes = relatedNode.CollectAs<TRelatedNode>()
+                .Return((relation, relatedNode) => new
+                {
+                    nodeRelations = relation.As<TRelation>(),
+                    relationNodes = relatedNode.As<TRelatedNode>()
                 })
+                .ChangeQueryForPaginationAnonymousType(orderByProperty, skipCount, limitCount)
                 .ResultsAsync;
 
-            var fRes = res.Single();
-            if(fRes.nodeRelations.Count() != fRes.relationNodes.Count())
-                throw new Exception($"Count of nodes don't equals count of relation. (Relations){fRes.nodeRelations.Count()}!=(Nodes){fRes.relationNodes.Count()}");
-
-            //А могу ли я быть уверен, что связь - узел идет 1 к 1?
-            var relations = fRes.nodeRelations.ToList();
-            var relatedNodes = fRes.relationNodes.ToList();
-
-            for (int i = 0; i < relations.Count; i++)
+            var nodeIsNodeFrom = typeof(TNode) == typeNodeFrom;
+            var relations = res.Select(h =>
             {
-                relations[i].NodeFrom = relationInEntity ? node : relatedNodes[i];
-                relations[i].NodeTo = relationInEntity ? node : relatedNodes[i];
-            }
+                h.nodeRelations.NodeFrom = nodeIsNodeFrom ? node : h.relationNodes;
+                h.nodeRelations.NodeTo = nodeIsNodeFrom ? h.relationNodes : node;
+                return h.nodeRelations;
+            }).ToList();
 
             return relations;
         }
@@ -215,6 +218,9 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<List<TNode>> GetNodesWithoutRelation<TRelation>(int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
         {
+            for (int i = 0; i < orderByProperty.Length; i++)
+                orderByProperty[i] = "node." + orderByProperty[i];
+
             var directionIn = GetDirection(typeof(TRelation).Name); 
             var directionOut = GetDirection(typeof(TRelation).Name);
 

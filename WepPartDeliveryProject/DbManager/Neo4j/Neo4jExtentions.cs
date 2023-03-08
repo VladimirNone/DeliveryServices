@@ -13,7 +13,19 @@ namespace DbManager.Neo4j
     {
         public static ICypherFluentQuery<TModel> ChangeQueryForPagination<TModel>(this ICypherFluentQuery<TModel> query, string[] orderByProperty, int? skipCount = null, int? limitCount = null) where TModel : IModel
         {
-            if (orderByProperty != null)
+            if (orderByProperty != null && orderByProperty.Length != 0)
+                query = query.OrderBy(orderByProperty);
+
+            query = query
+                .Skip(skipCount)
+                .Limit(limitCount);
+
+            return query;
+        }
+
+        public static ICypherFluentQuery<T> ChangeQueryForPaginationAnonymousType<T>(this ICypherFluentQuery<T> query, string[] orderByProperty, int? skipCount = null, int? limitCount = null) where T : class
+        {
+            if (orderByProperty != null && orderByProperty.Length != 0)
                 query = query.OrderBy(orderByProperty);
 
             query = query

@@ -28,23 +28,17 @@ namespace WepPartDeliveryProject.Controllers
         {
             var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>(true);
 
-            var orders = await orderRepo.GetNodesAsync(0,5, "Price","SumWeight");
+            var order = await orderRepo.GetNodeAsync(Guid.Parse("261f62c7-284a-477b-9299-5a9996e9afa9"));
 
-            var ordersInQueue = await orderRepo.GetOrdersByState("31301ccc-cef5-469e-a339-ac750bac486e", OrderStateEnum.InQueue);
-            var ordersCooking = await orderRepo.GetOrdersByState("31301ccc-cef5-469e-a339-ac750bac486e", OrderStateEnum.Cooking);
-
-            var orderToNextStage = ordersInQueue.First();
-            await orderRepo.MoveOrderToNextStage(orderToNextStage.Id.ToString(), null);
-
-            var ordersInQueue1 = await orderRepo.GetOrdersByState("31301ccc-cef5-469e-a339-ac750bac486e", OrderStateEnum.InQueue);
-            var ordersCooking1 = await orderRepo.GetOrdersByState("31301ccc-cef5-469e-a339-ac750bac486e", OrderStateEnum.Cooking);
+            var orderedDishes = await orderRepo.GetRelatedNodesAsync<OrderedDish, Dish>(order, orderByProperty: "Count");
             
 
 
             /*            var orderRepo = _repositoryFactory.GetRepository<Order>();
                         var clientRepo = _repositoryFactory.GetRepository<Client>();
 
-                        var order = await orderRepo.GetNodeAsync(Guid.Parse("3b76d755-ae98-4706-b1c5-8f0a901c7ba3"));
+           
+            var order = await orderRepo.GetNodeAsync(Guid.Parse("3b76d755-ae98-4706-b1c5-8f0a901c7ba3"));
                         var client = await clientRepo.GetNodeAsync(Guid.Parse("ed885ac7-9ba0-4aec-996a-ce7a0451fdea"));
 
                         var orderedBy = await orderRepo.GetRelationOfNodesAsync<Ordered, Client>(order, client, true);*/
@@ -53,7 +47,7 @@ namespace WepPartDeliveryProject.Controllers
             var client = await clientRepo.GetNodeAsync(1);
             await orderRepo.RelateNodesAsync<Ordered, Client>(order, new Ordered() { SomeText = "SomeTextik"}, client, true);*/
 
-            return Ok();
+            return Ok(orderedDishes);
         }
 
         [HttpGet("update")]

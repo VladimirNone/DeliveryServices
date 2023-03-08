@@ -94,7 +94,7 @@ namespace DbManager.Neo4j.Interfaces
         /// <param name="node">Node, which have related nodes</param>
         /// <param name="relationInEntity">Determines the direction of relation</param>
         /// <returns>If target node don't have related nodes, will be returned empty lists</returns>
-        Task<List<TRelation>> GetRelatedNodesAsync<TRelation, TRelatedNode>(TNode node, bool relationInEntity = false)
+        Task<List<TRelation>> GetRelatedNodesAsync<TRelation, TRelatedNode>(TNode node, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
             where TRelation : IRelation
             where TRelatedNode : INode;
         

@@ -40,9 +40,9 @@ namespace DbManager.Neo4j.Interfaces
         /// <summary>
         /// Get all nodes TModel type
         /// </summary>
-        /// <param name="skipCount"></param>
-        /// <param name="limitCount"></param>
-        /// <param name="orderByProperty"></param>
+        /// <param name="skipCount">Count of nodes will skip</param>
+        /// <param name="limitCount">Count of nodes will returner after skip</param>
+        /// <param name="orderByProperty">Property names by which to sort. ONLY properties of TNode</param>
         /// <returns>List of TModel type</returns>
         Task<List<TNode>> GetNodesAsync(int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
 
@@ -60,6 +60,9 @@ namespace DbManager.Neo4j.Interfaces
         /// <typeparam name="TRelatedNode">Type of related nodes</typeparam>
         /// <param name="node">The first node</param>
         /// <param name="relatedNode">The second node</param>
+        /// <param name="skipCount">Count of nodes will skip</param>
+        /// <param name="limitCount">Count of nodes will returner after skip</param>
+        /// <param name="orderByProperty">Property names by which to sort. ONLY properties of TRelation</param>
         /// <returns></returns>
         Task<TRelation> GetRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
             where TRelation : IRelation
@@ -92,7 +95,9 @@ namespace DbManager.Neo4j.Interfaces
         /// <typeparam name="TRelation">The type of searched relation</typeparam>
         /// <typeparam name="TRelatedNode">The type of related nodes</typeparam>
         /// <param name="node">Node, which have related nodes</param>
-        /// <param name="relationInEntity">Determines the direction of relation</param>
+        /// <param name="skipCount">Count of nodes will skip</param>
+        /// <param name="limitCount">Count of nodes will returner after skip</param>
+        /// <param name="orderByProperty">Property names by which to sort. ONLY properties of TRelation</param>
         /// <returns>If target node don't have related nodes, will be returned empty lists</returns>
         Task<List<TRelation>> GetRelatedNodesAsync<TRelation, TRelatedNode>(TNode node, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
             where TRelation : IRelation
@@ -111,6 +116,9 @@ namespace DbManager.Neo4j.Interfaces
         /// Get all nodes, which haven't specified relation
         /// </summary>
         /// <typeparam name="TRelation">The type of relation, which nodes haven't to use</typeparam>
+        /// <param name="skipCount">Count of nodes will skip</param>
+        /// <param name="limitCount">Count of nodes will returner after skip</param>
+        /// <param name="orderByProperty">Property names by which to sort. ONLY properties of TNode</param>
         /// <returns>Nodes, which haven't related using specified relation</returns>
         Task<List<TNode>> GetNodesWithoutRelation<TRelation>(int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
     }

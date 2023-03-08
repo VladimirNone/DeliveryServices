@@ -158,7 +158,7 @@ namespace DbManager.Neo4j.Implementations
                 .ChangeQueryForPagination(orderByProperty, skipCount, limitCount)
                 .ResultsAsync;
 
-            if (res.Count() != 1)
+            if (res.Count() < 1)
                 throw new Exception($"Nodes don't have relation ({typeof(TNode).Name})-[{typeof(TRelation).Name.ToUpper()})]-({typeof(TRelatedNode).Name})");
 
             return res.First();

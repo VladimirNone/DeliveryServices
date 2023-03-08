@@ -75,8 +75,10 @@ namespace DbManager.Neo4j.Implementations
             var query = dbContext.Cypher
                 .Match($"(entity:{typeof(TNode).Name})")
                 .Return(entity => entity.As<TNode>());
+
             if (orderByProperty != null)
                 query = query.OrderBy(orderByProperty);
+
             var res = await query
                 .Skip(skipCount)
                 .Limit(limitCount)
@@ -106,7 +108,7 @@ namespace DbManager.Neo4j.Implementations
                 throw new Exception("NodeFromId or NodeToId is null. Method RelateNodesAsync where TRelation is " + typeof(TRelation));
             }
 
-            var direction = GetDirection(relation.GetType().Name.ToUpper());
+            var direction = GetDirection(relation.GetType().Name, "relation");
 
             relation.Id = Guid.NewGuid();
 
@@ -126,7 +128,7 @@ namespace DbManager.Neo4j.Implementations
         public async Task UpdateRelationNodesAsync<TRelation>(TRelation updatedRelation)
             where TRelation : IRelation
         {
-            var direction = GetDirection(updatedRelation.GetType().Name.ToUpper());
+            var direction = GetDirection(updatedRelation.GetType().Name, "relation");
 
             await dbContext.Cypher
                 .Match($"(node {{Id: $id}}){direction}(relatedNode {{Id: $relatedNodeId}})")
@@ -144,7 +146,7 @@ namespace DbManager.Neo4j.Implementations
             where TRelation : IRelation
             where TRelatedNode : INode
         {
-            var direction = GetDirection(typeof(TRelation).Name.ToUpper(), relationInEntity);
+            var direction = GetDirection(typeof(TRelation).Name, "relation");
 
             var res = await dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name} {{Id: $relatedNodeId}})")
@@ -166,7 +168,7 @@ namespace DbManager.Neo4j.Implementations
             where TRelation: IRelation
             where TRelatedNode: INode
         {
-            var direction = GetDirection(typeof(TRelation).Name.ToUpper(), relationInEntity);
+            var direction = GetDirection(typeof(TRelation).Name, "relation");
 
             var res = await dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name})")
@@ -201,7 +203,7 @@ namespace DbManager.Neo4j.Implementations
             where TRelation : IRelation
             where TRelatedNode : INode
         {
-            var direction = GetDirection(typeof(TRelation).Name.ToUpper(), relationInEntity);
+            var direction = GetDirection(typeof(TRelation).Name, "relation");
 
             await dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name} {{Id: $relatedNodeId}})")
@@ -216,30 +218,32 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<List<TNode>> GetNodesWithoutRelation<TRelation>()
         {
-            var directionIn = GetDirection(typeof(TRelation).Name.ToUpper()); 
-            var directionOut = GetDirection(typeof(TRelation).Name.ToUpper(), false, "relation1");
+            var directionIn = GetDirection(typeof(TRelation).Name); 
+            var directionOut = GetDirection(typeof(TRelation).Name);
 
             var result = await dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name})")
                 .Where($"not (node){directionIn}() and not (node){directionOut}()")
-                .Return(node => node.CollectAs<TNode>())
+                .Return(node => node.As<TNode>())
                 .ResultsAsync;
 
-            return result.Single().ToList();
+            return result.ToList();
         }
 
         /// <summary>
         /// Get string with directed relation. Relation has name type of "relation" + relationInstanceName
         /// </summary>
         /// <param name="nameRelation">Name of the relation in DB</param>
-        /// <param name="relationInEntity">Relation input in node or output</param>
         /// <param name="relationInstanceName">Name of relation instance</param>
+        /// <param name="relationInEntity">Relation input in node or output</param>
         /// <returns>String with directed relation</returns>
-        protected string GetDirection(string nameRelation, bool relationInEntity = false, string relationInstanceName = "relation")
+        protected string GetDirection(string nameRelation, string? relationInstanceName = "", bool? relationInEntity = null)
         {
-            var direction = $"-[{relationInstanceName}:{nameRelation}]-";
-            
-            return relationInEntity ? "<" + direction: direction + ">";
+            var direction = $"-[{relationInstanceName}:{nameRelation.ToUpper()}]-";
+            if (relationInEntity == null)
+                return direction;
+
+            return relationInEntity.Value ? "<" + direction: direction + ">";
         }
     }
 }

@@ -30,8 +30,8 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<List<Order>> GetOrdersByState(Guid kitchenId, Guid orderStateId)
         {
-            var directionInOrderCB = GetDirection(typeof(CookedBy).Name.ToUpper(), false, "");
-            var directionInOrderHOS = GetDirection(typeof(HasOrderState).Name.ToUpper(), false, "");
+            var directionInOrderCB = GetDirection(typeof(CookedBy).Name);
+            var directionInOrderHOS = GetDirection(typeof(HasOrderState).Name);
 
             var res = await dbContext.Cypher
                 .Match(
@@ -45,10 +45,10 @@ namespace DbManager.Neo4j.Implementations
                         kitchenId,
                         orderStateId,
                     })
-                .Return(orders => orders.CollectAs<Order>())
+                .Return(orders => orders.As<Order>())
                 .ResultsAsync;
 
-            return res.Count() == 0 ? new List<Order>(): res.SingleOrDefault().ToList();
+            return res.ToList();
         }
 
 

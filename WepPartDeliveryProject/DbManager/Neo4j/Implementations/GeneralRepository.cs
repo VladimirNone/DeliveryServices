@@ -1,6 +1,7 @@
 ﻿using DbManager.Data;
 using DbManager.Neo4j.Interfaces;
 using Neo4jClient;
+using Neo4jClient.Cypher;
 
 namespace DbManager.Neo4j.Implementations
 {
@@ -71,18 +72,13 @@ namespace DbManager.Neo4j.Implementations
         {
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "entity." + orderByProperty[i];
-            
-            var query = dbContext.Cypher
+
+            ICypherFluentQuery<TNode> query = dbContext.Cypher
                 .Match($"(entity:{typeof(TNode).Name})")
-                .Return(entity => entity.As<TNode>());
+                .Return(entity => entity.As<TNode>())
+                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount);
 
-            if (orderByProperty != null)
-                query = query.OrderBy(orderByProperty);
-
-            var res = await query
-                .Skip(skipCount)
-                .Limit(limitCount)
-                .ResultsAsync;
+            var res = await query.ResultsAsync;
 
             return res.ToList();
         }
@@ -142,7 +138,7 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
-        public async Task<TRelation> GetRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, bool relationInEntity = false)
+        public async Task<TRelation> GetRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
             where TRelation : IRelation
             where TRelatedNode : INode
         {
@@ -156,6 +152,7 @@ namespace DbManager.Neo4j.Implementations
                     relatedNodeId = relatedNode.Id,
                 })
                 .Return(relation => relation.As<TRelation>())
+                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount)
                 .ResultsAsync;
 
             if (res.Count() != 1)
@@ -199,7 +196,7 @@ namespace DbManager.Neo4j.Implementations
             return relations;
         }
 
-        public async Task DeleteRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, bool relationInEntity = false)
+        public async Task DeleteRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode)
             where TRelation : IRelation
             where TRelatedNode : INode
         {
@@ -216,7 +213,7 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
-        public async Task<List<TNode>> GetNodesWithoutRelation<TRelation>()
+        public async Task<List<TNode>> GetNodesWithoutRelation<TRelation>(int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
         {
             var directionIn = GetDirection(typeof(TRelation).Name); 
             var directionOut = GetDirection(typeof(TRelation).Name);
@@ -225,6 +222,7 @@ namespace DbManager.Neo4j.Implementations
                 .Match($"(node:{typeof(TNode).Name})")
                 .Where($"not (node){directionIn}() and not (node){directionOut}()")
                 .Return(node => node.As<TNode>())
+                .ChangeQueryForPagination(orderByProperty,skipCount,limitCount)
                 .ResultsAsync;
 
             return result.ToList();

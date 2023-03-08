@@ -18,17 +18,17 @@ namespace DbManager.Neo4j.Implementations
         {
         }
 
-        public async Task<List<Order>> GetOrdersByState(string kitchenId, string nameOfState)
+        public async Task<List<Order>> GetOrdersByState(string kitchenId, string nameOfState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
         {
-            return await GetOrdersByState(Guid.Parse(kitchenId),OrderState.OrderStatesFromDb.Single(h=>h.NameOfState == nameOfState).Id);
+            return await GetOrdersByState(Guid.Parse(kitchenId),OrderState.OrderStatesFromDb.Single(h=>h.NameOfState == nameOfState).Id, skipCount, limitCount, orderByProperty);
         }
 
-        public async Task<List<Order>> GetOrdersByState(string kitchenId, OrderStateEnum orderState)
+        public async Task<List<Order>> GetOrdersByState(string kitchenId, OrderStateEnum orderState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
         {
-            return await GetOrdersByState(Guid.Parse(kitchenId), OrderState.OrderStatesFromDb.Single(h => (OrderStateEnum)h.NumberOfStage == orderState).Id);
+            return await GetOrdersByState(Guid.Parse(kitchenId), OrderState.OrderStatesFromDb.Single(h => (OrderStateEnum)h.NumberOfStage == orderState).Id, skipCount, limitCount, orderByProperty);
         }
 
-        public async Task<List<Order>> GetOrdersByState(Guid kitchenId, Guid orderStateId)
+        public async Task<List<Order>> GetOrdersByState(Guid kitchenId, Guid orderStateId, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
         {
             var directionInOrderCB = GetDirection(typeof(CookedBy).Name);
             var directionInOrderHOS = GetDirection(typeof(HasOrderState).Name);
@@ -46,6 +46,7 @@ namespace DbManager.Neo4j.Implementations
                         orderStateId,
                     })
                 .Return(orders => orders.As<Order>())
+                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount)
                 .ResultsAsync;
 
             return res.ToList();

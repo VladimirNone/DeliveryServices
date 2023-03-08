@@ -13,9 +13,9 @@ namespace DbManager.Neo4j.Interfaces
     /// </summary>
     public interface IOrderRepository : IGeneralRepository<Order>
     {
-        Task<List<Order>> GetOrdersByState(string kitchenId, string nameOfState);
-        Task<List<Order>> GetOrdersByState(string kitchenId, OrderStateEnum orderState);
-        Task<List<Order>> GetOrdersByState(Guid kitchenId, Guid orderStateId);
+        Task<List<Order>> GetOrdersByState(string kitchenId, string nameOfState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
+        Task<List<Order>> GetOrdersByState(string kitchenId, OrderStateEnum orderState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
+        Task<List<Order>> GetOrdersByState(Guid kitchenId, Guid orderStateId, int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
         Task MoveOrderToNextStage(string orderId, string comment);
     }
 }

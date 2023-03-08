@@ -38,9 +38,12 @@ namespace DbManager.Neo4j.Interfaces
         Task<TNode> GetNodeAsync(Guid id);
 
         /// <summary>
-        /// Get all nodes TNode type
+        /// Get all nodes TModel type
         /// </summary>
-        /// <returns>List of TNode type</returns>
+        /// <param name="skipCount"></param>
+        /// <param name="limitCount"></param>
+        /// <param name="orderByProperty"></param>
+        /// <returns>List of TModel type</returns>
         Task<List<TNode>> GetNodesAsync(int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
 
         /// <summary>
@@ -57,9 +60,8 @@ namespace DbManager.Neo4j.Interfaces
         /// <typeparam name="TRelatedNode">Type of related nodes</typeparam>
         /// <param name="node">The first node</param>
         /// <param name="relatedNode">The second node</param>
-        /// <param name="relationInEntity">Determines the direction of relation</param>
         /// <returns></returns>
-        Task<TRelation> GetRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, bool relationInEntity = false)
+        Task<TRelation> GetRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
             where TRelation : IRelation
             where TRelatedNode : INode;
 
@@ -79,9 +81,8 @@ namespace DbManager.Neo4j.Interfaces
         /// <typeparam name="TRelatedNode">Type of related nodes</typeparam>
         /// <param name="node">The first node</param>
         /// <param name="relatedNode">The second node</param>
-        /// <param name="relationInEntity">Determines the direction of relation</param>
         /// <returns></returns>
-        Task DeleteRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, bool relationInEntity = false)
+        Task DeleteRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode)
             where TRelation : IRelation
             where TRelatedNode : INode;
 
@@ -111,6 +112,6 @@ namespace DbManager.Neo4j.Interfaces
         /// </summary>
         /// <typeparam name="TRelation">The type of relation, which nodes haven't to use</typeparam>
         /// <returns>Nodes, which haven't related using specified relation</returns>
-        Task<List<TNode>> GetNodesWithoutRelation<TRelation>();
+        Task<List<TNode>> GetNodesWithoutRelation<TRelation>(int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
     }
 }

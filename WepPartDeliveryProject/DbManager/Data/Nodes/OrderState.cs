@@ -11,8 +11,6 @@ namespace DbManager.Data.Nodes
 
         /// <summary>
         /// Order states loading from DB when app starts
-        /// string - NameOfState
-        /// OrderState - state from DB
         /// </summary>
         [JsonIgnore]
         [Neo4jIgnore]

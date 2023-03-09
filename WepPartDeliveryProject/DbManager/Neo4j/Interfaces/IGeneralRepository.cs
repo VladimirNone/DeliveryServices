@@ -105,7 +105,7 @@ namespace DbManager.Neo4j.Interfaces
         /// <param name="node">Node, which have related nodes</param>
         /// <param name="skipCount">Count of nodes will skip</param>
         /// <param name="limitCount">Count of nodes will returner after skip</param>
-        /// <param name="orderByProperty">Property names by which to sort. ONLY properties of TRelation</param>
+        /// <param name="orderByProperty">Property names by which to sort. ONLY properties of TRelatedNode</param>
         /// <returns>If target node don't have related nodes, will be returned empty lists</returns>
         Task<List<TRelation>> GetRelatedNodesAsync<TRelation, TRelatedNode>(TNode node, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
             where TRelation : IRelation

@@ -76,7 +76,7 @@ namespace DbManager.Neo4j.Implementations
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "entity." + orderByProperty[i];
 
-            ICypherFluentQuery<TNode> query = dbContext.Cypher
+            var query = dbContext.Cypher
                 .Match($"(entity:{typeof(TNode).Name})")
                 .Return(entity => entity.As<TNode>())
                 .ChangeQueryForPagination(orderByProperty, skipCount, limitCount);
@@ -173,7 +173,7 @@ namespace DbManager.Neo4j.Implementations
             where TRelatedNode: INode
         {
             for (int i = 0; i < orderByProperty.Length; i++)
-                orderByProperty[i] = "relation." + orderByProperty[i];
+                orderByProperty[i] = "relatedNode." + orderByProperty[i];
 
             var direction = GetDirection(typeof(TRelation).Name, "relation");
             var typeNodeFrom = typeof(TRelation).BaseType.GenericTypeArguments[0];

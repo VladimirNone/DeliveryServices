@@ -41,6 +41,15 @@ namespace DbManager
                 .Result
                 .Single()
                 .ToList();
+
+            Category.CategoriesFromDb =
+                graphClient.Cypher
+                .Match($"(categories:{typeof(Category).Name})")
+                .Return(categories => categories.CollectAs<Category>())
+                .ResultsAsync
+                .Result
+                .Single()
+                .ToList();
         }
     }
 }

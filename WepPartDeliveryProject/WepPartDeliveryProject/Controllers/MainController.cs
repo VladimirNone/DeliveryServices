@@ -7,6 +7,7 @@ using DbManager.Neo4j.Interfaces;
 using DbManager.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace WepPartDeliveryProject.Controllers
 {
@@ -15,34 +16,32 @@ namespace WepPartDeliveryProject.Controllers
     public class MainController : ControllerBase
     {
         private readonly IRepositoryFactory _repositoryFactory;
+        private readonly ApplicationSettings _appSettings;
 
-        public MainController(IRepositoryFactory repositoryFactory)
+        public MainController(IRepositoryFactory repositoryFactory, IOptions<ApplicationSettings> configOptions)
         {
             _repositoryFactory = repositoryFactory;
+            _appSettings = configOptions.Value;
+        }
+
+        [HttpGet("getCategoriesList")]
+        public async Task<IActionResult> GetCategoriesList()
+        {
+            var categories = Category.CategoriesFromDb;
+            return Ok(categories);
         }
 
         [HttpGet("getDishesList")]
         public async Task<IActionResult> GetDishesList(int page, int categoryNumber)
         {
-            return Ok();
-        }
+            if(categoryNumber < 1 || categoryNumber >= Category.CategoriesFromDb.Count)
+            {
+                return BadRequest($"CategoryNumber must be in range [1,{Category.CategoriesFromDb.Count}], but request contain CategoryNumber={categoryNumber}");
+            }
+            var choicedCategory = Category.CategoriesFromDb.Single(h=>h.CategoryNumber == categoryNumber);
+            var categoryDishes = await _repositoryFactory.GetRepository<Category>().GetRelatedNodesAsync<ContainsDish, Dish>(choicedCategory, page * _appSettings.CountOfItemsOnWebPage, _appSettings.CountOfItemsOnWebPage, "Name");
 
-        [HttpGet("create")]
-        public async Task<IActionResult> CreateClient()
-        {
-            var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>(true);
-
-            var order = await orderRepo.GetNodeAsync(Guid.Parse("261f62c7-284a-477b-9299-5a9996e9afa9"));
-
-            var orderedDishes = await orderRepo.GetRelatedNodesAsync<OrderedDish, Dish>(order, orderByProperty: "Count");
-
-            return Ok(orderedDishes);
-        }
-
-        [HttpGet("update")]
-        public async Task<IActionResult> UpdateClient()
-        {
-            return Ok();
+            return Ok(categoryDishes);
         }
     }
 }

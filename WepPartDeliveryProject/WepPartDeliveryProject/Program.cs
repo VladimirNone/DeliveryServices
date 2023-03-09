@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Neo4jClient;
 using Newtonsoft.Json;
+using WepPartDeliveryProject;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,7 @@ services.AddSwaggerGen();
 
 // Register application setting
 services.Configure<Neo4jSettings>(configuration.GetSection("Neo4jSettings"));
+services.Configure<ApplicationSettings>(configuration.GetSection("ApplicationSettings"));
 
 // Fetch settings object from configuration
 var settings = new Neo4jSettings();

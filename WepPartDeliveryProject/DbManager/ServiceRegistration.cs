@@ -1,14 +1,10 @@
 ﻿using DbManager.Neo4j.Implementations;
 using DbManager.Neo4j.Interfaces;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Neo4jClient;
 using DbManager.Data.Nodes;
-using System.Collections;
 using DbManager.Services;
 using DbManager.Neo4j.DataGenerator;
-using DbManager.Neo4j;
-using Neo4j.Driver;
 
 namespace DbManager
 {
@@ -18,10 +14,10 @@ namespace DbManager
         {
             // This is to register Neo4j Client Object as a singleton
             services.AddSingleton<IGraphClient, BoltGraphClient>(op => {
-                    var graphClient = new BoltGraphClient(settings.Neo4jConnection, settings.Neo4jUser, settings.Neo4jPassword);
-                    graphClient.ConnectAsync().Wait();
-                    LoadStandartData(graphClient);
-                    return graphClient;
+                        var graphClient = new BoltGraphClient(settings.Neo4jConnection, settings.Neo4jUser, settings.Neo4jPassword);
+                        graphClient.ConnectAsync().Wait();
+                        LoadStandartData(graphClient);
+                        return graphClient;
                     });
 
             services.AddSingleton<IRepositoryFactory, RepositoryFactory>();

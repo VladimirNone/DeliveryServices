@@ -30,6 +30,14 @@ namespace DbManager.Neo4j.Interfaces
         Task UpdateNodeAsync(TNode node);
 
         /// <summary>
+        /// Get the node with the specified id. If DB return count of nodes < 1, then function throw Exception
+        /// </summary>
+        /// <param name="id">Node id</param>
+        /// <returns>Node with specified id</returns>
+        /// <exception cref="Exception">Count of items with specified id less 1.</exception>
+        Task<TNode> GetNodeAsync(string id);
+
+        /// <summary>
         /// Get the node with the specified id. If DB return count of nodes != 1, then function throw Exception
         /// </summary>
         /// <param name="id">Node id</param>

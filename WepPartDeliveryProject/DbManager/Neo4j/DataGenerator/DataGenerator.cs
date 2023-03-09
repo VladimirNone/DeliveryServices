@@ -37,6 +37,9 @@ namespace DbManager.Neo4j.DataGenerator
         public List<Kitchen> GenerateKitchens(int count)
             => ObjectGenerator.GenerateKitchen().Generate(count);
 
+        public List<Category> GenerateCategories(int count)
+            => ObjectGenerator.GenerateCategory().Generate(count);
+
         public List<OrderState> GenerateOrderStates()
             => new List<OrderState> 
             {
@@ -50,6 +53,9 @@ namespace DbManager.Neo4j.DataGenerator
 
         public List<CookedBy> GenerateRelationsCookedBy(int count, List<Order> orders, List<Kitchen> kitchens)
             => ObjectGenerator.GenerateCookedBy(orders, kitchens).Generate(count);
+
+        public List<ContainsDish> GenerateRelationsContainsDish(int count, List<Category> categories, List<Dish> dishes)
+            => ObjectGenerator.GenerateContainsDish(categories, dishes).Generate(count);
 
         public List<DeliveredBy> GenerateRelationsDeliveredBy(int count, List<Order> orders, List<DeliveryMan> deliveryMen)
             => ObjectGenerator.GenerateDeliveredBy(orders, deliveryMen).Generate(count);

@@ -32,6 +32,7 @@ namespace DbManager.Neo4j.DataGenerator
             var kitchenWorkers = _dataGenerator.GenerateKitchenWorkers(9);
             var kitchens = _dataGenerator.GenerateKitchens(3);
             var orders = _dataGenerator.GenerateOrders(30);
+            var categories = _dataGenerator.GenerateCategories(6);
 
             //вставляем узлы в бд
             var orderRepo = _repoFactory.GetRepository<Order>();
@@ -45,6 +46,7 @@ namespace DbManager.Neo4j.DataGenerator
             await _repoFactory.GetRepository<OrderState>().AddNodesAsync(orderStates);
 
             //генерируем связи между узлами. Последовательность важна!
+            var containsDishes = _dataGenerator.GenerateRelationsContainsDish(dishes.Count, categories, dishes);
             var workedIns = _dataGenerator.GenerateRelationsWorkedIn(kitchenWorkers.Count, kitchens, new List<KitchenWorker>(kitchenWorkers));
             var cookedBies = _dataGenerator.GenerateRelationsCookedBy(orders.Count, new List<Order>(orders), kitchens);
             var deliveredBies = _dataGenerator.GenerateRelationsDeliveredBy(orders.Count, new List<Order>(orders), deliveryMen);

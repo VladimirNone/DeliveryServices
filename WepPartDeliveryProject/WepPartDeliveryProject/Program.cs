@@ -48,7 +48,8 @@ if (!app.Environment.IsDevelopment())
 //await app.Services.GetService<GeneratorService>().GenerateAll();
 //Отчасти костыль
 var graphClient = app.Services.GetService<IGraphClient>();
-graphClient.OperationCompleted += (sender, e) => app.Logger.LogInformation(e.QueryText);
+graphClient.OperationCompleted += (sender, e) => 
+app.Logger.LogInformation(e.QueryText.Replace("\r\n", ""));
 
 app.UseSwagger();
 app.UseSwaggerUI(options =>

@@ -51,6 +51,9 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
+        public async Task<TNode> GetNodeAsync(string id)
+            => await GetNodeAsync(Guid.Parse(id));
+
         public async Task<TNode> GetNodeAsync(Guid id)
         {
             var res = await dbContext.Cypher
@@ -103,8 +106,8 @@ namespace DbManager.Neo4j.Implementations
             { 
                 throw new Exception("NodeFromId or NodeToId is null. Method RelateNodesAsync where TRelation is " + typeof(TRelation));
             }
-
-            var direction = GetDirection(relation.GetType().Name, "relation");
+            var typeNodeFrom = typeof(TRelation).BaseType.GenericTypeArguments[0];
+            var direction = GetDirection(relation.GetType().Name, "relation", typeNodeFrom == typeof(TNode));
 
             relation.Id = Guid.NewGuid();
 
@@ -124,7 +127,8 @@ namespace DbManager.Neo4j.Implementations
         public async Task UpdateRelationNodesAsync<TRelation>(TRelation updatedRelation)
             where TRelation : IRelation
         {
-            var direction = GetDirection(updatedRelation.GetType().Name, "relation");
+            var typeNodeFrom = typeof(TRelation).BaseType.GenericTypeArguments[0];
+            var direction = GetDirection(updatedRelation.GetType().Name, "relation", typeNodeFrom == typeof(TNode));
 
             await dbContext.Cypher
                 .Match($"(node {{Id: $id}}){direction}(relatedNode {{Id: $relatedNodeId}})")

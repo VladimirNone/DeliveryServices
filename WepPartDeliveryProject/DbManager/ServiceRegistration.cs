@@ -14,16 +14,15 @@ namespace DbManager
 {
     public static class ServiceRegistration
     {
-        public static void AddDbInfrastructure(this IServiceCollection services, ApplicationSettings settings)
+        public static void AddDbInfrastructure(this IServiceCollection services, Neo4jSettings settings)
         {
             // This is to register Neo4j Client Object as a singleton
             services.AddSingleton<IGraphClient, BoltGraphClient>(op => {
                     var graphClient = new BoltGraphClient(settings.Neo4jConnection, settings.Neo4jUser, settings.Neo4jPassword);
                     graphClient.ConnectAsync().Wait();
-                    graphClient.OperationCompleted += GraphClient_OperationLogger;
                     LoadStandartData(graphClient);
                     return graphClient;
-                });
+                    });
 
             services.AddSingleton<IRepositoryFactory, RepositoryFactory>();
 
@@ -32,13 +31,8 @@ namespace DbManager
             services.AddTransient<DataGenerator>();
             services.AddSingleton<GeneratorService>();
 
-            // This is the registration for domain repository class
+            // This is the registration for custom repository class
             services.AddTransient<IGeneralRepository<Order>, OrderRepository>();
-        }
-
-        private static void GraphClient_OperationLogger(object sender, OperationCompletedEventArgs e)
-        {
-            var k = e.QueryText;
         }
 
         private static void LoadStandartData(IGraphClient graphClient)

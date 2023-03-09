@@ -14,13 +14,15 @@ namespace WepPartDeliveryProject.Controllers
     public class MainController : ControllerBase
     {
         private readonly IRepositoryFactory _repositoryFactory;
-        private readonly DataGenerator _dataGenerator;
 
-
-        public MainController(IRepositoryFactory repositoryFactory, IPasswordService passService, DataGenerator dataGenerator)
+        public MainController(IRepositoryFactory repositoryFactory)
         {
             _repositoryFactory = repositoryFactory;
-            _dataGenerator = dataGenerator;
+        }
+        [HttpGet("getDishesList")]
+        public IActionResult GetDishesList(int page)
+        {
+            return Ok();
         }
 
         [HttpGet("create")]

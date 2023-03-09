@@ -1,5 +1,8 @@
 using DbManager;
 using DbManager.Neo4j.DataGenerator;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Neo4jClient;
 using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var services = builder.Services;
 var configuration = builder.Configuration;
+
+services.AddLogging(loggingBuilder => {
+    var loggingSection = configuration.GetSection("Logging");
+    loggingBuilder.AddFile(loggingSection);
+});
 
 services.AddControllers().AddNewtonsoftJson(options =>
         {
@@ -18,11 +26,11 @@ services.AddControllers().AddNewtonsoftJson(options =>
 services.AddSwaggerGen();
 
 // Register application setting
-services.Configure<ApplicationSettings>(configuration.GetSection("ApplicationSettings"));
+services.Configure<Neo4jSettings>(configuration.GetSection("Neo4jSettings"));
 
 // Fetch settings object from configuration
-var settings = new ApplicationSettings();
-configuration.GetSection("ApplicationSettings").Bind(settings);
+var settings = new Neo4jSettings();
+configuration.GetSection("Neo4jSettings").Bind(settings);
 
 services.AddDbInfrastructure(settings);
 services.AddHealthChecks().AddCheck<GraphHealthCheck>("GraphHealthCheck");
@@ -38,6 +46,9 @@ if (!app.Environment.IsDevelopment())
 }
 
 //await app.Services.GetService<GeneratorService>().GenerateAll();
+//Отчасти костыль
+var graphClient = app.Services.GetService<IGraphClient>();
+graphClient.OperationCompleted += (sender, e) => app.Logger.LogInformation(e.QueryText);
 
 app.UseSwagger();
 app.UseSwaggerUI(options =>

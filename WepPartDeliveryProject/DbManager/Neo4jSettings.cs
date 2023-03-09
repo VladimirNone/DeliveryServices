@@ -1,6 +1,6 @@
 ﻿namespace DbManager
 {
-    public class ApplicationSettings
+    public class Neo4jSettings
     {
         public Uri Neo4jConnection { get; set; }
 

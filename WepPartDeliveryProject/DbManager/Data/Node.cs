@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DbManager.Data
 {
-    public abstract class Model : IModel
+    public abstract class Node : INode
     {
         public Guid Id { get; set; }
     }

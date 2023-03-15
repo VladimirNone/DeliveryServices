@@ -3,8 +3,10 @@ using Newtonsoft.Json;
 
 namespace DbManager.Data
 {
-    public class Relation<TFrom, TTo> : Model, IRelation where TFrom : class, INode where TTo : class, INode
+    public class Relation<TFrom, TTo> : IRelation where TFrom : class, INode where TTo : class, INode
     {
+        public Guid Id { get; set; }
+
         private TFrom? _nodeFrom;
         private TTo? _nodeTo;
 

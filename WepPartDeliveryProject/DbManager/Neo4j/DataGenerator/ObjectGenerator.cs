@@ -46,7 +46,7 @@ namespace DbManager.Neo4j.DataGenerator
                 .RuleFor(h => h.Name, g => g.Person.FullName)
                 .RuleFor(h => h.Login, g => g.Internet.Email())
                 .RuleFor(h => h.PhoneNumber, g => g.Phone.PhoneNumber("+7!!!!!!!!!!"))
-                .RuleFor(h => h.PasswordHash, (g, o) => pswService.GetPasswordHash(o.Login, g.Internet.Password()));
+                .RuleFor(h => h.PasswordHash, (g, o) => pswService.GetPasswordHash(o.Login, g.Internet.Password()).ToList());
 
         public static Faker<Client> GenerateClient(IPasswordService pswService)
             => new Faker<Client>("ru")
@@ -56,7 +56,7 @@ namespace DbManager.Neo4j.DataGenerator
                 .RuleFor(h => h.Login, g => g.Internet.Email())
                 .RuleFor(h => h.Bonuses, g => Math.Round(g.Random.Double() + g.Random.Number(150, 1000), 2))
                 .RuleFor(h => h.PhoneNumber, g => g.Phone.PhoneNumber("+7!!!!!!!!!!"))
-                .RuleFor(h => h.PasswordHash, (g, o) => pswService.GetPasswordHash(o.Login, g.Internet.Password()));
+                .RuleFor(h => h.PasswordHash, (g, o) => pswService.GetPasswordHash(o.Login, g.Internet.Password()).ToList());
 
         public static Faker<DeliveryMan> GenerateDeliveryMan(IPasswordService pswService)
             => new Faker<DeliveryMan>("ru")
@@ -66,7 +66,7 @@ namespace DbManager.Neo4j.DataGenerator
                 .RuleFor(h => h.Login, g => g.Internet.Email())
                 .RuleFor(h => h.MaxWeight, g => g.Random.Number(4000, 50000))
                 .RuleFor(h => h.PhoneNumber, g => g.Phone.PhoneNumber("+7!!!!!!!!!!"))
-                .RuleFor(h => h.PasswordHash, (g, o) => pswService.GetPasswordHash(o.Login, g.Internet.Password()));
+                .RuleFor(h => h.PasswordHash, (g, o) => pswService.GetPasswordHash(o.Login, g.Internet.Password()).ToList());
 
         public static Faker<KitchenWorker> GenerateKitchenWorker(IPasswordService pswService)
             => new Faker<KitchenWorker>("ru")
@@ -76,7 +76,7 @@ namespace DbManager.Neo4j.DataGenerator
                 .RuleFor(h => h.Login, g => g.Internet.Email())
                 .RuleFor(h => h.JobTitle, g => g.Name.JobTitle())
                 .RuleFor(h => h.PhoneNumber, g => g.Phone.PhoneNumber("+7!!!!!!!!!!"))
-                .RuleFor(h => h.PasswordHash, (g, o) => pswService.GetPasswordHash(o.Login, g.Internet.Password()));
+                .RuleFor(h => h.PasswordHash, (g, o) => pswService.GetPasswordHash(o.Login, g.Internet.Password()).ToList());
 
         //---------------------------------------------GenerateRelations-------------------------------------------------------------
 

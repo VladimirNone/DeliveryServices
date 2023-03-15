@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace DbManager.Data.Nodes
 {
-    public class Order : Model, INode
+    public class Order : Node, INode
     {
         public double Price { get; set; }
         public int SumWeight { get; set; }

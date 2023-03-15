@@ -17,11 +17,26 @@ namespace WepPartDeliveryProject.Controllers
     {
         private readonly IRepositoryFactory _repositoryFactory;
         private readonly ApplicationSettings _appSettings;
+        private readonly IPasswordService _pswService;
 
-        public MainController(IRepositoryFactory repositoryFactory, IOptions<ApplicationSettings> configOptions)
+        public MainController(IRepositoryFactory repositoryFactory, IOptions<ApplicationSettings> configOptions, IPasswordService passwordService)
         {
             _repositoryFactory = repositoryFactory;
             _appSettings = configOptions.Value;
+            _pswService = passwordService;
+        }
+
+        [HttpGet("test")]
+        public async Task<IActionResult> GetTestList()
+        {
+            var orderRepo = _repositoryFactory.GetRepository<Order>();
+            var orders = await orderRepo.GetNodesAsync();
+            var order = orders.First();
+
+            var orderedProds = await orderRepo.GetRelatedNodesAsync<OrderedDish, Dish>(order);
+            var prods = orderedProds.Select(h => h.NodeTo).ToList();
+
+            return Ok(prods);
         }
 
         [HttpGet("getCategoriesList")]
@@ -41,7 +56,7 @@ namespace WepPartDeliveryProject.Controllers
             var choicedCategory = Category.CategoriesFromDb.Single(h=>h.CategoryNumber == categoryNumber);
             var categoryDishes = await _repositoryFactory.GetRepository<Category>().GetRelatedNodesAsync<ContainsDish, Dish>(choicedCategory, page * _appSettings.CountOfItemsOnWebPage, _appSettings.CountOfItemsOnWebPage, "Name");
 
-            return Ok(categoryDishes);
+            return Ok(categoryDishes.Select(h=>h.NodeTo).ToList());
         }
     }
 }

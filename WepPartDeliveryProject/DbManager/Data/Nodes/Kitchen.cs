@@ -3,7 +3,7 @@ using Neo4jClient;
 
 namespace DbManager.Data.Nodes
 {
-    public class Kitchen : Model, INode
+    public class Kitchen : Node, INode
     {
         public string Address { get; set; }
 

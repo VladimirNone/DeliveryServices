@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace DbManager.Data.Nodes
 {
-    public class Category : Model, INode
+    public class Category : Node, INode
     {
         public string Name { get; set; }
         public string Description { get; set; }

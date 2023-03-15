@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace DbManager.Data.Nodes
 {
-    public class OrderState : Model, INode
+    public class OrderState : Node, INode
     {
         public int NumberOfStage { get; set; }
         public string NameOfState { get; set; }

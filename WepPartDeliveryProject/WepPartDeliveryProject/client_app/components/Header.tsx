@@ -6,7 +6,7 @@ import styles from '@/styles/Home.module.css'
 const Header: FC = () => {
     return (
         <Container fluid="xl" className="row g-0 pt-2">
-            <Col sm={6} className="d-flex justify-content-center align-items-center">
+            <Col sm={6} className="d-flex justify-content-center align-items-center p-1">
                 <Link href="/">
                     <NavbarBrand>
                         My Brand!

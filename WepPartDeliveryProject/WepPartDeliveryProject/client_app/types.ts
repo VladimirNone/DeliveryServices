@@ -1,10 +1,10 @@
 
 type footerPanelInfo = {
     panelName: string,
-    panelItems: Array<footerPanelItem>,
+    panelItems: Array<linkPanelItem>,
 }
 
-type footerPanelItem = {
+type linkPanelItem = {
     itemName: string,
     itemHref: string,
 }

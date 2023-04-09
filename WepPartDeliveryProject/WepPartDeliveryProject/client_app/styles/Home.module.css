@@ -1,3 +1,12 @@
+.sidebarToggle{
+  min-width: 2em;
+  max-width: 3em;
+}
+
+.rotate90deg{
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
 
 @media(max-width:576px){
   .headerButton{

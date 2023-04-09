@@ -1,8 +1,8 @@
+
 @media(max-width:576px){
   .headerButton{
     max-width: 20em;
   }
-
 }
 
 @media(min-width:576px){

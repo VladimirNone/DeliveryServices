@@ -1,34 +1,53 @@
-import { Nav, Navbar, NavDropdown, Container, Button, Form } from 'react-bootstrap';
+import { Nav, Navbar, NavDropdown, Container, Button, Form ,Offcanvas} from 'react-bootstrap';
 import { FC } from "react"
 import { NavbarContext } from './contexts/Navbar-context';
 import Link from 'next/link';
 import Image from 'next/image'
 
-const HorizontalMenuItems: Array<string> = [
-  "Главная",
-  "Акции",
-  "Доставка",
+const HorizontalMenuItems: Array<linkPanelItem> = [
+  { 
+    itemName:"Главная",
+    itemHref: "/",
+  },
+  { 
+    itemName:"Акции",
+    itemHref: "/",
+  },
+  { 
+    itemName:"Доставка",
+    itemHref: "/",
+  },
 ];
 
-const AdminPanelMenuItems: Array<string> = [
-  "Добавить блюдо",
-  "Статистика",
-  "Карта",
+const AdminPanelMenuItems: Array<linkPanelItem> = 
+[
+  { 
+    itemName:"Добавить блюдо",
+    itemHref: "/",
+  },
+  { 
+    itemName:"Статистика",
+    itemHref: "/",
+  },
+  { 
+    itemName:"Карта",
+    itemHref: "/",
+  },
 ];
 
 const MainNavbar: FC = () => {
   return (
     <Navbar bg="light" expand="md">
-      <Container className="g-0">
-        <Navbar.Toggle aria-controls="basic-navbar-nav" data-bs-toggle="offcanvas" className="order-1 col-3"></Navbar.Toggle>
+      <Container>
+        <Navbar.Toggle aria-controls="offcanvasNavbar-expand" className="order-1 col-3"></Navbar.Toggle>
         <Navbar.Collapse id="basic-navbar-nav" className='order-3'>
           <Nav className="me-auto">
-            
+
             {HorizontalMenuItems.map((value, i) =>
               (<Nav.Item className='mx-auto' key={i}>
-                <Link href="/" passHref legacyBehavior>
-                  <Nav.Link eventKey={i}>
-                    {value}
+                <Link href={value.itemHref} passHref legacyBehavior>
+                  <Nav.Link>
+                    {value.itemName}
                   </Nav.Link>
                 </Link>
               </Nav.Item>)
@@ -39,8 +58,13 @@ const MainNavbar: FC = () => {
                 <NavDropdown className='mx-auto' title="Админ панель" id="nav-dropdown">
                   {AdminPanelMenuItems.map((value, i) => (
                     <NavDropdown.Item key={i} className='mx-auto'>
-                      {value}
-                    </NavDropdown.Item>))}
+                      <Link href={value.itemHref} passHref legacyBehavior>
+                        <Nav.Link>
+                          {value.itemName}
+                        </Nav.Link>
+                      </Link>
+                    </NavDropdown.Item>))
+                  }
                 </NavDropdown>
               }
             </NavbarContext.Consumer>

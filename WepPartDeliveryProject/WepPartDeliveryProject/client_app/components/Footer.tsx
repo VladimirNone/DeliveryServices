@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { FC } from "react"
-import { Button, Col, Container, NavbarBrand, Nav, Navbar } from "react-bootstrap";
-import styles from '@/styles/Home.module.css'
+import { Col, Container, NavbarBrand, Nav, Navbar } from "react-bootstrap";
 
 const questionsPanel:footerPanelInfo = 
 {
@@ -43,10 +42,10 @@ const informationPanel:footerPanelInfo =
 const FooterPanelItem : FC<footerPanelInfo> = (contentPanel:footerPanelInfo) =>{
     return (
         <Navbar bg="light" expand="md">
-            <Container>
+            <Container fluid="xl" className="g-0" >
                 <Navbar.Toggle aria-controls="basic-navbar-nav" className="w-100">{contentPanel.panelName}</Navbar.Toggle>
-                <Navbar.Collapse id="basic-navbar-nav "  >
-                    <Nav className="me-auto flex-column">
+                <Navbar.Collapse id="basic-navbar-nav">
+                    <Nav className="me-auto flex-column w-100">
                         <Nav.Item className='w-100 d-none d-md-block text-center'>
                             <b>{contentPanel.panelName}</b>
                         </Nav.Item>
@@ -69,7 +68,7 @@ const FooterPanelItem : FC<footerPanelInfo> = (contentPanel:footerPanelInfo) =>{
 
 const Footer: FC = () => {
     return (
-        <Container fluid="lg" className="row g-0">
+        <Container className="row mx-auto">
             <Col md={4} xs={12} className="p-1 h-100">
                 {FooterPanelItem(informationPanel)}
             </Col>

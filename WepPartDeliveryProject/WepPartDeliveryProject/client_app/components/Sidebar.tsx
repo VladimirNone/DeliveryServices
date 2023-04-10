@@ -47,29 +47,23 @@ const Sidebar: FC = () => {
                             Категории
                         </Offcanvas.Title>
                     </Offcanvas.Header>
-                    <Offcanvas.Body className='g-0 justify-content-center'>
+                    <Offcanvas.Body className='g-0'>
                         <Nav className="flex-column">
-                            <Nav.Item className='w-100 d-none d-md-block text-center'>
+                            <Nav.Item className='w-100 d-none d-md-block p-2'>
                                 <b>Категории</b>
                             </Nav.Item>
                             {VerticalMenuItems.map((value, i) =>
-                                (<Nav.Item className='mx-auto' key={i}>
-                                    <Link href={value.itemHref} passHref legacyBehavior>
-                                        <Nav.Link>
+                                (<Nav.Item key={i}>
+                                    <Link className="nav-link" href={value.itemHref}>
                                             {value.itemName}
-                                        </Nav.Link>
                                     </Link>
                                 </Nav.Item>)
                             )}
-                            <NavDropdown id='offcanvasNavbarDropdown' className='mx-auto' title="Админ панель">
+                            <NavDropdown id='offcanvasNavbarDropdown' title="Админ панель">
                                 {AdminPanelMenuItems.map((value, i) => (
-                                    <NavDropdown.Item key={i} className='mx-auto'>
-                                        <Link href={value.itemHref} passHref legacyBehavior>
-                                            <Nav.Link>
+                                        <Link key={i} className="nav-link dropdown-item mx-auto" href={value.itemHref}>
                                             {value.itemName}
-                                            </Nav.Link>
                                         </Link>
-                                    </NavDropdown.Item>
                                 ))}
                             </NavDropdown>
                         </Nav>

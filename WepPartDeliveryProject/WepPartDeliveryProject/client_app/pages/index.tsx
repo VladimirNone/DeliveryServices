@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '@/styles/Home.module.css'
+import DishCard from '@/components/cards/DishCard'
 
 
 export default function Home() {
@@ -13,8 +14,9 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <div style={{height:"300px", backgroundColor:"grey"}}>
-
+        <div style={{backgroundColor:"grey"}}>
+          <DishCard imagePath="/суши.png"/>
+          <DishCard imagePath="/суши1.png"/>
         </div>
       </main>
     </>

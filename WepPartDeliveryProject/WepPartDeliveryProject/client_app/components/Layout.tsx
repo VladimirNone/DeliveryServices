@@ -14,7 +14,7 @@ const Layout:FC<layoutProps> = ({children}) =>  (
             <Header/>
             <MainNavbar/>
             <Container fluid="xl" className="row pt-2 mx-auto">
-                <Col xs={2} md={3} className="g-0 px-1">
+                <Col xs={2} md={3} lg={2} className="g-0 px-1">
                     <Sidebar/>
                 </Col>
                 <Col className="g-0">

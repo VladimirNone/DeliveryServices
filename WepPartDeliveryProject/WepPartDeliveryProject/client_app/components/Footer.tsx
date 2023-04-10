@@ -33,7 +33,11 @@ const informationPanel:footerPanelInfo =
             itemHref: "/",
         },
         {
-            itemName: "Возникли проблемы с сайтом",
+            itemName: "Действия при возникновении проблем с сайтом",
+            itemHref: "/",
+        },
+        {
+            itemName: "Вакансии",
             itemHref: "/",
         },
     ]
@@ -52,10 +56,8 @@ const FooterPanelItem : FC<footerPanelInfo> = (contentPanel:footerPanelInfo) =>{
 
                         {contentPanel.panelItems.map((value, i) =>
                             (<Nav.Item className="w-100" key={i}>
-                                <Link href={value.itemHref} passHref legacyBehavior>
-                                    <Nav.Link eventKey={i}>
+                                <Link className="nav-link" href={value.itemHref}>
                                         {value.itemName}
-                                    </Nav.Link>
                                 </Link>
                             </Nav.Item>)
                         )}

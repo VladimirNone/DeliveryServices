@@ -9,7 +9,7 @@ const DishCard: FC<{imagePath:string}> = (props:{imagePath:string}) => {
             <Card>
                 <Row className='g-0'>
                 <Col xs={12} sm={5} md={4} lg={3} className='d-flex align-items-center'>
-                        <img src={props.imagePath} alt="." className='img-fluid rounded w-100'/>
+                        <Card.Img src={props.imagePath} alt="."/>
                     </Col>
                     <Col>
                         <Card.Body>

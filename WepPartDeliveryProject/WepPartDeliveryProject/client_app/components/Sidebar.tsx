@@ -36,7 +36,7 @@ const AdminPanelMenuItems: Array<linkPanelItem> =
 
 const Sidebar: FC = () => {
     return (
-        <Navbar bg="light" expand="md" className="h-100">
+        <Navbar bg="light" expand="md" style={{maxHeight:"100vw"}} className="h-100">
             <Container fluid className='h-100 align-items-start justify-content-end g-0 mx-auto'>
             <Navbar.Toggle aria-controls='offcanvasNavbar' className={`${styles.sidebarToggle} h-100`}>
                 <div className={`${styles.rotate90deg} align-items-center`}>Категории</div>

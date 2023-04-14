@@ -1,8 +1,23 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '@/styles/Home.module.css'
-import DishCard from '@/components/cards/DishCard'
+import DishClientCard from '@/components/cards/DishClientCard'
 
+const dishClientCard = {
+  images: ["/суши1.png","/суши.png","/суши1.png","/суши.png"],
+  name: "Калифорния",
+  description: "Классический ролл с лососем, «снежным крабом»,кунжутным майонезом, авокадо и огурцом,панированный в икре тобико",
+  price : 389,
+  id: 1,
+}
+
+const dishClientCard1 = {
+  images: ["/суши.png","/суши1.png","/суши.png","/суши1.png"],
+  name: "Филадельфия",
+  description: "Нежный ролл с лососем,сливочным сыром и огурцом",
+  price : 549,
+  id: 2,
+}
 
 export default function Home() {
   return (
@@ -15,8 +30,8 @@ export default function Home() {
       </Head>
       <main>
         <div style={{backgroundColor:"grey"}}>
-          <DishCard imagePath="/суши.png"/>
-          <DishCard imagePath="/суши1.png"/>
+          <DishClientCard {...dishClientCard}/>
+          {/* <DishClientCard {...dishClientCard1}/> */}
         </div>
       </main>
     </>

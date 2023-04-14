@@ -1,24 +1,35 @@
-import { FC } from 'react';
-import { Card, Col, Row } from 'react-bootstrap';
-import Image from 'next/image'
+import { FC, useState } from 'react';
+import { Card, Col, Row, Carousel, Image } from 'react-bootstrap';
 import imageNext from "../../public/суши.png"
 
-const DishCard: FC<{imagePath:string}> = (props:{imagePath:string}) => {
+const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
+    const [index, setIndex] = useState(0);
+
+    const handleSelect = (selectedIndex: number, e: any) => {
+        setIndex(selectedIndex);
+    };
+
     return (
         <>
             <Card>
                 <Row className='g-0'>
-                <Col xs={12} sm={5} md={4} lg={3} className='d-flex align-items-center'>
-                        <Card.Img src={props.imagePath} alt="."/>
+                    <Col xs={12} sm={5} md={4} lg={3} className='d-flex align-items-center'>
+                        <Carousel activeIndex={index} onSelect={handleSelect}>
+                            {dishInfo.images.slice(0,2).map((value, i)=>
+                                <Carousel.Item key={i}>
+                                    <Image className="d-block w-100" src={value} alt="First slide"/>
+                                </Carousel.Item>
+                            )}
+                        </Carousel>
                     </Col>
                     <Col>
                         <Card.Body>
                             <Row className='align-items-center text-nowrap'>
-                                <Col xs={9}><h3>Название блюда</h3></Col>
-                                <Col ><p className='text-start text-lg-center m-0'>Цена: 350р</p></Col>
+                                <Col xs={9}><h3>{dishInfo.name}</h3></Col>
+                                <Col ><p className='text-start text-lg-center m-0'>Цена: {dishInfo.price}р</p></Col>
                             </Row>
                             <Card.Text>
-                                Это более широкая карточка с вспомогательным текстом ниже в качестве естественного перехода к дополнительному контенту
+                                {dishInfo.description}
                             </Card.Text>
                             <div className='d-flex justify-content-end pe-md-3'>
 
@@ -38,5 +49,5 @@ const DishCard: FC<{imagePath:string}> = (props:{imagePath:string}) => {
     );
 }
 
-export default DishCard;
+export default DishClientCard;
 

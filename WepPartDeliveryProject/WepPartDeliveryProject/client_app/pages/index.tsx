@@ -2,6 +2,7 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '@/styles/Home.module.css'
 import DishClientCard from '@/components/cards/DishClientCard'
+import DishedList from '@/components/DishedList'
 
 const dishClientCard = {
   images: ["/суши1.png","/суши.png","/суши1.png","/суши.png"],
@@ -30,8 +31,7 @@ export default function Home() {
       </Head>
       <main>
         <div style={{backgroundColor:"grey"}}>
-          <DishClientCard {...dishClientCard}/>
-          {/* <DishClientCard {...dishClientCard1}/> */}
+          <DishedList {...{dishes: [dishClientCard, dishClientCard1], page: 1}}/>
         </div>
       </main>
     </>

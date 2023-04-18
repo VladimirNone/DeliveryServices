@@ -15,3 +15,8 @@ type dishClientCardProps = {
     price : number,
     id: number,
 }
+
+type dishListProps = {
+    page: number,
+    dishes: Array<dishClientCardProps>,
+}

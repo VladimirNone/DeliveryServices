@@ -1,11 +1,20 @@
-import { FC, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { Card, Col, Row, Carousel, Image } from 'react-bootstrap';
 import imageNext from "../../public/суши.png"
+import styles from '@/styles/Home.module.css'
 
 const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
     const [index, setIndex] = useState(0);
+    const [count, setCount] = useState(1);
 
-    const handleSelect = (selectedIndex: number, e: any) => {
+    const handleClick = (countToAdd: number) =>{
+        setCount((count) => {
+            let sum = count + countToAdd;
+            return sum > 20 || sum < 0 ? count : sum;
+        });
+    }
+
+    const handleSelect = (selectedIndex: number) => {
         setIndex(selectedIndex);
     };
 
@@ -33,11 +42,11 @@ const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
                             </Card.Text>
                             <div className='d-flex justify-content-end pe-md-3'>
 
-                                <button className='btn btn-secondary' style={{ width: '37.6px', height: '37.6px' }}>+</button>
-                                <div className='d-flex align-items-center justify-content-center' style={{ width: '37.6px', height: '37.6px' }}>
-                                    <p className='m-0'>1</p>
+                                <button onClick={()=>handleClick(1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>+</button>
+                                <div className={`d-flex align-items-center justify-content-center ${styles.cardCountBtnAndP}`}>
+                                    <p className='m-0'>{count}</p>
                                 </div>
-                                <button className='btn btn-secondary me-2' style={{ width: '37.6px', height: '37.6px' }}>-</button>
+                                <button onClick={()=>handleClick(-1)} className={`btn btn-secondary me-2 ${styles.cardCountBtnAndP}`}>-</button>
 
                                 <button className='btn btn-primary'>Добавить в корзину</button>
                             </div>

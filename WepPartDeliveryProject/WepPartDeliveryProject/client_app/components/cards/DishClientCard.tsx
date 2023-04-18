@@ -24,7 +24,7 @@ const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
                 <Row className='g-0'>
                     <Col xs={12} sm={5} md={4} lg={3} className='d-flex align-items-center'>
                         <Carousel activeIndex={index} onSelect={handleSelect}>
-                            {dishInfo.images.slice(0,2).map((value, i)=>
+                            {dishInfo.images?.slice(0,2).map((value, i)=>
                                 <Carousel.Item key={i}>
                                     <Image className="d-block w-100" src={value} alt="First slide"/>
                                 </Carousel.Item>

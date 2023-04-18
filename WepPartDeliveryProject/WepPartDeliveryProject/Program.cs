@@ -17,6 +17,15 @@ services.AddLogging(loggingBuilder => {
     loggingBuilder.AddFile(loggingSection);
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000");
+        });
+});
+
 services.AddControllers().AddNewtonsoftJson(options =>
         {
             options.SerializerSettings.MaxDepth = 3;
@@ -65,6 +74,8 @@ app.UseStaticFiles();
 app.UseHealthChecks("/healthcheck");
 
 app.UseRouting();
+
+app.UseCors();
 
 app.MapControllers();
 

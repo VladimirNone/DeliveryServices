@@ -46,17 +46,14 @@ namespace WepPartDeliveryProject.Controllers
             return Ok(categories);
         }
 
-        [HttpGet("getDishesList")]
-        public async Task<IActionResult> GetDishesList(int page, int categoryNumber)
+        [HttpGet("getDishesList/{category}")]
+        public async Task<IActionResult> GetDishesList(string category)
         {
-            if(categoryNumber < 1 || categoryNumber >= Category.CategoriesFromDb.Count)
-            {
-                return BadRequest($"CategoryNumber must be in range [1,{Category.CategoriesFromDb.Count}], but request contain CategoryNumber={categoryNumber}");
-            }
-            var choicedCategory = Category.CategoriesFromDb.Single(h=>h.CategoryNumber == categoryNumber);
-            var categoryDishes = await _repositoryFactory.GetRepository<Category>().GetRelatedNodesAsync<ContainsDish, Dish>(choicedCategory, page * _appSettings.CountOfItemsOnWebPage, _appSettings.CountOfItemsOnWebPage, "Name");
+            var choicedCategory = Category.CategoriesFromDb.Single(h=>h.LinkName == category);
+            var categoryDishes = await _repositoryFactory.GetRepository<Category>().GetRelatedNodesAsync<ContainsDish, Dish>(choicedCategory, orderByProperty: "Name");
 
             return Ok(categoryDishes.Select(h=>h.NodeTo).ToList());
         }
     }
 }
+ 

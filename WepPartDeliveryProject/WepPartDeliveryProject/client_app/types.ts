@@ -20,3 +20,10 @@ type dishListProps = {
     page: number,
     dishes: Array<dishClientCardProps>,
 }
+
+type categoryItem = {
+    id: string,
+    name: string,
+    linkName: string,
+    categoryNumber: number,
+}

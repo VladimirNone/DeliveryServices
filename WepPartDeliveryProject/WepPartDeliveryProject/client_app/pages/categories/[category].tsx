@@ -32,7 +32,12 @@ export const getStaticProps:GetStaticProps = async (context) => {
     }
 }
 
-const Category: FC<{categories:categoryItem[], dishes: dishClientCardProps[]}> = ({categories, dishes}) => {
+type categoryPageProps = {
+  categories:categoryItem[], 
+  dishes: dishClientCardProps[],
+}
+
+const Category: FC<categoryPageProps> = ({categories, dishes}) => {
   return (
     <ClientLayout categories={categories}>
       <Head>
@@ -42,7 +47,7 @@ const Category: FC<{categories:categoryItem[], dishes: dishClientCardProps[]}> =
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <div style={{backgroundColor:"grey"}}>
+        <div>
             <DishedList {...{dishes, page: 1}}/>
         </div>
       </main>

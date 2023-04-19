@@ -73,7 +73,7 @@ const MainNavbar: FC = () => {
         <Form className="d-flex col-lg-4 col-md-5 col-8 order-md-4 order-2 ">
           <Form.Control className='w-100' placeholder="Поиск" aria-describedby="basic-addon2" />
           <Button variant="outline-secondary" id="button-addon2">
-            <Image src="loupe.svg" width="20" height="20" alt="Поиск" />
+            <Image src="\loupe.svg" width="20" height="20" alt="Поиск" />
           </Button>
         </Form>
       </Container>

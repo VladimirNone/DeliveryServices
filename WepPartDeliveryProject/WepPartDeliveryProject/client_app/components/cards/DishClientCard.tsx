@@ -2,6 +2,7 @@ import React, { FC, useState } from 'react';
 import { Card, Col, Row, Carousel, Image } from 'react-bootstrap';
 import imageNext from "../../public/суши.png"
 import styles from '@/styles/Home.module.css'
+import Link from 'next/link';
 
 const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
     const [index, setIndex] = useState(0);
@@ -19,19 +20,19 @@ const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
     };
 
     return (
-        <>
+        <Link href={'\\dishes\\' + dishInfo.id.toString()}>
             <Card>
                 <Row className='g-0'>
-                    <Col xs={12} sm={5} md={4} lg={3} className='d-flex align-items-center'>
+                    <Col xs={12} sm={5} md={4} lg={3}>
                         <Carousel activeIndex={index} onSelect={handleSelect}>
-                            {dishInfo.images?.slice(0,2).map((value, i)=>
+                            {dishInfo.images?.slice(0,3).map((value, i)=>
                                 <Carousel.Item key={i}>
                                     <Image className="d-block w-100" src={value} alt="First slide"/>
                                 </Carousel.Item>
                             )}
                         </Carousel>
                     </Col>
-                    <Col>
+                    <Col xs={12} sm={7} md={8} lg={9}>
                         <Card.Body>
                             <Row className='align-items-center text-nowrap'>
                                 <Col xs={9}><h3>{dishInfo.name}</h3></Col>
@@ -54,7 +55,7 @@ const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
                     </Col>
                 </Row>
             </Card>
-        </>
+        </Link>
     );
 }
 

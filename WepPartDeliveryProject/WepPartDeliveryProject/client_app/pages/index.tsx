@@ -42,7 +42,7 @@ const Home: FC<{categories:Array<categoryItem>}> = ({categories}) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <div style={{backgroundColor:"grey"}}>
+        <div>
           <DishedList {...{dishes: [dishClientCard, dishClientCard1], page: 1}}/>
         </div>
       </main>

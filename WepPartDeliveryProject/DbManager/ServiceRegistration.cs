@@ -5,18 +5,24 @@ using Neo4jClient;
 using DbManager.Data.Nodes;
 using DbManager.Services;
 using DbManager.Neo4j.DataGenerator;
+using Microsoft.Extensions.Configuration;
+using DbManager.Data.Relations;
 
 namespace DbManager
 {
     public static class ServiceRegistration
     {
-        public static void AddDbInfrastructure(this IServiceCollection services, Neo4jSettings settings)
+        public static void AddDbInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            // Fetch settings object from configuration
+            var settings = new Neo4jSettings();
+            configuration.GetSection("Neo4jSettings").Bind(settings);
+
             // This is to register Neo4j Client Object as a singleton
             services.AddSingleton<IGraphClient, BoltGraphClient>(op => {
                         var graphClient = new BoltGraphClient(settings.Neo4jConnection, settings.Neo4jUser, settings.Neo4jPassword);
                         graphClient.ConnectAsync().Wait();
-                        LoadStandartData(graphClient);
+                        PrepareData(graphClient, configuration.GetSection("ClientAppSettings:PathToPublicSourceDirecroty").Value);
                         return graphClient;
                     });
 
@@ -31,25 +37,44 @@ namespace DbManager
             services.AddTransient<IGeneralRepository<Order>, OrderRepository>();
         }
 
-        private static void LoadStandartData(IGraphClient graphClient)
+        private static void PrepareData(IGraphClient graphClient, string pathToPublicClientAppDirectory)
         {
-            OrderState.OrderStatesFromDb =
-                graphClient.Cypher
-                .Match($"(orderStates:{typeof(OrderState).Name})")
-                .Return(orderStates => orderStates.CollectAs<OrderState>())
-                .ResultsAsync
-                .Result
-                .Single()
-                .ToList();
+            var categoryRepo = new GeneralRepository<Category>(graphClient);
+            var dishRepo = new GeneralRepository<Dish>(graphClient);
 
-            Category.CategoriesFromDb =
-                graphClient.Cypher
-                .Match($"(categories:{typeof(Category).Name})")
-                .Return(categories => categories.CollectAs<Category>())
-                .ResultsAsync
-                .Result
-                .Single()
-                .ToList();
+            var dirWithDishImages = "dishes";
+            var pathToDishesDir = Path.Combine(pathToPublicClientAppDirectory, dirWithDishImages);
+
+            OrderState.OrderStatesFromDb = new GeneralRepository<OrderState>(graphClient).GetNodesAsync().Result;
+
+            Category.CategoriesFromDb = categoryRepo.GetNodesAsync().Result;
+
+            foreach (var category in Category.CategoriesFromDb)
+            {
+                var categoryDishes = categoryRepo.GetRelatedNodesAsync<ContainsDish, Dish>(category).Result.Select(h=>(Dish)h.NodeTo);
+                var pathToCategoryDir = Path.Combine(pathToDishesDir, category.LinkName);
+
+                foreach (var dish in categoryDishes)
+                {
+                    var pathToDishDir = Path.Combine(pathToCategoryDir, dish.Id.ToString());
+                    if (Directory.Exists(pathToDishDir))
+                    {
+                        dish.Images = Directory
+                            .GetFiles(pathToDishDir)
+                            //получаемый путь
+                            // \\dishes\\{Название категории на англ}\\{Guid}\\{Название файла}
+                            .Select(h => Path.Combine("\\", dirWithDishImages, category.LinkName, dish.Id.ToString(), Path.GetFileName(h)).Replace('\\','/'))
+                            .ToList();
+
+                        dishRepo.UpdateNodeAsync(dish).Wait();
+                    }
+                    else
+                    {
+                        Directory.CreateDirectory(pathToDishDir);
+                    }
+                }
+            }
+            
         }
     }
 }

@@ -20,7 +20,6 @@ namespace DbManager.Neo4j.DataGenerator
                 .RuleFor(h => h.Id, g => Guid.NewGuid())
                 .RuleFor(h => h.Name, g => g.Commerce.ProductName())
                 .RuleFor(h => h.Description, g => g.Lorem.Paragraph())
-                .RuleFor(h => h.DirectoryWithImages, g => "/Dishes/" + g.Random.Number(0, 10) + "/")
                 .RuleFor(h => h.Price, g => Math.Round(g.Random.Double() + g.Random.Number(150, 1000), 2))
                 .RuleFor(h => h.Weight, g => g.Random.Number(150, 1200));
 

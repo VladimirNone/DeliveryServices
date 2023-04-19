@@ -16,7 +16,7 @@ namespace DbManager.Data.Nodes
         /// <summary>
         /// Images of product. First image is main
         /// </summary>
-        public string? DirectoryWithImages { get; set; }
+        public List<string> Images { get; set; }
 
         [Neo4jIgnore]
         public List<OrderedDish>? Orders { get; set; }

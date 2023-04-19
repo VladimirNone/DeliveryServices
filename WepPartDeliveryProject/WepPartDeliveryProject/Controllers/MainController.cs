@@ -29,14 +29,19 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("test")]
         public async Task<IActionResult> GetTestList()
         {
-            var orderRepo = _repositoryFactory.GetRepository<Order>();
-            var orders = await orderRepo.GetNodesAsync();
-            var order = orders.First();
 
-            var orderedProds = await orderRepo.GetRelatedNodesAsync<OrderedDish, Dish>(order);
-            var prods = orderedProds.Select(h => h.NodeTo).ToList();
+            //похоже на получение блюд, находящихся в заказе или корзине
+            /*            var orderRepo = _repositoryFactory.GetRepository<Order>();
+                        var orders = await orderRepo.GetNodesAsync();
+                        var order = orders.First();
 
-            return Ok(prods);
+                        var orderedProds = await orderRepo.GetRelatedNodesAsync<OrderedDish, Dish>(order);
+                        var prods = orderedProds.Select(h => h.NodeTo).ToList();*/
+
+            var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesAsync();
+
+
+            return Ok();
         }
 
         [HttpGet("getCategoriesList")]
@@ -44,6 +49,20 @@ namespace WepPartDeliveryProject.Controllers
         {
             var categories = Category.CategoriesFromDb;
             return Ok(categories);
+        }
+
+        [HttpGet("getDishIds")]
+        public async Task<IActionResult> GetDishIds()
+        {
+            var dishIds = (await _repositoryFactory.GetRepository<Dish>().GetNodesAsync()).Select(h=>h.Id).ToList();
+            return Ok(dishIds);
+        }
+
+        [HttpGet("getDish/{id}")]
+        public async Task<IActionResult> GetDish(Guid id)
+        {
+            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(id);
+            return Ok(dish);
         }
 
         [HttpGet("getDishesList/{category}")]

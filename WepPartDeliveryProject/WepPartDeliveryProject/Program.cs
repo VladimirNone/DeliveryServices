@@ -22,7 +22,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000");
+            policy.WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value);
         });
 });
 
@@ -39,11 +39,7 @@ services.AddSwaggerGen();
 services.Configure<Neo4jSettings>(configuration.GetSection("Neo4jSettings"));
 services.Configure<ApplicationSettings>(configuration.GetSection("ApplicationSettings"));
 
-// Fetch settings object from configuration
-var settings = new Neo4jSettings();
-configuration.GetSection("Neo4jSettings").Bind(settings);
-
-services.AddDbInfrastructure(settings);
+services.AddDbInfrastructure(configuration);
 services.AddHealthChecks().AddCheck<GraphHealthCheck>("GraphHealthCheck");
 
 var app = builder.Build();

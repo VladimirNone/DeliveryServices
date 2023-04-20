@@ -16,7 +16,7 @@ const ClientLayout:FC<clientLayoutProps> = ({children, categories}) =>  (
                 <Col xs={2} md={3} lg={2} className="g-0 px-1">
                     <Sidebar categories={categories}/> 
                 </Col>
-                <Col className="g-0">
+                <Col xs={10} md={9} lg={10} className="g-0">
                     {children}
                 </Col>
             </Container>

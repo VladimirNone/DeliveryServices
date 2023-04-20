@@ -41,11 +41,11 @@ const Dish: FC<dishPageProps> = ({ categories, dish }) => {
   const [index, setIndex] = useState(0);
   const [count, setCount] = useState(1);
 
-  const handleClick = (countToAdd: number) =>{
-      setCount((count) => {
-          let sum = count + countToAdd;
-          return sum > 20 || sum < 0 ? count : sum;
-      });
+  const handleClick = (countToAdd: number) => {
+    setCount((count) => {
+      let sum = count + countToAdd;
+      return sum > 20 || sum < 0 ? count : sum;
+    });
   }
 
   const handleSelect = (selectedIndex: number) => {
@@ -73,14 +73,14 @@ const Dish: FC<dishPageProps> = ({ categories, dish }) => {
               </Carousel>
             </Col>
           </Row>
-          <Row  className="justify-content-center">
-          <Col xs={12} sm={11} md={10} lg={9}>
-            <div>
-              <div className="d-flex mb-3 mt-2">
-                <h5 className="flex-grow-1">{dish.name}</h5>
-                <h5 className=""><b>{dish.price}Р</b></h5>
-              </div>
-              <p className="text-justify">{dish.description}</p>
+          <Row className="justify-content-center mb-3">
+            <Col xs={12} sm={11} md={10} lg={9}>
+              <div>
+                <div className="d-flex mb-3 mt-2">
+                  <h5 className="flex-grow-1">{dish.name}</h5>
+                  <h5 className=""><b>{dish.price}Р</b></h5>
+                </div>
+                <p className="text-justify">{dish.description}</p>
               </div>
               <div className='d-flex justify-content-end pe-md-3'>
                 <div className={`d-flex align-items-center justify-content-center me-2`}>

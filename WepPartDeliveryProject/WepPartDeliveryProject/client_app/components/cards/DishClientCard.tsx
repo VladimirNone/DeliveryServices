@@ -11,7 +11,7 @@ const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
     const handleClick = (countToAdd: number) =>{
         setCount((count) => {
             let sum = count + countToAdd;
-            return sum > 20 || sum < 0 ? count : sum;
+            return sum > 20 || sum < 1 ? count : sum;
         });
     }
 
@@ -20,7 +20,7 @@ const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
     };
 
     return (
-        <Link href={'\\dishes\\' + dishInfo.id.toString()}>
+        <>
             <Card>
                 <Row className='g-0'>
                     <Col xs={12} sm={5} md={4} lg={3}>
@@ -34,8 +34,12 @@ const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
                     </Col>
                     <Col xs={12} sm={7} md={8} lg={9}>
                         <Card.Body>
-                            <Row className='align-items-center text-nowrap'>
-                                <Col xs={9}><h3>{dishInfo.name}</h3></Col>
+                            <Row className='align-items-center'>
+                                <Col xs={9}>
+                                    <Link href={'/dishes/' + dishInfo.id.toString()} className={`${styles.linkWithoutDefaultStyles}`}>
+                                        <h3>{dishInfo.name}</h3>
+                                    </Link>
+                                </Col>
                                 <Col ><p className='text-start text-lg-center m-0'>Цена: {dishInfo.price}р</p></Col>
                             </Row>
                             <Card.Text>
@@ -55,7 +59,7 @@ const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
                     </Col>
                 </Row>
             </Card>
-        </Link>
+        </>
     );
 }
 

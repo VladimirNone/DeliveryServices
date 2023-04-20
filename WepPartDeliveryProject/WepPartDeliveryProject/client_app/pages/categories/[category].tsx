@@ -48,7 +48,7 @@ const Category: FC<categoryPageProps> = ({categories, dishes}) => {
       </Head>
       <main>
         <div>
-            <DishedList {...{dishes, page: 1}}/>
+            <DishedList {...{dishes}}/>
         </div>
       </main>
     </ClientLayout>

@@ -17,7 +17,6 @@ type dishClientCardProps = {
 }
 
 type dishListProps = {
-    page: number,
     dishes: Array<dishClientCardProps>,
 }
 

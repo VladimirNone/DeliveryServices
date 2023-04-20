@@ -43,7 +43,7 @@ const Home: FC<{categories:Array<categoryItem>}> = ({categories}) => {
       </Head>
       <main>
         <div>
-          <DishedList {...{dishes: [dishClientCard, dishClientCard1], page: 1}}/>
+          <DishedList {...{dishes: [dishClientCard, dishClientCard1]}}/>
         </div>
       </main>
     </ClientLayout>

@@ -62,7 +62,7 @@ namespace DbManager
                         dish.Images = Directory
                             .GetFiles(pathToDishDir)
                             //получаемый путь
-                            // \\dishes\\{Название категории на англ}\\{Guid}\\{Название файла}
+                            // /dishes/{Название категории на англ}/{Guid}/{Название файла}
                             .Select(h => Path.Combine("\\", dirWithDishImages, category.LinkName, dish.Id.ToString(), Path.GetFileName(h)).Replace('\\','/'))
                             .ToList();
 

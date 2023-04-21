@@ -6,7 +6,7 @@ import ClientLayout from '@/components/ClientLayout'
 import { GetStaticPaths, GetStaticProps } from 'next'
 
 export const getStaticPaths:GetStaticPaths = async () => {
-    const resp = await fetch(`https://localhost:7161/main/getCategoriesList`);
+    const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getCategoriesList`);
     const categories = await resp.json() as categoryItem[];
     const paths = categories.map((value)=> ({params: {category: value.linkName}}))
 
@@ -18,10 +18,10 @@ export const getStaticPaths:GetStaticPaths = async () => {
 
 export const getStaticProps:GetStaticProps = async (context) => {
     const category = context.params?.category;
-    const resp1 = await fetch(`https://localhost:7161/main/getCategoriesList`);
+    const resp1 = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getCategoriesList`);
     const categoryList = await resp1.json() as categoryItem[];
 
-    const resp2 = await fetch(`https://localhost:7161/main/getDishesList/${category}`);
+    const resp2 = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getDishesList/${category}`);
     const dishList = await resp2.json() as dishClientCardProps[];
 
     return {

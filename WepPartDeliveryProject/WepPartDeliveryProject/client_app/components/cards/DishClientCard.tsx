@@ -8,14 +8,14 @@ const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
     const [index, setIndex] = useState(0);
     const [count, setCount] = useState(1);
 
-    const handleClick = (countToAdd: number) =>{
+    const handleClick = (countToAdd: number):void =>{
         setCount((count) => {
             let sum = count + countToAdd;
             return sum > 20 || sum < 1 ? count : sum;
         });
     }
 
-    const handleSelect = (selectedIndex: number) => {
+    const handleSelect = (selectedIndex: number):void => {
         setIndex(selectedIndex);
     };
 

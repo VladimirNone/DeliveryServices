@@ -18,7 +18,9 @@ const Header: FC = () => {
                     <Button className="w-100">Корзина</Button>
                 </div>
                 <div className={`col-6 col-sm-8 p-1 ${styles.headerButton}`}>
-                    <Button className="w-100 text-nowrap">Войти/Регистрация</Button>
+                    <Link href='/login'>
+                        <Button className="w-100 text-nowrap">Войти/Регистрация</Button>
+                    </Link>
                 </div>
             </Col>
         </Container>

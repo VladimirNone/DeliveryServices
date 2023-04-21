@@ -2,6 +2,7 @@ using DbManager;
 using DbManager.Neo4j.DataGenerator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 using Neo4jClient;
 using Newtonsoft.Json;
 using WepPartDeliveryProject;
@@ -19,10 +20,13 @@ services.AddLogging(loggingBuilder => {
 
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(
+    options.AddPolicy("_myAllowSpecificOrigins",
         policy =>
         {
-            policy.WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value);
+            policy.WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value)
+            .WithHeaders(HeaderNames.ContentType)
+            .WithMethods("GET", "POST")
+                ;
         });
 });
 
@@ -71,7 +75,7 @@ app.UseHealthChecks("/healthcheck");
 
 app.UseRouting();
 
-app.UseCors();
+app.UseCors("_myAllowSpecificOrigins");
 
 app.MapControllers();
 

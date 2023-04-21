@@ -6,7 +6,7 @@ import Head from 'next/head'
 import styles from '@/styles/Home.module.css'
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const resp = await fetch(`https://localhost:7161/main/getDishIds`);
+  const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getDishIds`);
   const dishIds = await resp.json() as string[];
   const paths = dishIds.map((value) => ({ params: { id: value } }))
 
@@ -18,10 +18,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps = async (context) => {
   const id = context.params?.id;
-  const resp1 = await fetch(`https://localhost:7161/main/getCategoriesList`);
+  const resp1 = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getCategoriesList`);
   const categoryList = await resp1.json() as categoryItem[];
 
-  const resp2 = await fetch(`https://localhost:7161/main/getDish/${id}`);
+  const resp2 = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getDish/${id}`);
   const dish = await resp2.json() as dishClientCardProps;
 
   return {
@@ -41,14 +41,14 @@ const Dish: FC<dishPageProps> = ({ categories, dish }) => {
   const [index, setIndex] = useState(0);
   const [count, setCount] = useState(1);
 
-  const handleClick = (countToAdd: number) => {
+  const handleClick = (countToAdd: number):void => {
     setCount((count) => {
       let sum = count + countToAdd;
-      return sum > 20 || sum < 0 ? count : sum;
+      return sum > 20 || sum < 1 ? count : sum;
     });
   }
 
-  const handleSelect = (selectedIndex: number) => {
+  const handleSelect = (selectedIndex: number):void => {
     setIndex(selectedIndex);
   };
 

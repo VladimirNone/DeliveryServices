@@ -16,14 +16,10 @@ namespace WepPartDeliveryProject.Controllers
     public class MainController : ControllerBase
     {
         private readonly IRepositoryFactory _repositoryFactory;
-        private readonly ApplicationSettings _appSettings;
-        private readonly IPasswordService _pswService;
 
-        public MainController(IRepositoryFactory repositoryFactory, IOptions<ApplicationSettings> configOptions, IPasswordService passwordService)
+        public MainController(IRepositoryFactory repositoryFactory)
         {
             _repositoryFactory = repositoryFactory;
-            _appSettings = configOptions.Value;
-            _pswService = passwordService;
         }
 
         [HttpGet("test")]

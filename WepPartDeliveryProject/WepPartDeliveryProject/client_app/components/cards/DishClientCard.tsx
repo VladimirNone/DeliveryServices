@@ -3,17 +3,10 @@ import { Card, Col, Row, Carousel, Image } from 'react-bootstrap';
 import imageNext from "../../public/суши.png"
 import styles from '@/styles/Home.module.css'
 import Link from 'next/link';
+import CountDishToCart from '../CountDishToCart';
 
 const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
     const [index, setIndex] = useState(0);
-    const [count, setCount] = useState(1);
-
-    const handleClick = (countToAdd: number):void =>{
-        setCount((count) => {
-            let sum = count + countToAdd;
-            return sum > 20 || sum < 1 ? count : sum;
-        });
-    }
 
     const handleSelect = (selectedIndex: number):void => {
         setIndex(selectedIndex);
@@ -36,7 +29,7 @@ const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
                         <Card.Body>
                             <Row className='align-items-center'>
                                 <Col xs={9}>
-                                    <Link href={'/dishes/' + dishInfo.id.toString()} className={`${styles.linkWithoutDefaultStyles}`}>
+                                    <Link href={'/dishes/' + dishInfo.id} className={`${styles.linkWithoutDefaultStyles}`}>
                                         <h3>{dishInfo.name}</h3>
                                     </Link>
                                 </Col>
@@ -45,16 +38,7 @@ const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
                             <Card.Text>
                                 {dishInfo.description}
                             </Card.Text>
-                            <div className='d-flex justify-content-end pe-md-3'>
-
-                                <button onClick={()=>handleClick(1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>+</button>
-                                <div className={`d-flex align-items-center justify-content-center ${styles.cardCountBtnAndP}`}>
-                                    <p className='m-0'>{count}</p>
-                                </div>
-                                <button onClick={()=>handleClick(-1)} className={`btn btn-secondary me-2 ${styles.cardCountBtnAndP}`}>-</button>
-
-                                <button className='btn btn-primary'>Добавить в корзину</button>
-                            </div>
+                            <CountDishToCart dishId={dishInfo.id}/>
                         </Card.Body>
                     </Col>
                 </Row>

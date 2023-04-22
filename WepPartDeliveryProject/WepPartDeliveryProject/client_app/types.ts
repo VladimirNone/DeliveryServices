@@ -13,7 +13,7 @@ type dishClientCardProps = {
     name: string,
     description: string,
     price : number,
-    id: number,
+    id: string,
 }
 
 type dishListProps = {

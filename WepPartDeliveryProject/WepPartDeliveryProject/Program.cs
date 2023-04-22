@@ -20,7 +20,7 @@ services.AddLogging(loggingBuilder => {
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("_myAllowSpecificOrigins",
+    options.AddDefaultPolicy(
         policy =>
         {
             policy.WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value)
@@ -75,7 +75,7 @@ app.UseHealthChecks("/healthcheck");
 
 app.UseRouting();
 
-app.UseCors("_myAllowSpecificOrigins");
+app.UseCors();
 
 app.MapControllers();
 

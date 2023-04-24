@@ -2,27 +2,17 @@ import React, { FC, useState } from 'react';
 import styles from '@/styles/Home.module.css'
 import { useCookies } from 'react-cookie';
 
-type dishCookieData = {
-    id: string,
-    count: number,
-}
 
-const CountDishToCart: FC<{dishId: string}> = ({dishId}) => {
+const CounterMainDish: FC<{dishId: string}> = ({dishId}) => {
     const [count, setCount] = useState(1);
-    const [cookies, setCookie] = useCookies(['cartDishes']);
+    const [cookies, setCookie] = useCookies(['cartDishes']);    
 
-    const addDishToCookies = ():void => {
-        const dishToAdd: dishCookieData = {id:dishId, count: count};
+    //Добавляет количество блюд, к находящихся в корзине
+    const addCountDishToCookies = ():void => {
+        var countCurDish = cookies.cartDishes[dishId] ?? 0;
+        cookies.cartDishes[dishId] = countCurDish + count;
 
-        if(cookies.cartDishes === undefined || cookies.cartDishes === null){
-            setCookie('cartDishes', JSON.stringify([dishToAdd]), { path: '/' })
-        }
-        else{
-            const addedDishes: dishCookieData[] = cookies.cartDishes;
-            addedDishes.push(dishToAdd);
-
-            setCookie('cartDishes', JSON.stringify(addedDishes), { path: '/' })
-        }
+        setCookie('cartDishes', JSON.stringify(cookies.cartDishes), { path: '/', sameSite: "none", secure: true })
     };
 
     const handleClick = (countToAdd: number): void => {
@@ -46,7 +36,7 @@ const CountDishToCart: FC<{dishId: string}> = ({dishId}) => {
                 <button onClick={() => handleClick(-1)} className={`btn btn-secondary me-2 ${styles.cardCountBtnAndP}`}>
                     -
                 </button>
-                <button className='btn btn-primary' onClick={addDishToCookies}>
+                <button className='btn btn-primary' onClick={addCountDishToCookies}>
                     Добавить в корзину
                 </button>
             </div>
@@ -54,5 +44,5 @@ const CountDishToCart: FC<{dishId: string}> = ({dishId}) => {
     );
 }
 
-export default CountDishToCart;
+export default CounterMainDish;
 

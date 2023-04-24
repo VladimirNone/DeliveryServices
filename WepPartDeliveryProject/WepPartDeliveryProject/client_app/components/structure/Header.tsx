@@ -15,7 +15,9 @@ const Header: FC = () => {
             </Col>
             <Col sm={7} md={6} className="d-flex justify-content-end">
                 <div className={`col-6 col-sm-4 p-1 ${styles.headerButton}`}>
-                    <Button className="w-100">Корзина</Button>
+                    <Link href='/cart'>
+                        <Button className="w-100">Корзина</Button>
+                    </Link>
                 </div>
                 <div className={`col-6 col-sm-8 p-1 ${styles.headerButton}`}>
                     <Link href='/login'>

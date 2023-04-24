@@ -1,4 +1,5 @@
-﻿using DbManager.Data.Nodes;
+﻿using DbManager.Data.DTOs;
+using DbManager.Data.Nodes;
 using DbManager.Neo4j.Interfaces;
 using DbManager.Services;
 using Microsoft.AspNetCore.Cors;
@@ -20,20 +21,14 @@ namespace WepPartDeliveryProject.Controllers
             _pswService = passwordService;
         }
 
-        public class UserLoginQuery
-        {
-            public string Login { get; set; }
-            public string Password { get; set; }
-        }
-
         [HttpPost("login")]
-        public async Task<IActionResult> Login(UserLoginQuery data)
+        public async Task<IActionResult> Login(UserLoginDTO data)
         {
             return Ok();
         }
 
         [HttpPost("signup")]
-        public async Task<IActionResult> Signup(UserLoginQuery data)
+        public async Task<IActionResult> Signup(UserLoginDTO data)
         {
             return Ok();
         }

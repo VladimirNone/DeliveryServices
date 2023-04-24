@@ -8,6 +8,8 @@ using DbManager.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace WepPartDeliveryProject.Controllers
 {
@@ -22,6 +24,8 @@ namespace WepPartDeliveryProject.Controllers
             _repositoryFactory = repositoryFactory;
         }
 
+
+
         [HttpGet("test")]
         public async Task<IActionResult> GetTestList()
         {
@@ -33,9 +37,6 @@ namespace WepPartDeliveryProject.Controllers
 
                         var orderedProds = await orderRepo.GetRelatedNodesAsync<OrderedDish, Dish>(order);
                         var prods = orderedProds.Select(h => h.NodeTo).ToList();*/
-
-            var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesAsync();
-
 
             return Ok();
         }
@@ -68,6 +69,24 @@ namespace WepPartDeliveryProject.Controllers
             var categoryDishes = await _repositoryFactory.GetRepository<Category>().GetRelatedNodesAsync<ContainsDish, Dish>(choicedCategory, orderByProperty: "Name");
 
             return Ok(categoryDishes.Select(h=>h.NodeTo).ToList());
+        }
+
+        class DishInfoFront
+        {
+            public Dish DishInfo { get; set; }
+            public int Count { get; set; }
+        }
+
+        [HttpGet("getCart")]
+        public async Task<IActionResult> GetCart()
+        {
+            var jsonData = Request.Cookies["cartDishes"];
+
+            var res = jsonData != null ? JsonConvert.DeserializeObject<Dictionary<string, int>>(jsonData) : new Dictionary<string, int>();
+
+            var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesByIdAsync(res.Keys.ToArray());
+
+            return Ok(dishes);
         }
     }
 }

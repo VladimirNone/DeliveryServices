@@ -238,6 +238,18 @@ namespace DbManager.Neo4j.Implementations
             return result.ToList();
         }
 
+        public async Task<List<TNode>> GetNodesByIdAsync(string[] ids, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+        {
+            var result = await dbContext.Cypher
+                .Match($"(node:{typeof(TNode).Name})")
+                .Where($"node.Id in [\"{string.Join("\",\"", ids)}\"]")
+                .Return(node => node.As<TNode>())
+                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount)
+                .ResultsAsync;
+
+            return result.ToList();
+        }
+
         /// <summary>
         /// Get string with directed relation. Relation has name type of "relation" + relationInstanceName
         /// </summary>

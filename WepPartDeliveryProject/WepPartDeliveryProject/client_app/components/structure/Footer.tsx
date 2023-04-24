@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { FC } from "react"
 import { Col, Container, NavbarBrand } from "react-bootstrap";
-import FooterPanelItem from "./FooterPanelItem";
+import FooterPanelItem from "../FooterPanelItem";
 
 const questionsPanel:footerPanelInfo = 
 {

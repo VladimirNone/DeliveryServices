@@ -1,11 +1,10 @@
 import React, { FC, useState } from 'react';
 import { Card, Col, Row, Carousel, Image } from 'react-bootstrap';
-import imageNext from "../../public/суши.png"
 import styles from '@/styles/Home.module.css'
 import Link from 'next/link';
-import CountDishToCart from '../CountDishToCart';
+import CounterCartDish from './components/CounterCartDish';
 
-const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
+const DishCartCard: FC<dishClientInfo> = (dishInfo) => {
     const [index, setIndex] = useState(0);
 
     const handleSelect = (selectedIndex: number):void => {
@@ -38,7 +37,7 @@ const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
                             <Card.Text>
                                 {dishInfo.description}
                             </Card.Text>
-                            <CountDishToCart dishId={dishInfo.id}/>
+                            <CounterCartDish dishId={dishInfo.id} cancelDish={dishInfo.DeleteCartFromList}/>
                         </Card.Body>
                     </Col>
                 </Row>
@@ -47,5 +46,5 @@ const DishClientCard: FC<dishClientCardProps> = (dishInfo) => {
     );
 }
 
-export default DishClientCard;
+export default DishCartCard;
 

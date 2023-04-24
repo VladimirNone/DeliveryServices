@@ -8,16 +8,17 @@ type linkPanelItem = {
     itemHref: string,
 }
 
-type dishClientCardProps = {
+type dishClientInfo = {
     images: Array<string>,
     name: string,
     description: string,
     price : number,
     id: string,
+    DeleteCartFromList: (dishId:string)=>void,
 }
 
 type dishListProps = {
-    dishes: Array<dishClientCardProps>,
+    dishes: Array<dishClientInfo>,
 }
 
 type categoryItem = {

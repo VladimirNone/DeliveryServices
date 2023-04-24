@@ -1,5 +1,6 @@
 using DbManager;
 using DbManager.Neo4j.DataGenerator;
+using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
@@ -24,9 +25,13 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy.WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value)
-            .WithHeaders(HeaderNames.ContentType)
+            //.WithHeaders(HeaderNames.ContentType, HeaderNames.Cookie)
+            .AllowAnyHeader()
             .WithMethods("GET", "POST")
-                ;
+            .AllowCredentials();
+/*            policy.AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();*/
         });
 });
 

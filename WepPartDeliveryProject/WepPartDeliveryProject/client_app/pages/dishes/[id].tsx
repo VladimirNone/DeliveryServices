@@ -1,10 +1,10 @@
 import { FC, useState } from "react"
-import ClientLayout from '@/components/ClientLayout'
+import ClientLayout from '@/components/structure/ClientLayout'
 import { GetStaticPaths, GetStaticProps } from 'next'
 import { Carousel, Row, Image, Col } from 'react-bootstrap'
 import Head from 'next/head'
 import styles from '@/styles/Home.module.css'
-import CountDishToCart from "@/components/CountDishToCart"
+import CounterMainDish from "@/components/cards/components/CounterMainDish"
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getDishIds`);
@@ -23,7 +23,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
   const categoryList = await resp1.json() as categoryItem[];
 
   const resp2 = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getDish/${id}`);
-  const dish = await resp2.json() as dishClientCardProps;
+  const dish = await resp2.json() as dishClientInfo;
 
   return {
     props: {
@@ -35,7 +35,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
 type dishPageProps = {
   categories: categoryItem[],
-  dish: dishClientCardProps,
+  dish: dishClientInfo,
 }
 
 const Dish: FC<dishPageProps> = ({ categories, dish }) => {
@@ -74,7 +74,7 @@ const Dish: FC<dishPageProps> = ({ categories, dish }) => {
                 </div>
                 <p className="text-justify">{dish.description}</p>
               </div>
-              <CountDishToCart dishId={dish.id}/>
+              <CounterMainDish dishId={dish.id}/>
             </Col>
           </Row>
         </div>

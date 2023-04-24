@@ -130,5 +130,15 @@ namespace DbManager.Neo4j.Interfaces
         /// <param name="orderByProperty">Property names by which to sort. ONLY properties of TNode</param>
         /// <returns>Nodes, which haven't related using specified relation</returns>
         Task<List<TNode>> GetNodesWithoutRelation<TRelation>(int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
+
+        /// <summary>
+        /// Get nodes with ids from params
+        /// </summary>
+        /// <param name="ids">Node's ids to return</param>
+        /// <param name="skipCount">Count of nodes will skip</param>
+        /// <param name="limitCount">Count of nodes will returner after skip</param>
+        /// <param name="orderByProperty">Property names by which to sort. ONLY properties of TNode</param>
+        /// <returns></returns>
+        Task<List<TNode>> GetNodesByIdAsync(string[] ids, int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
     }
 }

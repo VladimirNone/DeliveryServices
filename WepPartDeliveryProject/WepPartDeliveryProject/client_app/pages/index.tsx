@@ -1,9 +1,8 @@
 import Head from 'next/head'
 import { FC } from "react"
-import styles from '@/styles/Home.module.css'
-import DishedList from '@/components/DishedList'
-import ClientLayout from '@/components/ClientLayout'
+import ClientLayout from '@/components/structure/ClientLayout'
 import { GetStaticProps } from 'next'
+import DishMainCard from '@/components/cards/DishMainCard'
 
 const dishClientCard = {
   images: ["/суши1.png","/суши.png","/суши1.png","/суши.png"],
@@ -44,7 +43,7 @@ const Home: FC<{categories:Array<categoryItem>}> = ({categories}) => {
       </Head>
       <main>
         <div>
-          <DishedList {...{dishes: [dishClientCard, dishClientCard1]}}/>
+          {[dishClientCard, dishClientCard1].map((dish, i) => <DishMainCard key={i} {...dish}/>)}
         </div>
       </main>
     </ClientLayout>

@@ -1,8 +1,8 @@
-import { Nav, Navbar, NavDropdown, Container, Button, Form ,Offcanvas} from 'react-bootstrap';
-import { FC } from "react"
-import { NavbarContext } from './contexts/Navbar-context';
+import { Nav, Navbar, NavDropdown, Container, Button, Form} from 'react-bootstrap';
+import { FC } from "react";
 import Link from 'next/link';
-import Image from 'next/image'
+import Image from 'next/image';
+import { NavbarContext } from '../contexts/Navbar-context';
 
 const HorizontalMenuItems: Array<linkPanelItem> = [
   { 
@@ -19,8 +19,7 @@ const HorizontalMenuItems: Array<linkPanelItem> = [
   },
 ];
 
-const AdminPanelMenuItems: Array<linkPanelItem> = 
-[
+const AdminPanelMenuItems: Array<linkPanelItem> = [
   { 
     itemName:"Добавить блюдо",
     itemHref: "/",

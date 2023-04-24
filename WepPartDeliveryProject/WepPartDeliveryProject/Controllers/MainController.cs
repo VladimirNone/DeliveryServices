@@ -24,19 +24,9 @@ namespace WepPartDeliveryProject.Controllers
             _repositoryFactory = repositoryFactory;
         }
 
-
-
         [HttpGet("test")]
         public async Task<IActionResult> GetTestList()
         {
-
-            //похоже на получение блюд, находящихся в заказе или корзине
-            /*            var orderRepo = _repositoryFactory.GetRepository<Order>();
-                        var orders = await orderRepo.GetNodesAsync();
-                        var order = orders.First();
-
-                        var orderedProds = await orderRepo.GetRelatedNodesAsync<OrderedDish, Dish>(order);
-                        var prods = orderedProds.Select(h => h.NodeTo).ToList();*/
 
             return Ok();
         }
@@ -71,12 +61,6 @@ namespace WepPartDeliveryProject.Controllers
             return Ok(categoryDishes.Select(h=>h.NodeTo).ToList());
         }
 
-        class DishInfoFront
-        {
-            public Dish DishInfo { get; set; }
-            public int Count { get; set; }
-        }
-
         [HttpGet("getCart")]
         public async Task<IActionResult> GetCart()
         {
@@ -87,6 +71,18 @@ namespace WepPartDeliveryProject.Controllers
             var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesByIdAsync(res.Keys.ToArray());
 
             return Ok(dishes);
+        }
+
+        [HttpPost("placeAnOrder")]
+        public async Task<IActionResult> PlaceAnOrder()
+        {
+            var jsonData = Request.Cookies["cartDishes"];
+
+            var res = jsonData != null ? JsonConvert.DeserializeObject<Dictionary<string, int>>(jsonData) : new Dictionary<string, int>();
+
+            var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesByIdAsync(res.Keys.ToArray());
+
+            return Ok();
         }
     }
 }

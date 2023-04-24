@@ -7,12 +7,17 @@ const CounterMainDish: FC<{dishId: string}> = ({dishId}) => {
     const [count, setCount] = useState(1);
     const [cookies, setCookie] = useCookies(['cartDishes']);    
 
-    //Добавляет количество блюд, к находящихся в корзине
+    //Добавляет количество блюд, к находящимся в корзине
     const addCountDishToCookies = ():void => {
-        var countCurDish = cookies.cartDishes[dishId] ?? 0;
-        cookies.cartDishes[dishId] = countCurDish + count;
+        let futureCookie:any = {};
+        if(cookies.cartDishes != undefined)
+            futureCookie = cookies.cartDishes;
 
-        setCookie('cartDishes', JSON.stringify(cookies.cartDishes), { path: '/', sameSite: "none", secure: true })
+        var countCurDish = futureCookie[dishId] ?? 0;
+
+        futureCookie[dishId] = countCurDish + count;
+
+        setCookie('cartDishes', JSON.stringify(futureCookie), { path: '/', sameSite: "none", secure: true });
     };
 
     const handleClick = (countToAdd: number): void => {

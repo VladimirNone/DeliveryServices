@@ -1,27 +1,30 @@
-type footerPanelInfo = {
+interface footerPanelInfo {
     panelName: string,
     panelItems: Array<linkPanelItem>,
 }
 
-type linkPanelItem = {
+interface linkPanelItem {
     itemName: string,
     itemHref: string,
 }
 
-type dishClientInfo = {
+interface dishClientInfo {
     images: Array<string>,
     name: string,
     description: string,
     price : number,
     id: string,
+}
+
+interface dishCartInfo extends dishClientInfo {
     DeleteCartFromList: (dishId:string)=>void,
 }
 
-type dishListProps = {
+interface dishListProps {
     dishes: Array<dishClientInfo>,
 }
 
-type categoryItem = {
+interface categoryItem {
     id: string,
     name: string,
     linkName: string,

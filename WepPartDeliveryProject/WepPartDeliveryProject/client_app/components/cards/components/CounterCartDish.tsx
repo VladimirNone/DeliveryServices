@@ -22,6 +22,7 @@ const CounterCartDish: FC<{ dishId: string, cancelDish: (dishId: string) => void
         });
     }
 
+    //Удаляет свойство с id текущего блюда из куки, обновляет куки, удаляет блюдо из списка
     const handleCancelClick = (): void => {
         delete cookies.cartDishes[dishId];
         setCookie('cartDishes', JSON.stringify(cookies.cartDishes), { path: '/', sameSite: "none", secure: true })

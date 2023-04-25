@@ -240,6 +240,9 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<List<TNode>> GetNodesByIdAsync(string[] ids, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
         {
+            for (int i = 0; i < orderByProperty.Length; i++)
+                orderByProperty[i] = "node." + orderByProperty[i];
+
             var result = await dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name})")
                 .Where($"node.Id in [\"{string.Join("\",\"", ids)}\"]")

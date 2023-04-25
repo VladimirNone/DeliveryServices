@@ -1,4 +1,5 @@
-﻿using DbManager.Data;
+﻿using DbManager;
+using DbManager.Data;
 using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Neo4j.DataGenerator;
@@ -18,9 +19,14 @@ namespace WepPartDeliveryProject.Controllers
     public class MainController : ControllerBase
     {
         private readonly IRepositoryFactory _repositoryFactory;
+        private readonly ApplicationSettings _appSettings;
 
-        public MainController(IRepositoryFactory repositoryFactory)
+        public MainController(IRepositoryFactory repositoryFactory, IConfiguration configuration)
         {
+            // Fetch settings object from configuration
+            _appSettings = new ApplicationSettings();
+            configuration.GetSection("ApplicationSettings").Bind(_appSettings);
+
             _repositoryFactory = repositoryFactory;
         }
 
@@ -32,7 +38,7 @@ namespace WepPartDeliveryProject.Controllers
         }
 
         [HttpGet("getCategoriesList")]
-        public async Task<IActionResult> GetCategoriesList()
+        public IActionResult GetCategoriesList()
         {
             var categories = Category.CategoriesFromDb;
             return Ok(categories);
@@ -71,6 +77,17 @@ namespace WepPartDeliveryProject.Controllers
             var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesByIdAsync(res.Keys.ToArray());
 
             return Ok(dishes);
+        }
+
+        [HttpGet("getSearchedDishes")]
+        public async Task<IActionResult> GetCart(string searchText, int page = 0)
+        {
+            var dishes = await ((IDishRepository)_repositoryFactory.GetRepository<Dish>(true))
+                .SearchDishesByNameAndDescription(searchText, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
+
+            var pageEnded = dishes.Count() < 4;
+
+            return Ok(new { dishes = dishes.GetRange(0, dishes.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage: dishes.Count), pageEnded});
         }
 
         [HttpPost("placeAnOrder")]

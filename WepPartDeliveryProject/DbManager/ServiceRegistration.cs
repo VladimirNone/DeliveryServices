@@ -35,6 +35,7 @@ namespace DbManager
 
             // This is the registration for custom repository class
             services.AddTransient<IGeneralRepository<Order>, OrderRepository>();
+            services.AddTransient<IGeneralRepository<Dish>, DishRepository>();
         }
 
         private static void PrepareData(IGraphClient graphClient, string pathToPublicClientAppDirectory)

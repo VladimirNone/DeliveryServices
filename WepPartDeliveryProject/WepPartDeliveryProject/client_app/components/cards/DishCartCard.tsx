@@ -4,7 +4,7 @@ import styles from '@/styles/Home.module.css'
 import Link from 'next/link';
 import CounterCartDish from './components/CounterCartDish';
 
-const DishCartCard: FC<dishClientInfo> = (dishInfo) => {
+const DishCartCard: FC<dishCartInfo> = (dishInfo) => {
     const [index, setIndex] = useState(0);
 
     const handleSelect = (selectedIndex: number):void => {

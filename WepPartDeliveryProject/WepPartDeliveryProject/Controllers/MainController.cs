@@ -6,6 +6,7 @@ using DbManager.Neo4j.DataGenerator;
 using DbManager.Neo4j.Implementations;
 using DbManager.Neo4j.Interfaces;
 using DbManager.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -14,6 +15,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace WepPartDeliveryProject.Controllers
 {
+    [AllowAnonymous]
     [Route("[controller]")]
     [ApiController]
     public class MainController : ControllerBase

@@ -40,11 +40,11 @@ class Login extends Component<WithRouterProps, LoginState> {
         this.setState({secondPassword:inputText});
     }
 
-
     handleSubmit = async (e:FormEvent) => {
         e.preventDefault();
         const response = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/auth/signup`, {
             method: "POST",
+            credentials: "include",
             headers: {
                 'Content-Type': 'application/json;charset=utf-8'
             },

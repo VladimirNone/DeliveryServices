@@ -1,5 +1,8 @@
 using DbManager;
 using DbManager.Neo4j.DataGenerator;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -51,6 +54,16 @@ services.Configure<ApplicationSettings>(configuration.GetSection("ApplicationSet
 services.AddDbInfrastructure(configuration);
 services.AddHealthChecks().AddCheck<GraphHealthCheck>("GraphHealthCheck");
 
+services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(cookieAuthOp => 
+{
+    cookieAuthOp.Cookie = new CookieBuilder() { SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None, SecurePolicy = CookieSecurePolicy.Always };
+});
+
+services.AddAuthorization(options =>
+{
+    options.AddPolicy("age-policy", x => { x.RequireClaim("age"); });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -78,9 +91,17 @@ app.UseStaticFiles();
 
 app.UseHealthChecks("/healthcheck");
 
-app.UseRouting();
-
 app.UseCors();
+
+app.UseAuthentication();
+app.UseRouting();
+app.UseAuthorization();
+
+/*app.Use(async (context, next) =>
+{
+    var req = context.User;
+    await next.Invoke();
+});*/
 
 app.MapControllers();
 

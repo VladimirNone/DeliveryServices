@@ -37,9 +37,9 @@ class Login extends Component<WithRouterProps, LoginState> {
         e.preventDefault();
         const response = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/auth/login`, {
             method: "POST",
-            credentials: "include",
             headers: {
-                'Content-Type': 'application/json;charset=utf-8'
+                'Content-Type': 'application/json;charset=utf-8',
+                'Authorization': 'Bearer ' + sessionStorage.getItem("tokenKey"),
             },
             body: JSON.stringify({login:this.state.login, password:this.state.password})
         });

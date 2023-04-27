@@ -44,7 +44,6 @@ class Login extends Component<WithRouterProps, LoginState> {
         e.preventDefault();
         const response = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/auth/signup`, {
             method: "POST",
-            credentials: "include",
             headers: {
                 'Content-Type': 'application/json;charset=utf-8'
             },
@@ -52,7 +51,10 @@ class Login extends Component<WithRouterProps, LoginState> {
         });
 
         if(response.ok){
-            this.props.router.push('/');
+            const data = await response.text() as string;
+            sessionStorage.setItem("tokenKey", data);
+
+            this.props.router.push('/login');
         }
     }
 

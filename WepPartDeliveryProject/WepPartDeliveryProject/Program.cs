@@ -1,14 +1,18 @@
 using DbManager;
 using DbManager.Neo4j.DataGenerator;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Neo4jClient;
 using Newtonsoft.Json;
+using System.Text;
 using WepPartDeliveryProject;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +25,8 @@ services.AddLogging(loggingBuilder => {
     var loggingSection = configuration.GetSection("Logging");
     loggingBuilder.AddFile(loggingSection);
 });
+
+services.AddSingleton<JwtService>();
 
 builder.Services.AddCors(options =>
 {
@@ -54,14 +60,28 @@ services.Configure<ApplicationSettings>(configuration.GetSection("ApplicationSet
 services.AddDbInfrastructure(configuration);
 services.AddHealthChecks().AddCheck<GraphHealthCheck>("GraphHealthCheck");
 
-services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(cookieAuthOp => 
+services.AddAuthentication(options =>
 {
-    cookieAuthOp.Cookie = new CookieBuilder() { SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None, SecurePolicy = CookieSecurePolicy.Always };
-});
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection("ApplicationSettings:JwtSecretKey").Value)),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+        };
+    });
 
 services.AddAuthorization(options =>
 {
-    options.AddPolicy("age-policy", x => { x.RequireClaim("age"); });
+    options.AddPolicy("role-policy", x => { x.RequireClaim("role"); });
 });
 
 var app = builder.Build();

@@ -18,14 +18,16 @@ namespace WepPartDeliveryProject.Controllers
     {
         private readonly IRepositoryFactory _repositoryFactory;
         private readonly IPasswordService _pswService;
+        private readonly JwtService _jwtService;
 
-        public AuthController(IRepositoryFactory repositoryFactory, IPasswordService passwordService)
+        public AuthController(IRepositoryFactory repositoryFactory, IPasswordService passwordService, JwtService jwtService)
         {
             _repositoryFactory = repositoryFactory;
             _pswService = passwordService;
+            _jwtService = jwtService;
         }
 
-        [Authorize(Policy = "age-policy")]
+        [Authorize]
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserLoginDTO data)
         {
@@ -36,29 +38,9 @@ namespace WepPartDeliveryProject.Controllers
         [HttpPost("signup")]
         public async Task<IActionResult> Signup(UserLoginDTO data)
         {
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, "Fake User"),
-                new Claim("age", "25", ClaimValueTypes.Integer),
-                new Claim(ClaimTypes.Authentication, "true")
-            };
+            var jwtToken = _jwtService.GenerateJwtToken(data.Login, "client");
 
-            var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
-            identity.AddClaims(claims);
-
-            var principal = new ClaimsPrincipal(identity);
-
-            await HttpContext
-                .SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                principal,
-                new AuthenticationProperties
-                {
-                    ExpiresUtc = DateTime.UtcNow.AddMinutes(40)
-                });
-
-            //_logger.LogInformation(4, "User logged in.");
-
-            return Ok();
+            return Ok(jwtToken);
         }
     }
 }

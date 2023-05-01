@@ -2,7 +2,6 @@ import { Nav, Navbar, NavDropdown, Container, Button, Form} from 'react-bootstra
 import { ChangeEvent, FC, useState } from "react";
 import Link from 'next/link';
 import Image from 'next/image';
-import { NavbarContext } from '../contexts/Navbar-context';
 
 const HorizontalMenuItems: Array<linkPanelItem> = [
   { 

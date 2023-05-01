@@ -21,7 +21,7 @@ namespace DbManager.Neo4j.Implementations
         {
             {"User", 0},
             {"Client", 1},
-            {"KitchenManager", 2},
+            {"KitchenWorker", 2},
             {"Admin", 100},
         };
 

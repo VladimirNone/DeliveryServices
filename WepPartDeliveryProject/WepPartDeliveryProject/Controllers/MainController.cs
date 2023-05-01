@@ -1,5 +1,7 @@
-﻿using DbManager;
+﻿using AutoMapper;
+using DbManager;
 using DbManager.Data;
+using DbManager.Data.DTOs;
 using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Neo4j.DataGenerator;
@@ -21,14 +23,16 @@ namespace WepPartDeliveryProject.Controllers
     {
         private readonly IRepositoryFactory _repositoryFactory;
         private readonly ApplicationSettings _appSettings;
+        private readonly IMapper _mapper;
 
-        public MainController(IRepositoryFactory repositoryFactory, IConfiguration configuration)
+        public MainController(IRepositoryFactory repositoryFactory, IConfiguration configuration, IMapper mapper)
         {
             // Fetch settings object from configuration
             _appSettings = new ApplicationSettings();
             configuration.GetSection("ApplicationSettings").Bind(_appSettings);
 
             _repositoryFactory = repositoryFactory;
+            _mapper = mapper;
         }
 
         [HttpGet("test")]
@@ -68,18 +72,6 @@ namespace WepPartDeliveryProject.Controllers
             return Ok(categoryDishes.Select(h=>h.NodeTo).ToList());
         }
 
-        [HttpGet("getCart")]
-        public async Task<IActionResult> GetCart()
-        {
-            var jsonData = Request.Cookies["cartDishes"];
-
-            var res = jsonData != null ? JsonConvert.DeserializeObject<Dictionary<string, int>>(jsonData) : new Dictionary<string, int>();
-
-            var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesByPropertyAsync("Id", res.Keys.ToArray());
-
-            return Ok(dishes);
-        }
-
         [HttpGet("getSearchedDishes")]
         public async Task<IActionResult> GetCart(string searchText, int page = 0)
         {
@@ -91,16 +83,19 @@ namespace WepPartDeliveryProject.Controllers
             return Ok(new { dishes = dishes.GetRange(0, dishes.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage: dishes.Count), pageEnded});
         }
 
-        [HttpPost("placeAnOrder")]
-        public async Task<IActionResult> PlaceAnOrder()
+        [Authorize]
+        [HttpGet("getProfileInfo")]
+        public async Task<IActionResult> GetProfileInfo()
         {
-            var jsonData = Request.Cookies["cartDishes"];
+            var userId = Request.Cookies["X-UserId"];
+            if (userId == null)
+            {
+                return BadRequest("You don't have refresh token. You need to login or signup to system");
+            }
 
-            var res = jsonData != null ? JsonConvert.DeserializeObject<Dictionary<string, int>>(jsonData) : new Dictionary<string, int>();
+            var user = _mapper.Map<UserOutDTO>(await _repositoryFactory.GetRepository<User>().GetNodeAsync(userId));
 
-            var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesByPropertyAsync("Id", res.Keys.ToArray());
-
-            return Ok();
+            return Ok(user);
         }
     }
 }

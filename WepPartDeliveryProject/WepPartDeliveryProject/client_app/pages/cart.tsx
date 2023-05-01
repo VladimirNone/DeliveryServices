@@ -22,7 +22,7 @@ const Cart: FC<{categories:categoryItem[]}> = ({categories}) => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getCart`, {
+            const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/order/getCart`, {
                 credentials: 'include',                
             });
             const cartDishes = await resp.json() as dishClientInfo[];
@@ -42,7 +42,7 @@ const Cart: FC<{categories:categoryItem[]}> = ({categories}) => {
 
   const handlePlaceAnOrder = async () => {
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/placeAnOrder`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/order/placeAnOrder`, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json;charset=utf-8'

@@ -37,7 +37,23 @@ interface jsonTokenInfo {
     roleName: string,
 }
 
-interface AuthContextProps {
+interface authContextProps {
     JwtTokenIsValid: () => boolean,
     UpdateJwtToken: () => Promise<void>,
-  }
+}
+
+interface profileInfo {
+    login:string,
+    phoneNumber:string | null,
+    name:string,
+    born:Date | null,
+
+    // Client props
+    bonuses:number | null,
+
+    //KitchenWorker props
+    jobTitle:string | null,
+
+    //Admin props
+
+}

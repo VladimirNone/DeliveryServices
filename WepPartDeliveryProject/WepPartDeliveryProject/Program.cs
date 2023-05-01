@@ -1,4 +1,5 @@
 using DbManager;
+using DbManager.Mapper;
 using DbManager.Neo4j.DataGenerator;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -27,6 +28,7 @@ services.AddLogging(loggingBuilder => {
     loggingBuilder.AddFile(loggingSection);
 });
 
+services.AddAutoMapper(typeof(MapperProfile));
 services.AddSingleton<JwtService>();
 
 builder.Services.AddCors(options =>

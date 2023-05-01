@@ -31,6 +31,21 @@ namespace WepPartDeliveryProject.Controllers
             _jwtService = jwtService;
         }
 
+        private void AddCookieDataToResponse(string RefreshToken, string RefreshTokenCreated, string? userId = null)
+        {
+            if(userId != null) 
+            {
+                Response.Cookies.Append("X-UserId", userId,
+                            new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
+            }
+
+            Response.Cookies.Append("X-Refresh-Token", RefreshToken,
+                        new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
+            Response.Cookies.Append("X-Refresh-Token-Created", RefreshTokenCreated,
+                        new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
+
+        }
+
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserLoginDTO data)
         {
@@ -49,12 +64,7 @@ namespace WepPartDeliveryProject.Controllers
 
                 await _repositoryFactory.GetRepository<User>().UpdateNodeAsync(user);
 
-                Response.Cookies.Append("X-UserId", user.Id.ToString(),
-                            new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None });
-                Response.Cookies.Append("X-Refresh-Token", user.RefreshToken.ToString(),
-                            new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None });
-                Response.Cookies.Append("X-Refresh-Token-Created", user.RefreshTokenCreated.ToString(),
-                            new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None });
+                AddCookieDataToResponse(user.RefreshToken.ToString(), user.RefreshTokenCreated.ToString(), user.Id.ToString());
 
                 return Ok();
             }
@@ -81,16 +91,13 @@ namespace WepPartDeliveryProject.Controllers
                 var userRoleAsString = await userRepo.GetUserRole(userId);
 
                 var jwtTokenInfo = _jwtService.GenerateAccessJwtToken(userId, userRoleAsString);
-                var refreshToken = userNode.RefreshToken.ToString();
+
                 userNode.RefreshTokenCreated = DateTime.Now;
 
                 await userRepo.UpdateNodeAsync(userNode);
 
-                Response.Cookies.Append("X-Refresh-Token", refreshToken,
-                            new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None });
-                Response.Cookies.Append("X-Refresh-Token-Created", userNode.RefreshTokenCreated.ToString(),
-                            new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None });
-
+                AddCookieDataToResponse(userNode.RefreshToken.ToString(), userNode.RefreshTokenCreated.ToString());
+                
                 return Ok(jwtTokenInfo);
             }
             else
@@ -113,12 +120,7 @@ namespace WepPartDeliveryProject.Controllers
             await _repositoryFactory.GetRepository<User>().AddNodeAsync(user);
             await _repositoryFactory.GetRepository<User>().SetNewNodeType<Client>(user.Id.ToString());
 
-            Response.Cookies.Append("X-UserId", user.Id.ToString(),
-                        new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None });
-            Response.Cookies.Append("X-Refresh-Token", user.RefreshToken.ToString(),
-                        new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None });
-            Response.Cookies.Append("X-Refresh-Token-Created", user.RefreshTokenCreated.ToString(),
-                        new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None });
+            AddCookieDataToResponse(user.RefreshToken.ToString(), user.RefreshTokenCreated.ToString(), user.Id.ToString());
 
             return Ok();
         }
@@ -127,11 +129,11 @@ namespace WepPartDeliveryProject.Controllers
         public async Task<IActionResult> Logout()
         {
             Response.Cookies.Delete("X-UserId",
-                        new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None });
+                        new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
             Response.Cookies.Delete("X-Refresh-Token",
-                        new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None });
+                        new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
             Response.Cookies.Delete("X-Refresh-Token-Created",
-                        new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None });
+                        new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
 
             return Ok();
         }

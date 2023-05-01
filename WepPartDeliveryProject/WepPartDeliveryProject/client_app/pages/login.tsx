@@ -2,6 +2,7 @@ import { ChangeEvent, Component, FormEvent } from "react"
 import Link from 'next/link'
 import { Col, Form, Row, Container, Button } from "react-bootstrap";
 import { NextRouter, withRouter } from "next/router";
+import { AuthContext } from "@/components/contexts/Auth-context";
 
 type LoginState = {
     login: string,
@@ -35,11 +36,12 @@ class Login extends Component<WithRouterProps, LoginState> {
 
     handleSubmit = async (e:FormEvent) => {
         e.preventDefault();
+
         const response = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/auth/login`, {
             method: "POST",
+            credentials: "include",
             headers: {
                 'Content-Type': 'application/json;charset=utf-8',
-                'Authorization': 'Bearer ' + sessionStorage.getItem("tokenKey"),
             },
             body: JSON.stringify({login:this.state.login, password:this.state.password})
         });

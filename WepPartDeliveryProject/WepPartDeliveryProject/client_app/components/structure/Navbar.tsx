@@ -34,7 +34,7 @@ const AdminPanelMenuItems: Array<linkPanelItem> = [
   },
 ];
 
-const MainNavbar: FC = () => {
+const MainNavbar: FC<{isAdmin:boolean}> = ({isAdmin}) => {
   const [searchValue, setSearchValue] = useState("");
 
   const changeSearchValue = (e:ChangeEvent<HTMLInputElement>):void =>{
@@ -57,21 +57,17 @@ const MainNavbar: FC = () => {
                 </Link>
               </Nav.Item>)
             )}
-            <NavbarContext.Consumer >
-              {({ isAdmin }) => isAdmin &&
-                <NavDropdown className='mx-auto' title="Админ панель" id="nav-dropdown">
-                  {AdminPanelMenuItems.map((value, i) => (
-                    <NavDropdown.Item key={i} className='mx-auto'>
-                      <Link href={value.itemHref} passHref legacyBehavior>
-                        <Nav.Link>
-                          {value.itemName}
-                        </Nav.Link>
-                      </Link>
-                    </NavDropdown.Item>))
-                  }
-                </NavDropdown>
-              }
-            </NavbarContext.Consumer>
+            {isAdmin &&
+              <NavDropdown className='mx-auto' title="Админ панель" id="nav-dropdown">
+                {AdminPanelMenuItems.map((value, i) => (
+                  <Nav.Item key={i} className='mx-auto'>
+                    <Link href={value.itemHref} className='dropdown-item pt-2 pb-2'>
+                        {value.itemName}
+                    </Link>
+                  </Nav.Item>))
+                }
+              </NavDropdown>
+            }
           </Nav>
         </Navbar.Collapse>
         <Form className="d-flex col-lg-4 col-md-5 col-8 order-md-4 order-2 ">

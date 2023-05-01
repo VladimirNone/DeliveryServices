@@ -7,6 +7,7 @@ using DbManager.Services;
 using DbManager.Neo4j.DataGenerator;
 using Microsoft.Extensions.Configuration;
 using DbManager.Data.Relations;
+using DbManager.Data;
 
 namespace DbManager
 {
@@ -36,6 +37,7 @@ namespace DbManager
             // This is the registration for custom repository class
             services.AddTransient<IGeneralRepository<Order>, OrderRepository>();
             services.AddTransient<IGeneralRepository<Dish>, DishRepository>();
+            services.AddTransient<IGeneralRepository<User>, UserRepository>();
         }
 
         private static void PrepareData(IGraphClient graphClient, string pathToPublicClientAppDirectory)

@@ -30,3 +30,14 @@ interface categoryItem {
     linkName: string,
     categoryNumber: number,
 }
+
+interface jsonTokenInfo {
+    jwtToken: string,
+    validTo: Date,
+    roleName: string,
+}
+
+interface AuthContextProps {
+    JwtTokenIsValid: () => boolean,
+    UpdateJwtToken: () => Promise<void>,
+  }

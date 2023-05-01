@@ -5,24 +5,6 @@ import { GetStaticProps, GetServerSideProps } from 'next'
 import DishCartCard from '@/components/cards/DishCartCard'
 import { useCookies } from 'react-cookie'
 
-
-// export const getServerSideProps:GetServerSideProps = async () =>{
-//     const resp1 = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getCategoriesList`);
-//     const categories = await resp1.json() as categoryItem[];
-
-// const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getCart`, {
-//   credentials: 'include'
-// });
-// const cartDishes = await resp.json() as dishClientCardProps[];
-
-//     return {
-//       props:{
-//         //dishes: cartDishes,
-//         categories: categories,
-//       }
-//     }
-//   }
-
 export const getStaticProps:GetStaticProps = async () =>{
   const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getCategoriesList`);
   const categories = await resp.json() as categoryItem[];
@@ -39,15 +21,15 @@ const Cart: FC<{categories:categoryItem[]}> = ({categories}) => {
     const [cookies, setCookie, removeCookie] = useCookies(['cartDishes']);
 
     useEffect(() => {
-        const fetchData = async () =>{
-        const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getCart`, {
-          credentials: 'include'
-        });
-        const cartDishes = await resp.json() as dishClientInfo[];
-        setDishes(cartDishes);
-    }
-    fetchData();
-    }, [])
+        const fetchData = async () => {
+            const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getCart`, {
+                credentials: 'include',                
+            });
+            const cartDishes = await resp.json() as dishClientInfo[];
+            setDishes(cartDishes);
+        }
+        fetchData();
+    }, []);
 
   const handleDeleteItem = (dishId:string):void => {
     setDishes(prevState => prevState.filter(el => el.id != dishId ));

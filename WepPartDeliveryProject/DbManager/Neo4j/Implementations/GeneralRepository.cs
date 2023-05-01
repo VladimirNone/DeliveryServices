@@ -253,6 +253,47 @@ namespace DbManager.Neo4j.Implementations
             return result.ToList();
         }
 
+        public async Task<List<TNode>> GetNodesByPropertyAsync(string nameOfProperty, string[] propertyValues, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+        {
+            for (int i = 0; i < orderByProperty.Length; i++)
+                orderByProperty[i] = "node." + orderByProperty[i];
+
+            var result = await dbContext.Cypher
+                .Match($"(node:{typeof(TNode).Name})")
+                .Where($"node.{nameOfProperty} in [\"{string.Join("\",\"", propertyValues)}\"]")
+                .Return(node => node.As<TNode>())
+                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount)
+                .ResultsAsync;
+
+            return result.ToList();
+        }
+
+        public async Task SetNewNodeType<TNewNodeType>(string nodeId)
+            where TNewNodeType : INode
+        {
+            await dbContext.Cypher
+                .Merge($"(node:{typeof(TNode).Name} {{Id: $id}})")
+                .Set($"node:{typeof(TNewNodeType).Name}")
+                .WithParams(new
+                {
+                    id = nodeId,
+                })
+                .ExecuteWithoutResultsAsync();
+        }
+
+        public async Task RemoveNodeType<TNodeType>(string nodeId)
+            where TNodeType : INode
+        {
+            await dbContext.Cypher
+                .Merge($"(node:{typeof(TNode).Name} {{Id: $id}})")
+                .Remove($"node:{typeof(TNodeType).Name}")
+                .WithParams(new
+                {
+                    id = nodeId,
+                })
+                .ExecuteWithoutResultsAsync();
+        }
+
         /// <summary>
         /// Get string with directed relation. Relation has name type of "relation" + relationInstanceName
         /// </summary>

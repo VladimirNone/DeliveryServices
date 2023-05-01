@@ -12,10 +12,10 @@ type LoginState = {
 }
 
 type WithRouterProps = {
-    router: NextRouter
+    router: NextRouter,
   }
 
-class Login extends Component<WithRouterProps, LoginState> {
+class Signup extends Component<WithRouterProps, LoginState> {
 
     state = {
         login: '',
@@ -44,17 +44,12 @@ class Login extends Component<WithRouterProps, LoginState> {
         e.preventDefault();
         const response = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/auth/signup`, {
             method: "POST",
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8'
-            },
+            credentials: "include",
             body: JSON.stringify({login:this.state.login, password:this.state.password})
         });
 
         if(response.ok){
-            const data = await response.text() as string;
-            sessionStorage.setItem("tokenKey", data);
-
-            this.props.router.push('/login');
+            this.props.router.push('/');
         }
     }
 
@@ -104,4 +99,4 @@ class Login extends Component<WithRouterProps, LoginState> {
     }
 };
 
-export default withRouter(Login);
+export default withRouter(Signup);

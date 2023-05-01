@@ -3,7 +3,7 @@ import { FC } from "react"
 import { Button, Col, Container, NavbarBrand } from "react-bootstrap";
 import styles from '@/styles/Home.module.css'
 
-const Header: FC = () => {
+const Header: FC<{isAuthed: boolean}> = ({isAuthed}) => {
     return (
         <Container fluid="xl" className="row pt-2 mx-auto">
             <Col sm={5} md={6} className="d-flex justify-content-center align-items-center">
@@ -14,16 +14,24 @@ const Header: FC = () => {
                 </Link>
             </Col>
             <Col sm={7} md={6} className="d-flex justify-content-end">
-                <div className={`col-6 col-sm-4 p-1 ${styles.headerButton}`}>
+                <div className={`col-6 col-sm-${isAuthed ? '6' : '4'} p-1 ${styles.headerButton}`}>
                     <Link href='/cart'>
                         <Button className="w-100">Корзина</Button>
                     </Link>
                 </div>
-                <div className={`col-6 col-sm-8 p-1 ${styles.headerButton}`}>
-                    <Link href='/login'>
-                        <Button className="w-100 text-nowrap">Войти/Регистрация</Button>
-                    </Link>
-                </div>
+                { isAuthed ? 
+                    <div className={`col-6 col-sm-6 p-1 ${styles.headerButton}`}>
+                        <Link href='/profile'>
+                            <Button className="w-100">Профиль</Button>
+                        </Link>
+                    </div>
+                    :
+                    <div className={`col-6 col-sm-8 p-1 ${styles.headerButton}`}>
+                        <Link href='/login'>
+                            <Button className="w-100 text-nowrap">Войти/Регистрация</Button>
+                        </Link>
+                    </div>
+                }
             </Col>
         </Container>
     );

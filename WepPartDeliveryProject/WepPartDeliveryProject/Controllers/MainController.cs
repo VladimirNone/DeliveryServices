@@ -15,7 +15,6 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace WepPartDeliveryProject.Controllers
 {
-    [AllowAnonymous]
     [Route("[controller]")]
     [ApiController]
     public class MainController : ControllerBase
@@ -76,7 +75,7 @@ namespace WepPartDeliveryProject.Controllers
 
             var res = jsonData != null ? JsonConvert.DeserializeObject<Dictionary<string, int>>(jsonData) : new Dictionary<string, int>();
 
-            var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesByIdAsync(res.Keys.ToArray());
+            var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesByPropertyAsync("Id", res.Keys.ToArray());
 
             return Ok(dishes);
         }
@@ -99,7 +98,7 @@ namespace WepPartDeliveryProject.Controllers
 
             var res = jsonData != null ? JsonConvert.DeserializeObject<Dictionary<string, int>>(jsonData) : new Dictionary<string, int>();
 
-            var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesByIdAsync(res.Keys.ToArray());
+            var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesByPropertyAsync("Id", res.Keys.ToArray());
 
             return Ok();
         }

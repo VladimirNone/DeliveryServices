@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Neo4jClient;
+using Neo4jClient.Execution;
 using Newtonsoft.Json;
 using System.Text;
 using WepPartDeliveryProject;
@@ -36,11 +37,12 @@ builder.Services.AddCors(options =>
             policy.WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value)
             //.WithHeaders(HeaderNames.ContentType, HeaderNames.Cookie)
             .AllowAnyHeader()
-            .WithMethods("GET", "POST")
+            .AllowAnyMethod()
             .AllowCredentials();
-/*            policy.AllowAnyOrigin()
-                .AllowAnyHeader()
-                .AllowAnyMethod();*/
+            /*            policy.AllowAnyOrigin()
+                            .AllowAnyHeader()
+            .WithMethods("GET", "POST")
+                            .AllowAnyMethod();*/
         });
 });
 
@@ -64,6 +66,7 @@ services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
 })
     .AddJwtBearer(options =>
     {
@@ -77,8 +80,27 @@ services.AddAuthentication(options =>
             ValidateAudience = false,
             ValidateLifetime = true,
         };
+/*        options.Events = new JwtBearerEvents()
+        {
+            OnMessageReceived = context =>
+            {
+
+                if (context.Request.Cookies.ContainsKey("X-Access-Token"))
+                {
+                    context.Token = context.Request.Cookies["X-Access-Token"];
+                }
+
+                return Task.CompletedTask;
+            }
+        };*/
     });
 
+
+/*.AddCookie(cookieAuthOp => 
+{
+cookieAuthOp.Cookie = new CookieBuilder() { SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None, SecurePolicy = CookieSecurePolicy.Always };
+});
+*/
 services.AddAuthorization(options =>
 {
     options.AddPolicy("role-policy", x => { x.RequireClaim("role"); });
@@ -97,7 +119,7 @@ if (!app.Environment.IsDevelopment())
 //await app.Services.GetService<GeneratorService>().GenerateAll();
 //Отчасти костыль
 var graphClient = app.Services.GetService<IGraphClient>();
-graphClient.OperationCompleted += (sender, e) => app.Logger.LogInformation(e.QueryText.Replace("\r\n", ""));
+graphClient.OperationCompleted += (sender, e) => app.Logger.LogInformation(e.QueryText.Replace("\r\n", " "));
 
 app.UseSwagger();
 app.UseSwaggerUI(options =>
@@ -110,18 +132,18 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseHealthChecks("/healthcheck");
-
+app.Use(async (context, next) =>
+{
+    var req = context.User;
+    await next.Invoke();
+});
 app.UseCors();
 
 app.UseAuthentication();
 app.UseRouting();
 app.UseAuthorization();
 
-/*app.Use(async (context, next) =>
-{
-    var req = context.User;
-    await next.Invoke();
-});*/
+
 
 app.MapControllers();
 

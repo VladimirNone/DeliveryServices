@@ -20,9 +20,7 @@ const dishClientCard1 = {
   id: '2',
 }
 
-
-
-export const getStaticProps:GetStaticProps = async () =>{
+export const getStaticProps:GetStaticProps = async () => {
   const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getCategoriesList`);
   const data = await resp.json() as categoryItem[];
 

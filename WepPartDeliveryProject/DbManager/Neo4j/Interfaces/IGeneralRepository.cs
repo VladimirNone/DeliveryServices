@@ -132,13 +132,32 @@ namespace DbManager.Neo4j.Interfaces
         Task<List<TNode>> GetNodesWithoutRelation<TRelation>(int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
 
         /// <summary>
-        /// Get nodes with ids from params
+        /// Get nodes by property from params
         /// </summary>
-        /// <param name="ids">Node's ids to return</param>
+        /// <param name="nameOfProperty">Name of property, which will be use for search</param>
+        /// <param name="propertyValues">Values of property</param>
         /// <param name="skipCount">Count of nodes will skip</param>
         /// <param name="limitCount">Count of nodes will returner after skip</param>
         /// <param name="orderByProperty">Property names by which to sort. ONLY properties of TNode</param>
         /// <returns></returns>
-        Task<List<TNode>> GetNodesByIdAsync(string[] ids, int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
+        Task<List<TNode>> GetNodesByPropertyAsync(string nameOfProperty, string[] propertyValues, int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
+
+        /// <summary>
+        /// Set new type to node
+        /// </summary>
+        /// <typeparam name="TNewNodeType">New node type</typeparam>
+        /// <param name="nodeId">Id of node</param>
+        /// <returns></returns>
+        Task SetNewNodeType<TNewNodeType>(string nodeId)
+            where TNewNodeType : INode;
+
+        /// <summary>
+        /// Remove new type to node. If the node doesn't implement this type, then nothing will happen.
+        /// </summary>
+        /// <typeparam name="TNodeType">Node type which will be removed</typeparam>
+        /// <param name="nodeId">Id of node</param>
+        /// <returns></returns>
+        Task RemoveNodeType<TNodeType>(string nodeId)
+            where TNodeType : INode;
     }
 }

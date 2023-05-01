@@ -1,4 +1,5 @@
-﻿using DbManager.Neo4j.Interfaces;
+﻿using DbManager.Data.DTOs;
+using DbManager.Neo4j.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -16,7 +17,7 @@ public class JwtService
         configuration.GetSection("ApplicationSettings").Bind(_appSettings);
     }
 
-    public string GenerateJwtToken(string login, string role)
+    public JwtTokenInfoDTO GenerateAccessJwtToken(string userId, string role)
     {
         var secretKey = Encoding.ASCII.GetBytes(_appSettings.JwtSecretKey);
 
@@ -25,16 +26,16 @@ public class JwtService
         {
             Subject = new ClaimsIdentity(new Claim[]
             {
-                new Claim(ClaimTypes.Name, login),
+                new Claim(ClaimTypes.Sid, userId),
                 new Claim(ClaimTypes.Role, role),
             }),
-            Expires = DateTime.UtcNow.AddMinutes(15), // Время истечения токена
+            Expires = DateTime.Now.AddMinutes(30), // Время истечения токена
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKey), SecurityAlgorithms.HmacSha256Signature)
         };
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
         var tokenString = tokenHandler.WriteToken(token);
 
-        return tokenString;
+        return new JwtTokenInfoDTO { JwtToken = tokenString, ValidTo = token.ValidTo, RoleName = role };
     }
 }

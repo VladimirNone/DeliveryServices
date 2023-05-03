@@ -2,7 +2,6 @@ import { ChangeEvent, Component, FormEvent } from "react"
 import Link from 'next/link'
 import { Col, Form, Row, Container, Button } from "react-bootstrap";
 import { NextRouter, withRouter } from "next/router";
-import { AuthContext } from "@/components/contexts/Auth-context";
 
 type LoginState = {
     login: string,

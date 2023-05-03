@@ -12,11 +12,13 @@ namespace DbManager.Neo4j.DataGenerator
     {
         private readonly IRepositoryFactory _repoFactory;
         private readonly DataGenerator _dataGenerator;
+        private readonly IPasswordService _pswService;
 
-        public GeneratorService(IRepositoryFactory repositoryFactory, DataGenerator dataGenerator)
+        public GeneratorService(IRepositoryFactory repositoryFactory, IPasswordService passwordService, DataGenerator dataGenerator)
         {
             _repoFactory = repositoryFactory;
             _dataGenerator = dataGenerator;
+            _pswService = passwordService;
         }
 
         public async Task GenerateAll()
@@ -27,15 +29,36 @@ namespace DbManager.Neo4j.DataGenerator
             var orderStates = _dataGenerator.GenerateOrderStates();
             var dishes = _dataGenerator.GenerateDishes(30);
             var admins = _dataGenerator.GenerateAdmins(2);
+
+            var admin = admins[0];
+            admin.Login = "admin@admin";
+            admin.PasswordHash = _pswService.GetPasswordHash(admin.Login, "admin").ToList();
+
             var clients = _dataGenerator.GenerateClients(20);
+
+            var client = clients[0];
+            client.Login = "item@item";
+            client.PasswordHash = _pswService.GetPasswordHash(client.Login, "item").ToList();
+
             var deliveryMen = _dataGenerator.GenerateDeliveryMen(5);
+
+            var deliveryMan = deliveryMen[0];
+            deliveryMan.Login = "deliveryMan@deliveryMan";
+            deliveryMan.PasswordHash = _pswService.GetPasswordHash(deliveryMan.Login, "deliveryMan").ToList();
+
             var kitchenWorkers = _dataGenerator.GenerateKitchenWorkers(9);
+
+            var kitchenWorker = kitchenWorkers[0];
+            kitchenWorker.Login = "kitchenWorker@kitchenWorker";
+            kitchenWorker.PasswordHash = _pswService.GetPasswordHash(kitchenWorker.Login, "kitchenWorker").ToList();
+
             var kitchens = _dataGenerator.GenerateKitchens(3);
             var orders = _dataGenerator.GenerateOrders(30);
             var categories = _dataGenerator.GenerateCategories(6);
 
             //вставляем узлы в бд
             var orderRepo = _repoFactory.GetRepository<Order>();
+
             await orderRepo.AddNodesAsync(orders);
             await _repoFactory.GetRepository<Dish>().AddNodesAsync(dishes);
             await _repoFactory.GetRepository<Admin>().AddNodesAsync(admins);
@@ -44,9 +67,12 @@ namespace DbManager.Neo4j.DataGenerator
             await _repoFactory.GetRepository<KitchenWorker>().AddNodesAsync(kitchenWorkers);
             await _repoFactory.GetRepository<Kitchen>().AddNodesAsync(kitchens);
             await _repoFactory.GetRepository<OrderState>().AddNodesAsync(orderStates);
+            await _repoFactory.GetRepository<Category>().AddNodesAsync(categories);
 
             //генерируем связи между узлами. Последовательность важна!
-            var containsDishes = _dataGenerator.GenerateRelationsContainsDish(dishes.Count, categories, dishes);
+            //создаем новые списки, т.к. эти списки будут изменяться. 
+            //так, при генерации связи Ordered будут удаляться заказы из списка, чтобы они не дублировались
+            var containsDishes = _dataGenerator.GenerateRelationsContainsDish(dishes.Count, categories, new List<Dish>(dishes));
             var workedIns = _dataGenerator.GenerateRelationsWorkedIn(kitchenWorkers.Count, kitchens, new List<KitchenWorker>(kitchenWorkers));
             var cookedBies = _dataGenerator.GenerateRelationsCookedBy(orders.Count, new List<Order>(orders), kitchens);
             var deliveredBies = _dataGenerator.GenerateRelationsDeliveredBy(orders.Count, new List<Order>(orders), deliveryMen);
@@ -86,19 +112,32 @@ namespace DbManager.Neo4j.DataGenerator
             var finishedOrders = hasOrderStates.Where(h => ((OrderState)h.NodeTo).NumberOfStage == (int)OrderStateEnum.Finished).Select(h => (Order)h.NodeFrom).ToList();
 
             //Генерируем связь ReviewedBy между клиентами и ИХ заказами. Генерация только для завершенных заказов
-            foreach (var client in clients)
+            foreach (var item in clients)
             {
                 var orderedOrders = ordereds
-                    .Where(h => h.NodeFrom.Id == client.Id && finishedOrders.Contains((Order)h.NodeTo))
+                    .Where(h => h.NodeFrom.Id == item.Id && finishedOrders.Contains((Order)h.NodeTo))
                     .Select(h => (Order)h.NodeTo)
                     .ToList();
 
                 reviewedBies.AddRange(_dataGenerator
-                    .GenerateRelationsReviewedBy(orderedOrders.Count, new List<Order>(orderedOrders), new List<Client>() { client }));
+                    .GenerateRelationsReviewedBy(orderedOrders.Count, new List<Order>(orderedOrders), new List<Client>() { item }));
             }
 
             foreach (var item in reviewedBies)
                 await orderRepo.RelateNodesAsync(item);
+
+            foreach (var item in containsDishes)
+                await _repoFactory.GetRepository<Dish>().RelateNodesAsync(item);
+
+            //устанавливаем всем пользователям тип User
+            foreach (var item in admins)
+                await _repoFactory.GetRepository<Admin>().SetNewNodeType<User>(item.Id.ToString());
+            foreach (var item in clients)
+                await _repoFactory.GetRepository<Client>().SetNewNodeType<User>(item.Id.ToString());
+            foreach (var item in kitchenWorkers)
+                await _repoFactory.GetRepository<KitchenWorker>().SetNewNodeType<User>(item.Id.ToString());
+            foreach (var item in deliveryMen)
+                await _repoFactory.GetRepository<DeliveryMan>().SetNewNodeType<User>(item.Id.ToString());
         }
     }
 }

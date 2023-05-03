@@ -35,11 +35,14 @@ namespace WepPartDeliveryProject.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("test")]
-        public async Task<IActionResult> GetTestList()
+        [HttpGet("getDishesForMainPage")]
+        public async Task<IActionResult> GetTestList(int page = 0)
         {
+            var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesAsync(_appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
 
-            return Ok();
+            var pageEnded = dishes.Count() < 4;
+
+            return Ok(new { dishes = dishes.GetRange(0, dishes.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : dishes.Count), pageEnded });
         }
 
         [HttpGet("getCategoriesList")]
@@ -67,7 +70,7 @@ namespace WepPartDeliveryProject.Controllers
         public async Task<IActionResult> GetDishesList(string category)
         {
             var choicedCategory = Category.CategoriesFromDb.Single(h=>h.LinkName == category);
-            var categoryDishes = await _repositoryFactory.GetRepository<Category>().GetRelatedNodesAsync<ContainsDish, Dish>(choicedCategory, orderByProperty: "Name");
+            var categoryDishes = await _repositoryFactory.GetRepository<Category>().GetRelationsOfNodesAsync<ContainsDish, Dish>(choicedCategory, orderByProperty: "Name");
 
             return Ok(categoryDishes.Select(h=>h.NodeTo).ToList());
         }

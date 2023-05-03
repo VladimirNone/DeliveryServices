@@ -44,9 +44,11 @@ const Search: FC<{ categories: categoryItem[] }> = ({ categories }) => {
         if(resp.ok){
             setPage(page + 1);
             setDishes(dishes.concat(loadedData.dishes));
+            setPageEnded(loadedData.pageEnded);
         }
-
-        setPageEnded(loadedData.pageEnded);
+        else{
+          setPageEnded(true);
+        }
     }
 
     return (

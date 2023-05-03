@@ -3,6 +3,7 @@ import MainNavbar from "./Navbar";
 import Header from "./Header";
 import Footer from "./Footer";
 import React from "react";
+import { RoleContext } from "../contexts/RoleContext";
 
 type layoutProps = {
     children: ReactNode
@@ -10,23 +11,30 @@ type layoutProps = {
 
 const Layout:FC<layoutProps> = ({children}) =>  {
     const [isAuthed, setIsAuthed] = useState(false);
-    const [role, setRole] = useState("none");
+    const [role, setRole] = useState("User");
+
+    const DropJwtToken = () => {
+        setRole("User");
+        setIsAuthed(false);
+
+        localStorage.removeItem("jwtToken");
+        localStorage.removeItem("jwtTokenValidTo");
+    };
 
     const JwtTokenIsValid = ():boolean => {
-        const jwtTokenValidToNow: string | null = localStorage.getItem("jwtTokenValidTo");
+        const jwtTokenValidTo: string | null = localStorage.getItem("jwtTokenValidTo");
 
-        if(jwtTokenValidToNow == null || new Date(jwtTokenValidToNow) < new Date()){
-            setIsAuthed(false);
+        if(jwtTokenValidTo == null || new Date(jwtTokenValidTo) < new Date()){
             return false;
         }
 
-        setIsAuthed(true);
         return true;
     };
 
     const UpdateJwtToken = async () => {
-
-        if(JwtTokenIsValid())
+        //Если с jwt токеном все ок, то нет смысла его обновлять
+        //Если все плохо, то удаляем его
+        if(JwtTokenIsValid() && isAuthed != false)
             return;
 
         const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/auth/refreshAccessToken`, {
@@ -45,7 +53,7 @@ const Layout:FC<layoutProps> = ({children}) =>  {
             localStorage.setItem("jwtTokenValidTo", token.validTo.toString());
         }
         else{
-            setIsAuthed(false);
+            DropJwtToken();
         }
     }
 
@@ -55,9 +63,11 @@ const Layout:FC<layoutProps> = ({children}) =>  {
 
     return (
         <>
-            <Header isAuthed={isAuthed}/>
+            <Header isAuthed={isAuthed} dropJwtToken={DropJwtToken}/>
             <MainNavbar isAdmin={role == "Admin"} />
-            {children}
+            <RoleContext.Provider value = {{ isAdmin: role == "Admin"}}>
+                {children}
+            </RoleContext.Provider>
             <Footer />
         </>
     );

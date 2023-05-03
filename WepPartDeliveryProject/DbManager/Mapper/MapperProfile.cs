@@ -14,6 +14,8 @@ namespace DbManager.Mapper
             CreateMap<Admin, UserOutDTO>();
             CreateMap<KitchenWorker, UserOutDTO>();
 
+            CreateMap<Order, OrderOutDTO>();
+
 
         }
     }

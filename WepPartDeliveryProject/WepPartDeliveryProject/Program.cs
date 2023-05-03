@@ -82,27 +82,8 @@ services.AddAuthentication(options =>
             ValidateAudience = false,
             ValidateLifetime = true,
         };
-/*        options.Events = new JwtBearerEvents()
-        {
-            OnMessageReceived = context =>
-            {
-
-                if (context.Request.Cookies.ContainsKey("X-Access-Token"))
-                {
-                    context.Token = context.Request.Cookies["X-Access-Token"];
-                }
-
-                return Task.CompletedTask;
-            }
-        };*/
     });
 
-
-/*.AddCookie(cookieAuthOp => 
-{
-cookieAuthOp.Cookie = new CookieBuilder() { SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None, SecurePolicy = CookieSecurePolicy.Always };
-});
-*/
 services.AddAuthorization(options =>
 {
     options.AddPolicy("role-policy", x => { x.RequireClaim("role"); });

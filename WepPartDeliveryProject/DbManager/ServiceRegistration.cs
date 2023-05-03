@@ -54,7 +54,7 @@ namespace DbManager
 
             foreach (var category in Category.CategoriesFromDb)
             {
-                var categoryDishes = categoryRepo.GetRelatedNodesAsync<ContainsDish, Dish>(category).Result.Select(h=>(Dish)h.NodeTo);
+                var categoryDishes = categoryRepo.GetRelationsOfNodesAsync<ContainsDish, Dish>(category).Result.Select(h=>(Dish)h.NodeTo);
                 var pathToCategoryDir = Path.Combine(pathToDishesDir, category.LinkName);
 
                 foreach (var dish in categoryDishes)

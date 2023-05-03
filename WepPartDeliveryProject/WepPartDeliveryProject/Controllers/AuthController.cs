@@ -31,7 +31,7 @@ namespace WepPartDeliveryProject.Controllers
             _jwtService = jwtService;
         }
 
-        private void AddCookieDataToResponse(string RefreshToken, string RefreshTokenCreated, string? userId = null)
+        private void AddCookieDataToResponse(string RefreshToken, string? userId = null)
         {
             if(userId != null) 
             {
@@ -40,8 +40,6 @@ namespace WepPartDeliveryProject.Controllers
             }
 
             Response.Cookies.Append("X-Refresh-Token", RefreshToken,
-                        new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
-            Response.Cookies.Append("X-Refresh-Token-Created", RefreshTokenCreated,
                         new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
 
         }
@@ -64,7 +62,7 @@ namespace WepPartDeliveryProject.Controllers
 
                 await _repositoryFactory.GetRepository<User>().UpdateNodeAsync(user);
 
-                AddCookieDataToResponse(user.RefreshToken.ToString(), user.RefreshTokenCreated.ToString(), user.Id.ToString());
+                AddCookieDataToResponse(user.RefreshToken.ToString(), user.Id.ToString());
 
                 return Ok();
             }
@@ -96,7 +94,7 @@ namespace WepPartDeliveryProject.Controllers
 
                 await userRepo.UpdateNodeAsync(userNode);
 
-                AddCookieDataToResponse(userNode.RefreshToken.ToString(), userNode.RefreshTokenCreated.ToString());
+                AddCookieDataToResponse(userNode.RefreshToken.ToString());
                 
                 return Ok(jwtTokenInfo);
             }
@@ -114,25 +112,24 @@ namespace WepPartDeliveryProject.Controllers
                 Name = data.Login, 
                 RefreshToken = Guid.NewGuid(), 
                 RefreshTokenCreated = DateTime.Now, 
-                PasswordHash = _pswService.GetPasswordHash(data.Login, data.Password).ToList() 
+                PasswordHash = _pswService.GetPasswordHash(data.Login, data.Password).ToList(), 
             };
 
             await _repositoryFactory.GetRepository<User>().AddNodeAsync(user);
             await _repositoryFactory.GetRepository<User>().SetNewNodeType<Client>(user.Id.ToString());
 
-            AddCookieDataToResponse(user.RefreshToken.ToString(), user.RefreshTokenCreated.ToString(), user.Id.ToString());
+            AddCookieDataToResponse(user.RefreshToken.ToString(), user.Id.ToString());
 
             return Ok();
         }
 
+        [Authorize]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
             Response.Cookies.Delete("X-UserId",
                         new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
             Response.Cookies.Delete("X-Refresh-Token",
-                        new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
-            Response.Cookies.Delete("X-Refresh-Token-Created",
                         new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
 
             return Ok();

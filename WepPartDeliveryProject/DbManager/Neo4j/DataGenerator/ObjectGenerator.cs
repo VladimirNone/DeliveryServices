@@ -13,6 +13,26 @@ namespace DbManager.Neo4j.DataGenerator
 {
     internal static class ObjectGenerator
     {
+        private static List<string> CategoryNames = new List<string>
+        {
+            "Роллы",
+            "Напитки",
+            "Вторые блюда",
+            "Первые блюда",
+            "Салаты",
+            "Пицца",
+        };
+
+        private static Dictionary<string, string> CategoryLinks = new Dictionary<string, string>
+        {
+            { "Роллы", "Rolls" },
+            { "Напитки", "Drinks" },
+            { "Вторые блюда", "SecondMeal" },
+            { "Первые блюда", "FirstMeal" },
+            { "Салаты", "Salads" },
+            { "Пицца", "Pizza" },
+        };
+
         //----------------------------------------------GenerateNodes------------------------------------------------------------
 
         public static Faker<Dish> GenerateDish()
@@ -25,7 +45,8 @@ namespace DbManager.Neo4j.DataGenerator
 
         public static Faker<Category> GenerateCategory()
             => new Faker<Category>("ru")
-                .RuleFor(h => h.Name, g => g.Commerce.ProductName())
+                .RuleFor(h => h.Name, g => g.Random.ListItemWithRemove(CategoryNames))
+                .RuleFor(h => h.LinkName, (g, o) => CategoryLinks[o.Name])
                 .RuleFor(h => h.Description, g => g.Lorem.Paragraph());
 
         public static Faker<Order> GenerateOrder()

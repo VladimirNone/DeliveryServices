@@ -72,7 +72,7 @@ namespace DbManager.Neo4j.Interfaces
         /// <param name="limitCount">Count of nodes will returner after skip</param>
         /// <param name="orderByProperty">Property names by which to sort. ONLY properties of TRelation</param>
         /// <returns></returns>
-        Task<TRelation> GetRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+        Task<TRelation> GetRelationBetweenTwoNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
             where TRelation : IRelation
             where TRelatedNode : INode;
 
@@ -107,11 +107,24 @@ namespace DbManager.Neo4j.Interfaces
         /// <param name="limitCount">Count of nodes will returner after skip</param>
         /// <param name="orderByProperty">Property names by which to sort. ONLY properties of TRelatedNode</param>
         /// <returns>If target node don't have related nodes, will be returned empty lists</returns>
-        Task<List<TRelation>> GetRelatedNodesAsync<TRelation, TRelatedNode>
-            (TNode node, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+        Task<List<TRelation>> GetRelationsOfNodesAsync<TRelation, TRelatedNode> (TNode node, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
             where TRelation : IRelation
             where TRelatedNode : INode;
-        
+
+        /// <summary>
+        /// Get related nodes as List
+        /// </summary>
+        /// <typeparam name="TRelation">The type of searched relation</typeparam>
+        /// <typeparam name="TRelatedNode">The type of related nodes</typeparam>
+        /// <param name="nodeId">Node id, which have related nodes</param>
+        /// <param name="skipCount">Count of nodes will skip</param>
+        /// <param name="limitCount">Count of nodes will returner after skip</param>
+        /// <param name="orderByProperty">Property names by which to sort. ONLY properties of TRelatedNode</param>
+        /// <returns>If target node don't have related nodes, will be returned empty lists</returns>
+        Task<List<TRelation>> GetRelationsOfNodesAsync<TRelation, TRelatedNode>(string nodeId, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+            where TRelation : IRelation
+            where TRelatedNode : INode;
+
         /// <summary>
         /// Relate two existing nodes
         /// </summary>

@@ -89,13 +89,12 @@ namespace DbManager.Neo4j.Implementations
         public async Task DeleteNodeWithAllRelations(TNode node)
         {
             await dbContext.Cypher
-                .Match($"(entity:{typeof(TNode).Name} {{Id: $id}})-[rOut]->()")
-                .Match($"(entity)<-[rIn]-()")
+                .Match($"(entity:{typeof(TNode).Name} {{Id: $id}})-[r]-()")
                 .WithParams(new
                 {
                     id = node.Id,
                 })
-                .Delete("rOut, rIn, entity")
+                .Delete("r, entity")
                 .ExecuteWithoutResultsAsync();
         }
 
@@ -142,7 +141,7 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
-        public async Task<TRelation> GetRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+        public async Task<TRelation> GetRelationBetweenTwoNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
             where TRelation : IRelation
             where TRelatedNode : INode
         {
@@ -168,7 +167,7 @@ namespace DbManager.Neo4j.Implementations
             return res.First();
         }
 
-        public async Task<List<TRelation>> GetRelatedNodesAsync<TRelation, TRelatedNode>(TNode node, int? skipCount = null, int? limitCount = null, params string[] orderByProperty) 
+        public async Task<List<TRelation>> GetRelationsOfNodesAsync<TRelation, TRelatedNode>(TNode node, int? skipCount = null, int? limitCount = null, params string[] orderByProperty) 
             where TRelation: IRelation
             where TRelatedNode: INode
         {
@@ -201,6 +200,15 @@ namespace DbManager.Neo4j.Implementations
             }).ToList();
 
             return relations;
+        }
+
+        public async Task<List<TRelation>> GetRelationsOfNodesAsync<TRelation, TRelatedNode>(string nodeId, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+            where TRelation : IRelation
+            where TRelatedNode : INode 
+        {
+            var node = await GetNodeAsync(nodeId);
+
+            return await GetRelationsOfNodesAsync<TRelation, TRelatedNode>(node, skipCount, limitCount, orderByProperty);
         }
 
         public async Task DeleteRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode)
@@ -272,7 +280,7 @@ namespace DbManager.Neo4j.Implementations
             where TNewNodeType : INode
         {
             await dbContext.Cypher
-                .Merge($"(node:{typeof(TNode).Name} {{Id: $id}})")
+                .Match($"(node:{typeof(TNode).Name} {{Id: $id}})")
                 .Set($"node:{typeof(TNewNodeType).Name}")
                 .WithParams(new
                 {
@@ -285,7 +293,7 @@ namespace DbManager.Neo4j.Implementations
             where TNodeType : INode
         {
             await dbContext.Cypher
-                .Merge($"(node:{typeof(TNode).Name} {{Id: $id}})")
+                .Match($"(node:{typeof(TNode).Name} {{Id: $id}})")
                 .Remove($"node:{typeof(TNodeType).Name}")
                 .WithParams(new
                 {

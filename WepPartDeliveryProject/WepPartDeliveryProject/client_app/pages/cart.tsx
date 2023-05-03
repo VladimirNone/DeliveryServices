@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import { FC, useEffect, useState } from "react"
 import ClientLayout from '@/components/structure/ClientLayout'
-import { GetStaticProps, GetServerSideProps } from 'next'
+import { GetStaticProps } from 'next'
 import DishCartCard from '@/components/cards/DishCartCard'
 import { useCookies } from 'react-cookie'
 
@@ -44,8 +44,9 @@ const Cart: FC<{categories:categoryItem[]}> = ({categories}) => {
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/order/placeAnOrder`, {
         method: "POST",
+        credentials: "include",
         headers: {
-            'Content-Type': 'application/json;charset=utf-8'
+            'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
         }
     });
 
@@ -66,7 +67,7 @@ const Cart: FC<{categories:categoryItem[]}> = ({categories}) => {
       </Head>
       <main className='mb-2'>
         <div>
-          {dishes.map((dish, i) => <DishCartCard key={i} {...dish} DeleteCartFromList={handleDeleteItem}/>)}
+          {dishes.map((dish, i) => <DishCartCard key={i} {...dish} DeleteCardFromList={handleDeleteItem}/>)}
         </div>
         {dishes.length !=0 ? 
           (<div>

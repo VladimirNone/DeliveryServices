@@ -17,7 +17,7 @@ interface dishClientInfo {
 }
 
 interface dishCartInfo extends dishClientInfo {
-    DeleteCartFromList: (dishId:string)=>void,
+    DeleteCardFromList: (dishId:string)=>void,
 }
 
 interface dishListProps {
@@ -56,4 +56,27 @@ interface profileInfo {
 
     //Admin props
 
+}
+
+interface orderCardInfo {
+    id: string,
+    price: number,
+    sumWeight: number,
+    deliveryAddress: string,
+    DeleteCardFromList: (orderId:string)=>void,
+}
+
+interface orderedDishClientInfo {
+    count:number,
+    orderId:string,
+    dishInfo:dishCartInfo,
+}
+
+interface orderInfo {
+    order: orderCardInfo,
+    orderedDishes: orderedDishClientInfo[],
+}
+
+interface roleContextProps {
+    isAdmin: boolean,
 }

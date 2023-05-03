@@ -1,15 +1,28 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useContext, useState } from 'react';
 import { Card, Col, Row, Carousel, Image } from 'react-bootstrap';
 import styles from '@/styles/Home.module.css'
 import Link from 'next/link';
-import CounterCartDish from './components/CounterCartDish';
+import CounterOrderDish from './components/CounterOrderDish';
+import { RoleContext } from '../contexts/RoleContext';
 
-const DishCartCard: FC<dishCartInfo> = (dishInfo) => {
+const DishOrderCard: FC<orderedDishClientInfo> = ({count, dishInfo, orderId}) => {
     const [index, setIndex] = useState(0);
+    const roleContextData = useContext<roleContextProps>(RoleContext);
 
     const handleSelect = (selectedIndex: number):void => {
         setIndex(selectedIndex);
     };
+
+    const changeCountOrderedDish = async (dishId:string, newCount: number) =>{
+        const response = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/order/changeCountOrderedDish`, {
+            method: "POST",
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
+                'Content-Type': 'application/json;charset=utf-8',
+            },
+            body: JSON.stringify({newCount, orderId, dishId})
+        });
+    }
 
     return (
         <>
@@ -32,12 +45,21 @@ const DishCartCard: FC<dishCartInfo> = (dishInfo) => {
                                         <h3>{dishInfo.name}</h3>
                                     </Link>
                                 </Col>
-                                <Col><p className='text-start text-lg-center m-0'>Цена: {dishInfo.price}р</p></Col>
+                                <Col>
+                                    <Row >
+                                        <Col xs={12} >
+                                            <p className='text-start m-0'>Цена: {dishInfo.price}р</p>
+                                        </Col>
+                                        <Col xs={12} >
+                                            <p className='text-start m-0'>Стоимость: {dishInfo.price*count}р</p>
+                                        </Col>
+                                    </Row>
+                                </Col>
                             </Row>
                             <Card.Text>
                                 {dishInfo.description}
                             </Card.Text>
-                            <CounterCartDish dishId={dishInfo.id} cancelDish={dishInfo.DeleteCardFromList}/>
+                            {roleContextData.isAdmin && <CounterOrderDish dishId={dishInfo.id} cancelDish={dishInfo.DeleteCardFromList} changeCountDish={changeCountOrderedDish} countOrdered={count}/>}
                         </Card.Body>
                     </Col>
                 </Row>
@@ -46,5 +68,5 @@ const DishCartCard: FC<dishCartInfo> = (dishInfo) => {
     );
 }
 
-export default DishCartCard;
+export default DishOrderCard;
 

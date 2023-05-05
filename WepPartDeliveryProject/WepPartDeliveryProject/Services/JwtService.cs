@@ -17,7 +17,7 @@ public class JwtService
         configuration.GetSection("ApplicationSettings").Bind(_appSettings);
     }
 
-    public JwtTokenInfoDTO GenerateAccessJwtToken(string userId, string role)
+    public JwtTokenInfoOutDTO GenerateAccessJwtToken(string userId, List<string> roles)
     {
         var secretKey = Encoding.ASCII.GetBytes(_appSettings.JwtSecretKey);
 
@@ -27,15 +27,35 @@ public class JwtService
             Subject = new ClaimsIdentity(new Claim[]
             {
                 new Claim(ClaimTypes.Sid, userId),
-                new Claim(ClaimTypes.Role, role),
             }),
             Expires = DateTime.Now.AddMinutes(30), // Время истечения токена
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKey), SecurityAlgorithms.HmacSha256Signature)
         };
+        foreach (var role in roles)
+        {
+            tokenDescriptor.Subject.AddClaim(new Claim(ClaimTypes.Role, role));
+        }
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
         var tokenString = tokenHandler.WriteToken(token);
 
-        return new JwtTokenInfoDTO { JwtToken = tokenString, ValidTo = token.ValidTo, RoleName = role };
+        return new JwtTokenInfoOutDTO { JwtToken = tokenString, ValidTo = token.ValidTo, RoleNames = roles };
+    }
+
+    public bool UserHasRole(string? jwtToken, string roleName)
+    {
+        if(jwtToken== null)
+            return false;
+
+        var clearJwtToken = jwtToken.Replace("Bearer ", "");
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var token = tokenHandler.ReadJwtToken(clearJwtToken);
+
+        if (token.Payload.TryGetValue("role", out var userRoleName) && (string)userRoleName == roleName)
+        {
+            return true;
+        }
+
+        return false;
     }
 }

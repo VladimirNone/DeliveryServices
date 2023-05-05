@@ -279,9 +279,14 @@ namespace DbManager.Neo4j.Implementations
         public async Task SetNewNodeType<TNewNodeType>(string nodeId)
             where TNewNodeType : INode
         {
+            await SetNewNodeType(nodeId, typeof(TNewNodeType).Name);
+        }
+
+        public async Task SetNewNodeType(string nodeId, string nodeTypeName)
+        {
             await dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}})")
-                .Set($"node:{typeof(TNewNodeType).Name}")
+                .Set($"node:{nodeTypeName}")
                 .WithParams(new
                 {
                     id = nodeId,
@@ -292,14 +297,44 @@ namespace DbManager.Neo4j.Implementations
         public async Task RemoveNodeType<TNodeType>(string nodeId)
             where TNodeType : INode
         {
+            await RemoveNodeType(nodeId, typeof(TNodeType).Name);
+        }
+
+        public async Task RemoveNodeType(string nodeId, string nodeTypeName)
+        {
             await dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}})")
-                .Remove($"node:{typeof(TNodeType).Name}")
+                .Remove($"node:{nodeTypeName}")
                 .WithParams(new
                 {
                     id = nodeId,
                 })
                 .ExecuteWithoutResultsAsync();
+        }
+
+        public async Task<bool> HasNodeType<TNodeType>(string nodeId)
+            where TNodeType : INode
+        {
+            return await HasNodeType(nodeId, typeof(TNodeType).Name);
+        }
+
+        public async Task<bool> HasNodeType(string nodeId, string nodeType)
+        {
+            var result = await dbContext.Cypher
+                .Match($"(node:{typeof(User).Name} {{Id: $id}})")
+                .WithParams(new
+                {
+                    id = nodeId,
+                })
+                .ReturnDistinct<List<string>>("labels(node)")
+                .ResultsAsync;
+
+            var clearResult = result.First().ToList();
+
+            if (clearResult.Contains(nodeType))
+                return true;
+
+            return false;
         }
 
         /// <summary>

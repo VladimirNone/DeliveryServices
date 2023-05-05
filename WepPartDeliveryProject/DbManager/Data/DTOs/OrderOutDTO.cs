@@ -15,6 +15,6 @@ namespace DbManager.Data.DTOs
         public int SumWeight { get; set; }
         public string DeliveryAddress { get; set; }
 
-        public List<HasOrderState> Story { get; set; } = new List<HasOrderState>();
+        public List<OrderStateItemOutDTO> Story { get; set; } = new List<OrderStateItemOutDTO>();
     }
 }

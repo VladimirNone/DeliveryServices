@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DbManager.Data.DTOs
 {
-    public class ManipulateOrderDataDTO
+    public class ManipulateOrderDataInDTO
     {
         public int? NewCount { get; set; }
         public string? OrderId { get; set; }

@@ -3,7 +3,7 @@ import MainNavbar from "./Navbar";
 import Header from "./Header";
 import Footer from "./Footer";
 import React from "react";
-import { RoleContext } from "../contexts/RoleContext";
+import { AuthContext as AuthContext } from "../contexts/AuthContext";
 
 type layoutProps = {
     children: ReactNode
@@ -11,10 +11,10 @@ type layoutProps = {
 
 const Layout:FC<layoutProps> = ({children}) =>  {
     const [isAuthed, setIsAuthed] = useState(false);
-    const [role, setRole] = useState("User");
+    const [roles, setRoles] = useState(["User"]);
 
     const DropJwtToken = () => {
-        setRole("User");
+        setRoles(["User"]);
         setIsAuthed(false);
 
         localStorage.removeItem("jwtToken");
@@ -32,9 +32,9 @@ const Layout:FC<layoutProps> = ({children}) =>  {
     };
 
     const UpdateJwtToken = async () => {
+        //Если пользователь не авторизован и при этом
         //Если с jwt токеном все ок, то нет смысла его обновлять
-        //Если все плохо, то удаляем его
-        if(JwtTokenIsValid() && isAuthed != false)
+        if(JwtTokenIsValid() && isAuthed == true)
             return;
 
         const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/auth/refreshAccessToken`, {
@@ -44,9 +44,8 @@ const Layout:FC<layoutProps> = ({children}) =>  {
     
         if(resp.ok){
             const token = await resp.json() as jsonTokenInfo;
-//ВОТ ЭТО ПОД БОЛЬШИМ ВОПРОСОМ!!!!!!!!!!!!!
-//роль стоит получать также тут и к тому же, хранить ее в куки. куки защищены
-            setRole(token.roleName);
+
+            setRoles(token.roleNames);
             setIsAuthed(true);
 
             localStorage.setItem("jwtToken", token.jwtToken);
@@ -59,15 +58,15 @@ const Layout:FC<layoutProps> = ({children}) =>  {
 
     useEffect(() => {
         UpdateJwtToken();
-    });
+    },[isAuthed]);
 
     return (
         <>
             <Header isAuthed={isAuthed} dropJwtToken={DropJwtToken}/>
-            <MainNavbar isAdmin={role == "Admin"} />
-            <RoleContext.Provider value = {{ isAdmin: role == "Admin"}}>
+            <MainNavbar isAdmin={roles.includes("Admin")} />
+            <AuthContext.Provider value = {{ isAdmin: roles.includes("Admin"), isAuth: isAuthed, toggleIsAuthed: () => setIsAuthed(true)}}>
                 {children}
-            </RoleContext.Provider>
+            </AuthContext.Provider>
             <Footer />
         </>
     );

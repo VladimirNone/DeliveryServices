@@ -1,5 +1,6 @@
 ﻿using DbManager.Data;
 using DbManager.Data.Nodes;
+using DbManager.Data.Relations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace DbManager.Neo4j.Interfaces
         Task<List<Order>> GetOrdersByState(string kitchenId, string nameOfState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
         Task<List<Order>> GetOrdersByState(string kitchenId, OrderStateEnum orderState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
         Task<List<Order>> GetOrdersByState(Guid kitchenId, Guid orderStateId, int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
-        Task MoveOrderToNextStage(string orderId, string comment);
+        Task<HasOrderState?> MoveOrderToNextStage(string orderId, string comment);
+        Task MoveOrderToPreviousStage(string orderId);
     }
 }

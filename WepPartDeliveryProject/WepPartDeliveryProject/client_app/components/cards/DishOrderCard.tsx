@@ -3,11 +3,11 @@ import { Card, Col, Row, Carousel, Image } from 'react-bootstrap';
 import styles from '@/styles/Home.module.css'
 import Link from 'next/link';
 import CounterOrderDish from './components/CounterOrderDish';
-import { RoleContext } from '../contexts/RoleContext';
+import { AuthContext } from '../contexts/AuthContext';
 
 const DishOrderCard: FC<orderedDishClientInfo> = ({count, dishInfo, orderId}) => {
     const [index, setIndex] = useState(0);
-    const roleContextData = useContext<roleContextProps>(RoleContext);
+    const roleContextData = useContext<authContextProps>(AuthContext);
 
     const handleSelect = (selectedIndex: number):void => {
         setIndex(selectedIndex);

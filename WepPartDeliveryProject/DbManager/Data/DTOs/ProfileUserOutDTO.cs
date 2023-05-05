@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DbManager.Data.DTOs
 {
-    public class UserOutDTO
+    public class ProfileUserOutDTO
     {
         public string Login { get; set; }
         public string PhoneNumber { get; set; }

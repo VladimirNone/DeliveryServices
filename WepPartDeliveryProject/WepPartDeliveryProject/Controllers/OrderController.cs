@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using DbManager.Data.Relations;
 using AutoMapper;
+using DbManager.Neo4j.Implementations;
 
 namespace WepPartDeliveryProject.Controllers
 {
@@ -18,8 +19,9 @@ namespace WepPartDeliveryProject.Controllers
         private readonly IRepositoryFactory _repositoryFactory;
         private readonly ApplicationSettings _appSettings;
         private readonly IMapper _mapper;
+        private readonly JwtService _jwtService;
 
-        public OrderController(IRepositoryFactory repositoryFactory, IConfiguration configuration, IMapper mapper)
+        public OrderController(IRepositoryFactory repositoryFactory, IConfiguration configuration, IMapper mapper, JwtService jwtService)
         {
             // Fetch settings object from configuration
             _appSettings = new ApplicationSettings();
@@ -27,6 +29,7 @@ namespace WepPartDeliveryProject.Controllers
 
             _repositoryFactory = repositoryFactory;
             _mapper = mapper;
+            _jwtService = jwtService;
         }
 
         [AllowAnonymous]
@@ -71,7 +74,7 @@ namespace WepPartDeliveryProject.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost("changeCountOrderedDish")]
-        public async Task<IActionResult> ChangeCountOrderedDish(ManipulateOrderDataDTO inputData)
+        public async Task<IActionResult> ChangeCountOrderedDish(ManipulateOrderDataInDTO inputData)
         {
             var order = await _repositoryFactory.GetRepository<Order>().GetNodeAsync(inputData.OrderId);
 
@@ -79,15 +82,21 @@ namespace WepPartDeliveryProject.Controllers
 
             var orderedDish = await _repositoryFactory.GetRepository<Dish>().GetRelationBetweenTwoNodesAsync<OrderedDish, Order>(dish, order);
 
+            order.Price -= orderedDish.Count * dish.Price;
+
             orderedDish.Count = (int)inputData.NewCount;
+
+            order.Price += orderedDish.Count * dish.Price;
+
+            await _repositoryFactory.GetRepository<Order>().UpdateNodeAsync(order);
 
             await _repositoryFactory.GetRepository<Order>().UpdateRelationNodesAsync(orderedDish);
 
             return Ok();
         }
 
-        [HttpGet("getOrderList")]
-        public async Task<IActionResult> GetOrderList(int page = 0)
+        [HttpGet("getClientOrders")]
+        public async Task<IActionResult> GetClientOrders(int page = 0)
         {
             var userId = Request.Cookies["X-UserId"];
             if (userId == null)
@@ -96,7 +105,7 @@ namespace WepPartDeliveryProject.Controllers
             }
 
             var ordereds = await _repositoryFactory.GetRepository<Client>().GetRelationsOfNodesAsync<Ordered, Order>(userId);
-            var orders = ordereds.Select(h => (Order)h.NodeTo).ToList();
+            var orders = ordereds.Select(h => _mapper.Map<OrderOutDTO>((Order)h.NodeTo)).ToList();
 
             return Ok(orders);
         }
@@ -104,19 +113,32 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getOrder/{orderId}")]
         public async Task<IActionResult> GetOrder(string orderId)
         {
-            var userId = Request.Cookies["X-UserId"];
-            if (userId == null)
+            Order? searchedOrder;
+            if (_jwtService.UserHasRole(Request.Headers.Authorization.FirstOrDefault(), "Admin"))
             {
-                return BadRequest("You don't have refresh token. You need to login or signup to system");
+                searchedOrder = await _repositoryFactory.GetRepository<Order>().GetNodeAsync(orderId);
+            }
+            else
+            {
+                var userId = Request.Cookies["X-UserId"];
+
+                if (userId == null)
+                {
+                    return BadRequest("You don't have refresh token. You need to login or signup to system");
+                }
+
+                var ordereds = await _repositoryFactory.GetRepository<Client>().GetRelationsOfNodesAsync<Ordered, Order>(userId);
+                searchedOrder = (Order)ordereds.SingleOrDefault(h => h.NodeToId.ToString() == orderId)?.NodeTo;
             }
 
-            var ordereds = await _repositoryFactory.GetRepository<Client>().GetRelationsOfNodesAsync<Ordered, Order>(userId);
-            var searchedOrder = ordereds.SingleOrDefault(h => h.NodeToId.ToString() == orderId);
-            if(searchedOrder != null)
+            if (searchedOrder != null)
             {
-                var orderedDishes = await _repositoryFactory.GetRepository<Order>().GetRelationsOfNodesAsync<OrderedDish, Dish>((Order)searchedOrder.NodeTo);
+                var orderedDishes = await _repositoryFactory.GetRepository<Order>().GetRelationsOfNodesAsync<OrderedDish, Dish>(searchedOrder);
 
-                return Ok(new { order = _mapper.Map<OrderOutDTO>(searchedOrder.NodeTo), orderedDishes = orderedDishes.Select(h=> new {count = h.Count, dishInfo = h.NodeTo}) });
+                var preparedOrder = _mapper.Map<OrderOutDTO>(searchedOrder);
+                preparedOrder.Story = _mapper.Map<List<OrderStateItemOutDTO>>(searchedOrder.Story);
+
+                return Ok(new { order = preparedOrder, orderedDishes = orderedDishes.Select(h=> new {count = h.Count, dishInfo = h.NodeTo}) });
             }
 
             return BadRequest("Запрашиваемый заказ не доступен данному пользователю или не существует");
@@ -124,11 +146,17 @@ namespace WepPartDeliveryProject.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost("cancelOrderedDish")]
-        public async Task<IActionResult> CancelOrderedDish(ManipulateOrderDataDTO inputData)
+        public async Task<IActionResult> CancelOrderedDish(ManipulateOrderDataInDTO inputData)
         {
             var order = await _repositoryFactory.GetRepository<Order>().GetNodeAsync(inputData.OrderId);
 
             var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(inputData.DishId);
+
+            var orderedDish = await _repositoryFactory.GetRepository<Dish>().GetRelationBetweenTwoNodesAsync<OrderedDish, Order>(dish, order);
+
+            order.Price -= orderedDish.Count * dish.Price;
+
+            await _repositoryFactory.GetRepository<Order>().UpdateNodeAsync(order);
 
             await _repositoryFactory.GetRepository<Order>().DeleteRelationOfNodesAsync<OrderedDish, Dish>(order, dish);
 
@@ -137,11 +165,34 @@ namespace WepPartDeliveryProject.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost("cancelOrder")]
-        public async Task<IActionResult> CancelOrder(ManipulateOrderDataDTO inputData)
+        public async Task<IActionResult> CancelOrder(ManipulateOrderDataInDTO inputData)
         {
             var order = await _repositoryFactory.GetRepository<Order>().GetNodeAsync(inputData.OrderId);
 
             await _repositoryFactory.GetRepository<Order>().DeleteNodeWithAllRelations(order);
+
+            return Ok();
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("moveToNextStage")]
+        public async Task<IActionResult> MoveToNextStage(ManipulateOrderDataInDTO inputData)
+        {
+            var orderRepo = (IOrderRepository) _repositoryFactory.GetRepository<Order>(true);
+            var newHasOrderState = await orderRepo.MoveOrderToNextStage(inputData.OrderId, "Изменено администрацией");
+
+            if(newHasOrderState != null){
+                return Ok(_mapper.Map<OrderStateItemOutDTO>(newHasOrderState));
+            }
+            return BadRequest("Заказ находится на финальной стадии и его состояние не может перейти на следующую стадию");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("moveToPreviousStage")]
+        public async Task<IActionResult> MoveToPreviousStage(ManipulateOrderDataInDTO inputData)
+        {
+            var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>(true);
+            await orderRepo.MoveOrderToPreviousStage(inputData.OrderId);
 
             return Ok();
         }

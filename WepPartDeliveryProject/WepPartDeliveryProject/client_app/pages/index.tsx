@@ -44,7 +44,7 @@ const Home: FC<homePageProps> = ({categories, dishesProps, pageEndedProps}) => {
     else{
       setPageEnded(true);
     }
-}
+  }
 
   return (
     <ClientLayout categories={categories}>

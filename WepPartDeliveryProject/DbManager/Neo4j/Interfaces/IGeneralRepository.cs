@@ -165,6 +165,14 @@ namespace DbManager.Neo4j.Interfaces
             where TNewNodeType : INode;
 
         /// <summary>
+        /// Set new type to node
+        /// </summary>
+        /// <param name="nodeId">Id of node</param>
+        /// <param name="nodeTypeName">Node type which will be new</param>
+        /// <returns></returns>
+        Task SetNewNodeType(string nodeId, string nodeTypeName);
+
+        /// <summary>
         /// Remove new type to node. If the node doesn't implement this type, then nothing will happen.
         /// </summary>
         /// <typeparam name="TNodeType">Node type which will be removed</typeparam>
@@ -172,5 +180,30 @@ namespace DbManager.Neo4j.Interfaces
         /// <returns></returns>
         Task RemoveNodeType<TNodeType>(string nodeId)
             where TNodeType : INode;
+
+        /// <summary>
+        /// Remove new type to node. If the node doesn't implement this type, then nothing will happen.
+        /// </summary>
+        /// <param name="nodeId">Id of node</param>
+        /// <param name="nodeTypeName">Node type which will be removed</param>
+        /// <returns></returns>
+        Task RemoveNodeType(string nodeId, string nodeTypeName);
+
+        /// <summary>
+        /// Return true if node is node type "TNodeType", false if not.
+        /// </summary>
+        /// <typeparam name="TNodeType">Node type which will searched</typeparam>
+        /// <param name="nodeId">Id of node</param>
+        /// <returns></returns>
+        Task<bool> HasNodeType<TNodeType>(string nodeId)
+            where TNodeType : INode;
+
+        /// <summary>
+        /// Return true if node is node type "TNodeType", false if not.
+        /// </summary>
+        /// <param name="nodeId">Id of node</param>
+        /// <param name="nodeTypeName">Node type which will searched</param>
+        /// <returns></returns>
+        Task<bool> HasNodeType(string nodeId, string nodeTypeName);
     }
 }

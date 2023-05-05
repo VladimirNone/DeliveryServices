@@ -47,7 +47,7 @@ namespace DbManager.Neo4j.Implementations
             return maxPriRole;
         }
 
-        public async Task<string> GetUserRole(string userId)
+        public async Task<List<string>> GetUserRoles(string userId)
         {
             var result = await dbContext.Cypher
                 .Match($"(node:{typeof(User).Name} {{Id: $id}})")
@@ -60,7 +60,7 @@ namespace DbManager.Neo4j.Implementations
 
             var clearResult = result.First().ToList();
 
-            return GetMaxPriorityRole(clearResult);
+            return clearResult;
         }
     }
 }

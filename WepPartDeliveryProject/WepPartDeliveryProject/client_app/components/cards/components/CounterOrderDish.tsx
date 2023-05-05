@@ -1,6 +1,5 @@
 import React, { FC, useState } from 'react';
 import styles from '@/styles/Home.module.css'
-import { useCookies } from 'react-cookie';
 import { Col, Row } from 'react-bootstrap';
 
 interface CounterOrderDishProps { 

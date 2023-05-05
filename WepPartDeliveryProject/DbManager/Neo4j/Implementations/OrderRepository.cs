@@ -55,25 +55,47 @@ namespace DbManager.Neo4j.Implementations
             return res.ToList();
         }
 
-
-        public async Task MoveOrderToNextStage(string orderId, string comment)
+        public async Task<HasOrderState?> MoveOrderToNextStage(string orderId, string comment)
         {
             var order = await GetNodeAsync(Guid.Parse(orderId));
             var orderHasState = order.Story.Last();
             var orderState = OrderState.OrderStatesFromDb.Single(h => h.Id == orderHasState.NodeToId);
-            if ((OrderStateEnum)orderState.NumberOfStage == OrderStateEnum.Cancelled)
-                return;
+            //Если заказ был отменен или завершен, то ничего не произойдет
+            if ((OrderStateEnum)orderState.NumberOfStage == OrderStateEnum.Cancelled || (OrderStateEnum)orderState.NumberOfStage == OrderStateEnum.Finished)
+                return null;
 
             await DeleteRelationOfNodesAsync<HasOrderState, OrderState>(order, orderState);
             var newOrderState = new HasOrderState() 
             {
                 Comment = comment, 
                 NodeFromId = order.Id, 
-                NodeToId = OrderState.OrderStatesFromDb.Single(h => h.NumberOfStage == orderState.NumberOfStage * 2).Id, 
+                NodeToId = OrderState.OrderStatesFromDb.Single(h => h.NumberOfStage == orderState.NumberOfStage * 2).Id,
                 TimeStartState = DateTime.Now 
             };
 
             order.Story.Add(newOrderState);
+            await RelateNodesAsync(newOrderState);
+            await UpdateNodeAsync(order);
+
+            newOrderState.NodeTo = OrderState.OrderStatesFromDb.Single(h => h.NumberOfStage == orderState.NumberOfStage * 2);
+
+            return newOrderState;
+        }
+
+        public async Task MoveOrderToPreviousStage(string orderId)
+        {
+            var order = await GetNodeAsync(Guid.Parse(orderId));
+            var orderHasState = order.Story.Last();
+            var orderState = OrderState.OrderStatesFromDb.Single(h => h.Id == orderHasState.NodeToId);
+            //Если заказ только попал в очередь
+            if ((OrderStateEnum)orderState.NumberOfStage == OrderStateEnum.InQueue)
+                return;
+            
+            await DeleteRelationOfNodesAsync<HasOrderState, OrderState>(order, orderState);
+            order.Story.Remove(orderHasState);
+
+            var newOrderState = order.Story.Last();
+
             await RelateNodesAsync(newOrderState);
             await UpdateNodeAsync(order);
         }

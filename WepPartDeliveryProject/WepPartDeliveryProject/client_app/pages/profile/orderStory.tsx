@@ -32,7 +32,7 @@ const OrderStory: FC<{ categories: categoryItem[] }> = ({ categories }) => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/order/getOrderList`, {
+            const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/order/getClientOrders`, {
                 credentials: 'include',
                 headers: {
                     'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
@@ -46,7 +46,7 @@ const OrderStory: FC<{ categories: categoryItem[] }> = ({ categories }) => {
 
     return (
         <ClientLayout categories={categories}>
-            {orders.map((order, i)=> <OrderCard key={i} {...order} DeleteCardFromList={handleDeleteItem}/>)}
+            {orders.map((order, i)=> <OrderCard key={i} {...order} DeleteOrder={handleDeleteItem}/>)}
         </ClientLayout>
     );
 }

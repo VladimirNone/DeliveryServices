@@ -1,11 +1,11 @@
-import { RoleContext } from "@/components/contexts/RoleContext";
+import { AuthContext } from "@/components/contexts/AuthContext";
 import Link from "next/link";
 import { FC, useContext, useEffect, useState } from "react";
 import { Card, Col, Container, Row } from "react-bootstrap";
 
 const ProfileInfo: FC = () => {
     const [profile, setProfileInfo] = useState<profileInfo>({ login: "", name: "", bonuses: null, born: null, jobTitle: null, phoneNumber: null });
-    const roleContextData = useContext<roleContextProps>(RoleContext);
+    const roleContextData = useContext<authContextProps>(AuthContext);
 
     useEffect(() => {
         const fetchData = async () => {

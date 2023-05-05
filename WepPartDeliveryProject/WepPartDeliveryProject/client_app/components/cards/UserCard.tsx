@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { AuthContext } from '../contexts/AuthContext';
 import OrderStateItem from './components/OrderStateItem';
 
-const OrderCard: FC<orderCardInfo> = (orderInfo) => {
+const UserCard: FC<orderCardInfo> = (orderInfo) => {
     const roleContextData = useContext<authContextProps>(AuthContext);
     const [showStory, setShowStory] = useState(false);
 
@@ -66,5 +66,5 @@ const OrderCard: FC<orderCardInfo> = (orderInfo) => {
     );
 }
 
-export default OrderCard;
+export default UserCard;
 

@@ -3,16 +3,8 @@ using DbManager.Data.DTOs;
 using DbManager.Data.Nodes;
 using DbManager.Neo4j.Interfaces;
 using DbManager.Services;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
-using System.Security.Claims;
 
 namespace WepPartDeliveryProject.Controllers
 {
@@ -45,7 +37,7 @@ namespace WepPartDeliveryProject.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(UserLoginDTO data)
+        public async Task<IActionResult> Login(UserLoginInDTO data)
         {
             var users = await _repositoryFactory.GetRepository<User>().GetNodesByPropertyAsync("Login", new[] { data.Login });
             if(users.Count != 1)
@@ -86,9 +78,9 @@ namespace WepPartDeliveryProject.Controllers
             var userNode = await userRepo.GetNodeAsync(userId);
             if(inputRefreshToken == userNode.RefreshToken.ToString() && userNode.RefreshTokenCreated.AddDays(60) > DateTime.Now)
             {
-                var userRoleAsString = await userRepo.GetUserRole(userId);
+                var userRoles = await userRepo.GetUserRoles(userId);
 
-                var jwtTokenInfo = _jwtService.GenerateAccessJwtToken(userId, userRoleAsString);
+                var jwtTokenInfo = _jwtService.GenerateAccessJwtToken(userId, userRoles);
 
                 userNode.RefreshTokenCreated = DateTime.Now;
 
@@ -105,7 +97,7 @@ namespace WepPartDeliveryProject.Controllers
         }
 
         [HttpPost("signup")]
-        public async Task<IActionResult> Signup(UserLoginDTO data)
+        public async Task<IActionResult> Signup(UserLoginInDTO data)
         {
             var user = new User() { 
                 Login = data.Login, 

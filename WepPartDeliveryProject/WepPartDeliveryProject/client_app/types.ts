@@ -34,12 +34,7 @@ interface categoryItem {
 interface jsonTokenInfo {
     jwtToken: string,
     validTo: Date,
-    roleName: string,
-}
-
-interface authContextProps {
-    JwtTokenIsValid: () => boolean,
-    UpdateJwtToken: () => Promise<void>,
+    roleNames: string[],
 }
 
 interface profileInfo {
@@ -63,7 +58,10 @@ interface orderCardInfo {
     price: number,
     sumWeight: number,
     deliveryAddress: string,
-    DeleteCardFromList: (orderId:string)=>void,
+    DeleteOrder: (orderId:string)=>void,
+    MoveOrderToNextStage: (orderId:string, orderStateId:string)=>void,
+    MoveOrderToPreviousStage: (orderId:string, orderStateId:string)=>void,
+    story?: orderState[],
 }
 
 interface orderedDishClientInfo {
@@ -77,6 +75,17 @@ interface orderInfo {
     orderedDishes: orderedDishClientInfo[],
 }
 
-interface roleContextProps {
+interface authContextProps {
     isAdmin: boolean,
+    isAuth: boolean,
+    toggleIsAuthed: ()=>void,
+}
+
+interface orderState {
+    timeStartState: Date,
+    comment: string,
+    orderStateId: string,
+    numberOfStage: number,
+    nameOfState: string,
+    descriptionForClient: string,
 }

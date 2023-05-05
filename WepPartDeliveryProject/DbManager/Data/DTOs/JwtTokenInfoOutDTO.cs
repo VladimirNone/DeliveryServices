@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace DbManager.Data.DTOs
 {
-    public class JwtTokenInfoDTO
+    public class JwtTokenInfoOutDTO
     {
         public string JwtToken { get; set; }
         public DateTime ValidTo { get; set; }
-        public string RoleName { get; set; }
+        public List<string> RoleNames { get; set; }
     }
 }

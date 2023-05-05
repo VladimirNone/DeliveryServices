@@ -96,7 +96,7 @@ namespace WepPartDeliveryProject.Controllers
                 return BadRequest("You don't have refresh token. You need to login or signup to system");
             }
 
-            var user = _mapper.Map<UserOutDTO>(await _repositoryFactory.GetRepository<User>().GetNodeAsync(userId));
+            var user = _mapper.Map<ProfileUserOutDTO>(await _repositoryFactory.GetRepository<User>().GetNodeAsync(userId));
 
             return Ok(user);
         }

@@ -12,7 +12,8 @@ namespace DbManager.Data.Nodes
         public string Description { get; set; }
         public double Price { get; set; }
         public int Weight { get; set; }
-        public bool IsAvailable { get; set; }
+        public bool IsAvailableForUser { get; set; }
+        public bool IsDeleted { get; set; }
         /// <summary>
         /// Images of product. First image is main
         /// </summary>

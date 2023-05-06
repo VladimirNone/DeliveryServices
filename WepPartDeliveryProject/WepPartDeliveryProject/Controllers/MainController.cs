@@ -38,6 +38,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getDishesForMainPage")]
         public async Task<IActionResult> GetTestList(int page = 0)
         {
+            //обычному пользователю не должен быть доступен удаленный или недоступный продукт
             var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesAsync(_appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
 
             var pageEnded = dishes.Count() < 4;
@@ -55,6 +56,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getDishIds")]
         public async Task<IActionResult> GetDishIds()
         {
+            //обычному пользователю не должен быть доступен удаленный или недоступный продукт
             var dishIds = (await _repositoryFactory.GetRepository<Dish>().GetNodesAsync()).Select(h=>h.Id).ToList();
             return Ok(dishIds);
         }
@@ -63,12 +65,14 @@ namespace WepPartDeliveryProject.Controllers
         public async Task<IActionResult> GetDish(Guid id)
         {
             var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(id);
+            //обычному пользователю не должен быть доступен удаленный или недоступный продукт
             return Ok(dish);
         }
 
         [HttpGet("getDishesList/{category}")]
         public async Task<IActionResult> GetDishesList(string category)
         {
+            //обычному пользователю не должен быть доступен удаленный или недоступный продукт
             var choicedCategory = Category.CategoriesFromDb.Single(h=>h.LinkName == category);
             var categoryDishes = await _repositoryFactory.GetRepository<Category>().GetRelationsOfNodesAsync<ContainsDish, Dish>(choicedCategory, orderByProperty: "Name");
 
@@ -78,6 +82,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getSearchedDishes")]
         public async Task<IActionResult> GetCart(string searchText, int page = 0)
         {
+            //обычному пользователю не должен быть доступен удаленный или недоступный продукт
             var dishes = await ((IDishRepository)_repositoryFactory.GetRepository<Dish>(true))
                 .SearchDishesByNameAndDescription(searchText, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
 

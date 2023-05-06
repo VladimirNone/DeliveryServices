@@ -31,6 +31,9 @@ namespace DbManager.Mapper
 
             CreateMap<Order, OrderOutDTO>()
                 .ForMember(dest => dest.Story, opt => opt.MapFrom(src => src.Story));
+
+            CreateMap<Dish, ManipulateDishDataInDTO>();
+            CreateMap<ManipulateDishDataInDTO, Dish>();
         }
     }
 }

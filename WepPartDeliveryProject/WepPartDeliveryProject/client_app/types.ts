@@ -16,6 +16,11 @@ interface dishClientInfo {
     id: string,
 }
 
+interface dishAdminInfo extends dishClientInfo{
+    isDeleted: boolean,
+    isAvailableForUser: boolean,
+}
+
 interface dishCartInfo extends dishClientInfo {
     DeleteCardFromList: (dishId:string)=>void,
 }

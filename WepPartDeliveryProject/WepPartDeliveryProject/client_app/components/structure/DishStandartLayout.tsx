@@ -11,7 +11,7 @@ const DishStandartLayout: FC<{ dishInfo: dishClientInfo, children: ReactNode }> 
     };
 
     return (
-        <Card>
+        <Card className='mt-1'>
             <Row className='g-0'>
                 <Col xs={12} sm={5} md={4} lg={3}>
                     <Carousel activeIndex={index} onSelect={handleSelect}>

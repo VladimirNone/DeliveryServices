@@ -20,16 +20,16 @@ const HorizontalMenuItems: Array<linkPanelItem> = [
 
 const AdminPanelMenuItems: Array<linkPanelItem> = [
   { 
-    itemName:"Добавить блюдо",
-    itemHref: "/admin/",
-  },
-  { 
     itemName:"Статистика",
-    itemHref: "/admin/",
+    itemHref: "/admin/statistics",
   },
   { 
     itemName:"Карта",
-    itemHref: "/admin/",
+    itemHref: "/admin/map",
+  },
+  { 
+    itemName:"Блюда",
+    itemHref: "/admin/dishes",
   },
   { 
     itemName:"Заказы",

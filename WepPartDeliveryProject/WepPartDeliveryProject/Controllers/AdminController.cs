@@ -41,6 +41,17 @@ namespace WepPartDeliveryProject.Controllers
             return Ok(new { orders = ordersDTOs.GetRange(0, ordersDTOs.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : ordersDTOs.Count), pageEnded });
         }
 
+        [HttpGet("getDishes")]
+        public async Task<IActionResult> GetDishes(string searchText = "", int page = 0)
+        {
+            var dishes = await ((IDishRepository)_repositoryFactory.GetRepository<Dish>(true))
+                .SearchDishesByNameAndDescription(searchText, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
+
+            var pageEnded = dishes.Count() < 4;
+
+            return Ok(new { dishes = dishes.GetRange(0, dishes.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : dishes.Count), pageEnded });
+        }
+
         [HttpGet("getUsers")]
         public async Task<IActionResult> GetUsers(string searchText = "", int page = 0)
         {
@@ -123,6 +134,62 @@ namespace WepPartDeliveryProject.Controllers
             }
 
             return Ok();
+        }
+
+        [HttpPost("changeDeleteStatusOfDish")]
+        public async Task<IActionResult> ChangeDeleteStatusOfDish(ManipulateDishDataInDTO inputData)
+        {
+            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(inputData.Id);
+            if (dish == null)
+            {
+                return BadRequest("Данные о блюде не обнаружены");
+            }
+
+            dish.IsDeleted = !dish.IsDeleted;
+            await _repositoryFactory.GetRepository<Dish>().UpdateNodeAsync(dish);
+
+            return Ok(dish.IsDeleted);
+        }
+
+        [HttpPost("changeVisibleStatusOfDish")]
+        public async Task<IActionResult> ChangeVisibleStatusOfDish(ManipulateDishDataInDTO inputData)
+        {
+            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(inputData.Id);
+            if (dish == null)
+            {
+                return BadRequest("Данные о блюде не обнаружены");
+            }
+
+            dish.IsAvailableForUser = !dish.IsAvailableForUser;
+            await _repositoryFactory.GetRepository<Dish>().UpdateNodeAsync(dish);
+
+            return Ok(dish.IsAvailableForUser);
+        }
+
+        [HttpPost("changeDish")]
+        public async Task<IActionResult> ChangeDish(ManipulateDishDataInDTO inputData)
+        {
+            var dishToChange = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(inputData.Id);
+            if(dishToChange == null)
+            {
+                return BadRequest("Данные о блюде не обнаружены");
+            }
+
+            _mapper.Map(inputData, dishToChange);
+
+            await _repositoryFactory.GetRepository<Dish>().UpdateNodeAsync(dishToChange);
+
+            return Ok();
+        }
+
+        [HttpPost("createDish")]
+        public async Task<IActionResult> CreateDish(ManipulateDishDataInDTO inputData)
+        {
+            var dish = _mapper.Map<Dish>(inputData);
+
+            await _repositoryFactory.GetRepository<Dish>().AddNodeAsync(dish);
+
+            return Ok(dish.Id);
         }
     }
 }

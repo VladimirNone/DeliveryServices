@@ -71,11 +71,7 @@ const Order: FC<{ categories: categoryItem[]}> = ({ categories }) => {
                     'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
                 }, 
             });
-
-            if(!resp.ok){
-                router.push("/profile/orderStory");
-            }
-
+            
             const orderInfo = await resp.json() as orderInfo;
             setOrderInfo(orderInfo);
         }

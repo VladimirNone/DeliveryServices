@@ -38,10 +38,13 @@ interface jsonTokenInfo {
 }
 
 interface profileInfo {
+    id: string | null,
     login:string,
     phoneNumber:string | null,
     name:string,
-    born:Date | null,
+    born:string | null,
+    isBlocked: boolean | null,
+    roles: string | null,
 
     // Client props
     bonuses:number | null,

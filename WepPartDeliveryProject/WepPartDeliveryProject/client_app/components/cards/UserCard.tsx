@@ -1,65 +1,68 @@
-import React, { FC, useContext, useState } from 'react';
-import { Card, Col, Row, Button } from 'react-bootstrap';
-import Link from 'next/link';
-import { AuthContext } from '../contexts/AuthContext';
-import OrderStateItem from './components/OrderStateItem';
+import React, { FC, ReactElement, useEffect, useState } from 'react';
+import { Card, Col, Row, Button, Form } from 'react-bootstrap';
 
-const UserCard: FC<orderCardInfo> = (orderInfo) => {
-    const roleContextData = useContext<authContextProps>(AuthContext);
-    const [showStory, setShowStory] = useState(false);
-
-    const handleCancelClick = (): void => {
-        orderInfo.DeleteOrder(orderInfo.id);
-    }
+const UserCard: FC<{userInfo: profileInfo, markUser: (userId:string)=>void, unmarkUser: (userId:string)=>void, }> = ({userInfo, markUser, unmarkUser}) => {
+    const [showMoreInfo, setShowMoreInfo] = useState(false);
+    const [unmarked, setUnmarked] = useState(true);
 
     const handleShowStoryClick = (): void => {
-        setShowStory(!showStory);
+        setShowMoreInfo(!showMoreInfo);
     }
 
-    const handleMoveToNextOrderStage = ():void => {
-        const orderStory = orderInfo.story as orderState[];
-        orderInfo.MoveOrderToNextStage(orderInfo.id, orderStory[orderStory.length - 1].orderStateId)
-    }
-
-    const handleMoveToPreviousOrderStage = ():void => {
-        const orderStory = orderInfo.story as orderState[];
-        orderInfo.MoveOrderToPreviousStage(orderInfo.id, orderStory[orderStory.length - 1].orderStateId)
+    const handleClickToCheckBox = ():void => {
+        if(unmarked){
+            markUser(userInfo.id as string);
+        }
+        else{
+            unmarkUser(userInfo.id as string);
+        }
+        setUnmarked(!unmarked);
     }
 
     return (
         <>
             <Card className="mt-2 bg-light">
                 <Row className="g-0 align-items-center">
-                    <Col className="col-md">
                         <Card.Body>
-                            <Card.Title>Номер заказа: {orderInfo.id}</Card.Title>
-                            <Card.Text>Стоимость:{orderInfo.price}</Card.Text>
-                            <Card.Text>Адрес доставки: {orderInfo.deliveryAddress}</Card.Text>
-                            {orderInfo.story != null && <Card.Text>Статус: {orderInfo.story[orderInfo.story.length-1].nameOfState}</Card.Text>}
-                            <Row className='d-flex justify-content-center'>
-                                <Col className='col-10 col-lg-auto me-lg-auto mt-2'>
-                                    <Link href={(roleContextData.isAdmin ? '/admin':'/profile') + "/order?orderId=" + orderInfo.id} className='btn btn-secondary w-100'>Посмотреть детали</Link>
+                            <Row className='d-flex justify-content-start'>
+                                <Col xs={12} lg='auto' className='mt-1'>
+                                    <Card.Title>Id: {userInfo.id}</Card.Title>
                                 </Col>
-                                {roleContextData.isAdmin && <Col className='col-10 col-lg-auto mt-2'>
-                                        <Button className='btn btn-danger w-100' onClick={handleCancelClick}>Отменить</Button>
-                                    </Col>}
-                                <Col className='col-10 col-lg-auto mt-2'>
-                                    <Button className='btn btn-secondary w-100' onClick={handleShowStoryClick}>{showStory ? 'Скрыть':'Показать'} историю заказа</Button>
+                                <Col xs={12} lg='auto' className='mt-1 me-auto'>
+                                    <Card.Text className='m-0'>Роли пользователя: {userInfo.roles}</Card.Text>
                                 </Col>
-                                {showStory && orderInfo.story?.map((value,i)=><OrderStateItem key={i} {...value}/>)}
-                                {showStory && roleContextData.isAdmin && 
-                                    <Row className='d-flex justify-content-center'>
-                                        <Col className='col-auto mt-2'>
-                                            <Button className='btn btn-danger w-100' onClick={handleMoveToPreviousOrderStage}>Вернуть к предыдущей стадии</Button>
-                                        </Col>
-                                        <Col className='col-auto mt-2'>
-                                            <Button className='btn btn-danger w-100' onClick={handleMoveToNextOrderStage}>Перевести в следующую стадию</Button>
-                                        </Col>
-                                    </Row>
-                                }
+                                <Col xs={12} lg='auto' className='mt-1 d-flex justify-content-end me-auto '>
+                                    <Form className='d-flex justify-content-end'>
+                                        <Form.Check reverse type="switch" onClick={handleClickToCheckBox} label="Выбрать пользователя"/>
+                                    </Form>
+                                </Col>
                             </Row>
+                            <Row className='d-flex justify-content-start'>
+                                <Col xs={12} lg='auto' className='me-lg-auto mt-1'>
+                                    <Card.Text>Логин пользователя: {userInfo.login}</Card.Text>
+                                </Col>
+                                {userInfo.isBlocked && 
+                                    <Col xs={12} lg='auto' className='mt-1'>
+                                        <Card.Text className='text-danger'>Заблокирован</Card.Text>
+                                    </Col>}
+                                <Col xs={12} lg='auto' className='mt-1'>
+                                    <Button className='btn btn-secondary w-100' onClick={handleShowStoryClick}>{showMoreInfo ? 'Скрыть':'Показать'} подробную информацию</Button>
+                                </Col>
+                            </Row>
+                            {showMoreInfo && 
+                                <Row className='d-flex justify-content-start'>
+                                    <Col md='auto' className='mt-1'>
+                                        <Card.Text>Имя: {userInfo.name}</Card.Text>
+                                    </Col>
+                                    <Col md='auto' className='mt-1'>
+                                        <Card.Text>Дата рождения: {new Date(userInfo.born as string).toLocaleDateString()}</Card.Text>
+                                    </Col>
+                                    <Col md='auto' className='mt-1'>
+                                        <Card.Text>Номер телефона: {userInfo.phoneNumber}</Card.Text>
+                                    </Col>
+                                </Row>
+                            }
                         </Card.Body>
-                    </Col>
                 </Row>
             </Card>
         </>

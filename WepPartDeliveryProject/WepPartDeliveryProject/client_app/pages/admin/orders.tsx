@@ -16,7 +16,6 @@ export const getStaticProps: GetStaticProps = async () => {
 
 const AdminOrders: FC<{categories:categoryItem[]}> = ({ categories }) => {
     const [orders, setOrders] = useState<orderCardInfo[]>([]);
-    //нулевая страница загружается при переходе на страницу
     const [page, setPage] = useState(0);
     const [pageEnded, setPageEnded] = useState(true);
 
@@ -62,7 +61,7 @@ const AdminOrders: FC<{categories:categoryItem[]}> = ({ categories }) => {
         }
     }
 
-    const handleShowMoreDishes = async  () => {
+    const handleShowMoreOrders = async  () => {
         const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/admin/getOrders?page=${page}`, {
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
@@ -78,7 +77,7 @@ const AdminOrders: FC<{categories:categoryItem[]}> = ({ categories }) => {
         else{
             setPageEnded(true);
         }
-      }
+    }
 
     const handleDeleteItem = async (orderId:string) => {
         setOrders(prevOrders => prevOrders.filter(el => el.id != orderId ));
@@ -95,15 +94,15 @@ const AdminOrders: FC<{categories:categoryItem[]}> = ({ categories }) => {
 
     useEffect(()=>{
         if(page == 0){
-            handleShowMoreDishes();
+            handleShowMoreOrders();
         }
-    });
+    }, [page]);
 
     return (
         <ClientLayout categories={categories}>
             {orders.map((order, i)=> <OrderCard key={i} {...order} DeleteOrder={handleDeleteItem} MoveOrderToPreviousStage={handleMoveOrderToPreviousStage} MoveOrderToNextStage={handleMoveOrderToNextStage}/>)}
             {!pageEnded && (<div>
-                    <button className='btn btn-primary w-100 mt-2' onClick={handleShowMoreDishes}>
+                    <button className='btn btn-primary w-100 mt-2' onClick={handleShowMoreOrders}>
                         Показать больше
                     </button>
                 </div>)

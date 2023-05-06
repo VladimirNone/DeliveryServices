@@ -2,8 +2,7 @@ import React, { FC } from 'react';
 import CounterCartDish from './components/CounterCartDish';
 import DishStandartLayout from '../structure/DishStandartLayout';
 
-const DishCartCard: FC<dishCartInfo> = (dishInfo) => {
-
+const DishAdminCard: FC<dishCartInfo> = (dishInfo) => {
     return (
         <DishStandartLayout dishInfo={dishInfo}>
             <CounterCartDish dishId={dishInfo.id} cancelDish={dishInfo.DeleteCardFromList}/>
@@ -11,5 +10,5 @@ const DishCartCard: FC<dishCartInfo> = (dishInfo) => {
     );
 }
 
-export default DishCartCard;
+export default DishAdminCard;
 

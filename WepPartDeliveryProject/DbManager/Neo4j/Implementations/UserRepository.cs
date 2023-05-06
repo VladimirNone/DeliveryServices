@@ -1,4 +1,5 @@
 ﻿using DbManager.Data;
+using DbManager.Data.DTOs;
 using DbManager.Data.Nodes;
 using DbManager.Neo4j.Interfaces;
 using Neo4jClient;
@@ -61,6 +62,68 @@ namespace DbManager.Neo4j.Implementations
             var clearResult = result.First().ToList();
 
             return clearResult;
+        }
+
+        public async Task<List<(User, List<string>)>> GetUsersForAdmin(int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+        {
+            for (int i = 0; i < orderByProperty.Length; i++)
+                orderByProperty[i] = "node." + orderByProperty[i];
+
+            var res = await dbContext.Cypher
+                .Match($"(node:{typeof(User).Name})")
+                .With("node, labels(node) as roles")
+                .Return((node, roles) => new
+                {
+                    user = node.As<User>(),
+                    userRoles = roles.As<List<string>>()
+                })
+                .ChangeQueryForPaginationAnonymousType(orderByProperty, skipCount, limitCount)
+                .ResultsAsync;
+
+            return res.Select(h=>(h.user, h.userRoles)).ToList();
+        }
+
+        public async Task<List<(User, List<string>)>> SearchUsersByIdAndLoginForAdmin(string searchText, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+        {
+            for (int i = 0; i < orderByProperty.Length; i++)
+                orderByProperty[i] = "node." + orderByProperty[i];
+
+            var res = await dbContext.Cypher
+                .Match($"(node:{typeof(User).Name})")
+                .Where($"toLower(node.Id) contains($searchText) or toLower(node.Login) contains($searchText)")
+                .WithParams(new
+                {
+                    searchText
+                })
+                .With("node, labels(node) as roles")
+                .Return((node, roles) => new
+                {
+                    user = node.As<User>(),
+                    userRoles = roles.As<List<string>>()
+                })
+                .ChangeQueryForPaginationAnonymousType(orderByProperty, skipCount, limitCount)
+                .ResultsAsync;
+
+            return res.Select(h => (h.user, h.userRoles)).ToList();
+        }
+
+        public async Task<List<User>> SearchUsersByIdAndLogin(string searchText, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+        {
+            for (int i = 0; i < orderByProperty.Length; i++)
+                orderByProperty[i] = "node." + orderByProperty[i];
+
+            var res = await dbContext.Cypher
+                .Match($"(node:{typeof(User).Name})")
+                .Where($"toLower(node.Id) contains($searchText) or toLower(node.Login) contains($searchText)")
+                .WithParams(new
+                {
+                    searchText
+                })
+                .Return((node) => node.As<User>())
+                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount)
+                .ResultsAsync;
+
+            return res.ToList();
         }
     }
 }

@@ -15,6 +15,10 @@ namespace DbManager.Mapper
             CreateMap<Admin, ProfileUserOutDTO>();
             CreateMap<KitchenWorker, ProfileUserOutDTO>();
 
+            CreateMap<User, UserForAdminOutDTO>();
+            CreateMap<List<string>, UserForAdminOutDTO>()
+                .ForMember(h => h.Roles, opt => opt.MapFrom(src => string.Join(", ", src)));
+
             CreateMap<OrderState, OrderStateItemOutDTO>()
                 .ForMember(h=>h.OrderStateId, (o) => o.MapFrom(src=>src.Id));
 

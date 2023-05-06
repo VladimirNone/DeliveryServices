@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react';
 import styles from '@/styles/Home.module.css'
 import { useCookies } from 'react-cookie';
-import { Col, Row } from 'react-bootstrap';
+import { Button, Col, Row } from 'react-bootstrap';
 
 
 const CounterCartDish: FC<{ dishId: string, cancelDish: (dishId: string) => void }> = ({ dishId, cancelDish }) => {
@@ -33,29 +33,29 @@ const CounterCartDish: FC<{ dishId: string, cancelDish: (dishId: string) => void
         <>
             <Row className='d-flex justify-content-end pe-md-3'>
                 <Col xs={12} md={4} className='d-flex justify-content-md-start justify-content-center mt-2'>
-                    <button onClick={handleCancelClick} className={`btn btn-danger me-2`}>
+                    <Button onClick={handleCancelClick} className={`btn btn-danger me-2`}>
                         Отменить
-                    </button>
+                    </Button>
                 </Col>
                 <Col xs={12} md={4} className='mt-2'>
                     <Row className='d-flex justify-content-md-end justify-content-center'>
-                        <button onClick={() => handleChangeCountClick(1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>
+                        <Button onClick={() => handleChangeCountClick(1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>
                             +
-                        </button>
+                        </Button>
                         <div className={`d-flex align-items-center justify-content-center ${styles.cardCountBtnAndP}`}>
                             <p className='m-0'>
                                 {count}
                             </p>
                         </div>
-                        <button onClick={() => handleChangeCountClick(-1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>
+                        <Button onClick={() => handleChangeCountClick(-1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>
                             -
-                        </button>
+                        </Button>
                     </Row>
                 </Col>
                 <Col xs={12} md={4} className='d-flex justify-content-md-start justify-content-center mt-2'>
-                    <button className='btn btn-primary' onClick={changeCountDishToCookies}>
+                    <Button className='btn btn-primary' onClick={changeCountDishToCookies}>
                         Изменить количество
-                    </button>
+                    </Button>
                 </Col>
             </Row>
         </>

@@ -9,6 +9,6 @@ namespace DbManager.Data.DTOs
     public class ManipulateUserDataInDTO
     {
         public string UserId { get; set; }
-        public string ChangeRole { get; set; }
+        public string? ChangeRole { get; set; }
     }
 }

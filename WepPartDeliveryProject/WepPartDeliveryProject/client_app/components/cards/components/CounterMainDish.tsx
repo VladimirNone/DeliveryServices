@@ -1,6 +1,7 @@
 import React, { FC, useState } from 'react';
 import styles from '@/styles/Home.module.css'
 import { useCookies } from 'react-cookie';
+import { Button } from 'react-bootstrap';
 
 
 const CounterMainDish: FC<{dishId: string}> = ({dishId}) => {
@@ -30,20 +31,20 @@ const CounterMainDish: FC<{dishId: string}> = ({dishId}) => {
     return (
         <>
             <div className='d-flex justify-content-end pe-md-3'>
-                <button onClick={() => handleClick(1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>
+                <Button onClick={() => handleClick(1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>
                     +
-                </button>
+                </Button>
                 <div className={`d-flex align-items-center justify-content-center ${styles.cardCountBtnAndP}`}>
                     <p className='m-0'>
                         {count}
                     </p>
                 </div>
-                <button onClick={() => handleClick(-1)} className={`btn btn-secondary me-2 ${styles.cardCountBtnAndP}`}>
+                <Button onClick={() => handleClick(-1)} className={`btn btn-secondary me-2 ${styles.cardCountBtnAndP}`}>
                     -
-                </button>
-                <button className='btn btn-primary' onClick={addCountDishToCookies}>
+                </Button>
+                <Button className='btn btn-primary' onClick={addCountDishToCookies}>
                     Добавить в корзину
-                </button>
+                </Button>
             </div>
         </>
     );

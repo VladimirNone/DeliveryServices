@@ -10,5 +10,6 @@ namespace DbManager.Data
         public DateTime? Born { get; set; }
         public Guid RefreshToken { get; set; }
         public DateTime RefreshTokenCreated { get; set; }
+        public bool IsBlocked { get; set; }
     }
 }

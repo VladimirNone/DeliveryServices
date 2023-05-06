@@ -47,6 +47,11 @@ namespace WepPartDeliveryProject.Controllers
 
             var user = users[0];
 
+            if (user.IsBlocked)
+            {
+                return BadRequest("Ваш аккаунт был заблокирован!");
+            }
+
             if(_pswService.CheckPassword(data.Login, data.Password, user.PasswordHash.ToArray()))
             {
                 user.RefreshToken = Guid.NewGuid();
@@ -76,7 +81,13 @@ namespace WepPartDeliveryProject.Controllers
             var inputRefreshToken = Request.Cookies["X-Refresh-Token"];
 
             var userNode = await userRepo.GetNodeAsync(userId);
-            if(inputRefreshToken == userNode.RefreshToken.ToString() && userNode.RefreshTokenCreated.AddDays(60) > DateTime.Now)
+
+            if (userNode.IsBlocked)
+            {
+                return BadRequest("Ваш аккаунт был заблокирован!");
+            }
+
+            if (inputRefreshToken == userNode.RefreshToken.ToString() && userNode.RefreshTokenCreated.AddDays(60) > DateTime.Now)
             {
                 var userRoles = await userRepo.GetUserRoles(userId);
 

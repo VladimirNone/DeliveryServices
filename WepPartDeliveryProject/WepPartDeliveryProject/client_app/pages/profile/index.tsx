@@ -4,8 +4,8 @@ import { FC, useContext, useEffect, useState } from "react";
 import { Card, Col, Container, Row } from "react-bootstrap";
 
 const ProfileInfo: FC = () => {
-    const [profile, setProfileInfo] = useState<profileInfo>({ login: "", name: "", bonuses: null, born: null, jobTitle: null, phoneNumber: null });
-    const roleContextData = useContext<authContextProps>(AuthContext);
+    const [profile, setProfileInfo] = useState<profileInfo>({ id: null, login: "", name: "", isBlocked:null, bonuses: null, born: null, jobTitle: null, phoneNumber: null, roles: null });
+    const authContextData = useContext<authContextProps>(AuthContext);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -37,7 +37,7 @@ const ProfileInfo: FC = () => {
                                 <p className="fonts">Consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. </p>
                             </div>
                             <div className="buttons">
-                                {!roleContextData.isAdmin && <Link href="/profile/orderStory" className="btn btn-outline-primary px-4">История заказов</Link>}
+                                {!authContextData.isAdmin && <Link href="/profile/orderStory" className="btn btn-outline-primary px-4">История заказов</Link>}
                                 <button className="btn btn-primary px-4 ms-3">Contacts</button>
                             </div>
                         </div>

@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace WepPartDeliveryProject.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     [Route("[controller]")]
     [ApiController]
     public class AdminController : Controller
@@ -42,47 +42,87 @@ namespace WepPartDeliveryProject.Controllers
         }
 
         [HttpGet("getUsers")]
-        public async Task<IActionResult> GetUsers(int page = 0)
+        public async Task<IActionResult> GetUsers(string searchText = "", int page = 0)
         {
-            var users = await _repositoryFactory.GetRepository<User>().GetNodesAsync(_appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1);
+            var usersAsTuples = await ((IUserRepository)_repositoryFactory.GetRepository<User>(true)).SearchUsersByIdAndLoginForAdmin(searchText, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1);
 
-            var pageEnded = users.Count() < 4;
+            var rightUsers = usersAsTuples.Select(h => _mapper.Map(h.Item2, _mapper.Map<UserForAdminOutDTO>(h.Item1))).ToList();
+            
+            var pageEnded = rightUsers.Count() < 4;
 
-            return Ok(new { users = users.GetRange(0, users.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : users.Count), pageEnded });
+            return Ok(new { users = rightUsers.GetRange(0, rightUsers.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : rightUsers.Count), pageEnded });
         }
 
         [HttpGet("getRoles")]
         public IActionResult GetRoles()
         {
-            return Ok(((IUserRepository)_repositoryFactory.GetRepository<User>()).UserRolePriority.Keys.ToList());
+            return Ok(((IUserRepository)_repositoryFactory.GetRepository<User>(true)).UserRolePriority.Keys.ToList());
         }
 
         [HttpPost("addUserRole")]
-        public async Task<IActionResult> AddUserRole(ManipulateUserDataInDTO inputData)
+        public async Task<IActionResult> AddUserRole(List<ManipulateUserDataInDTO> inputData)
         {
-            var user = await _repositoryFactory.GetRepository<User>().GetNodeAsync(inputData.UserId);
-            if(await _repositoryFactory.GetRepository<User>().HasNodeType(user.Id.ToString(), inputData.ChangeRole))
-            {
-                return BadRequest("Пользователь уже имеет роль " + inputData.ChangeRole);
-            }
+            var userRepo = (IUserRepository)_repositoryFactory.GetRepository<User>(true);
+            var usersDicrionary = (await userRepo.GetNodesByPropertyAsync("Id", inputData.Select(h => h.UserId).ToArray())).ToDictionary(h => h.Id.ToString());
 
-            await _repositoryFactory.GetRepository<User>().SetNewNodeType(user.Id.ToString(), inputData.ChangeRole);
+            foreach (var manipulateUsersData in inputData)
+            {
+                //на тот случай, если не все id верно переданы
+                if (usersDicrionary.TryGetValue(manipulateUsersData.UserId, out var user))
+                {
+                    await _repositoryFactory.GetRepository<User>().SetNewNodeType(user.Id.ToString(), manipulateUsersData.ChangeRole);
+                }
+
+            }
 
             return Ok();
         }
 
         [HttpPost("removeUserRole")]
-        public async Task<IActionResult> RemoveUserRole(ManipulateUserDataInDTO inputData)
+        public async Task<IActionResult> RemoveUserRole(List<ManipulateUserDataInDTO> inputData)
         {
-            var user = await _repositoryFactory.GetRepository<User>().GetNodeAsync(inputData.UserId);
-            if (await _repositoryFactory.GetRepository<User>().HasNodeType(user.Id.ToString(), inputData.ChangeRole))
-            {
-                await _repositoryFactory.GetRepository<User>().RemoveNodeType(user.Id.ToString(), inputData.ChangeRole);
+            var userRepo = (IUserRepository)_repositoryFactory.GetRepository<User>(true);
+            var usersDicrionary = (await userRepo.GetNodesByPropertyAsync("Id", inputData.Select(h => h.UserId).ToArray())).ToDictionary(h=>h.Id.ToString());
 
-                return Ok();
+            foreach (var manipulateUsersData in inputData)
+            {
+                //на тот случай, если не все id верно переданы
+                if(usersDicrionary.TryGetValue(manipulateUsersData.UserId, out var user))
+                {
+                    await _repositoryFactory.GetRepository<User>().RemoveNodeType(user.Id.ToString(), manipulateUsersData.ChangeRole);
+                }
+
             }
 
-            return BadRequest("Пользователь еще не имеет роль " + inputData.ChangeRole);
+            return Ok();
+        }
+
+        [HttpPost("blockUsers")]
+        public async Task<IActionResult> BlockUsers(List<ManipulateUserDataInDTO> inputData)
+        {
+            var userRepo = (IUserRepository)_repositoryFactory.GetRepository<User>(true);
+            var users = await userRepo.GetNodesByPropertyAsync("Id", inputData.Select(h=>h.UserId).ToArray());
+            foreach (var user in users)
+            {
+                user.IsBlocked = true;
+                await userRepo.UpdateNodeAsync(user);
+            }
+
+            return Ok();
+        }
+
+        [HttpPost("unblockUsers")]
+        public async Task<IActionResult> UnblockUsers(List<ManipulateUserDataInDTO> inputData)
+        {
+            var userRepo = (IUserRepository)_repositoryFactory.GetRepository<User>(true);
+            var users = await userRepo.GetNodesByPropertyAsync("Id", inputData.Select(h => h.UserId).ToArray());
+            foreach (var user in users)
+            {
+                user.IsBlocked = false;
+                await userRepo.UpdateNodeAsync(user);
+            }
+
+            return Ok();
         }
     }
 }

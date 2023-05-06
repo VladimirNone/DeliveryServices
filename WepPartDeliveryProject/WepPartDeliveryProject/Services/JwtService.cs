@@ -1,6 +1,8 @@
-﻿using DbManager.Data.DTOs;
+﻿using AutoMapper.Configuration.Annotations;
+using DbManager.Data.DTOs;
 using DbManager.Neo4j.Interfaces;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -51,7 +53,9 @@ public class JwtService
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.ReadJwtToken(clearJwtToken);
 
-        if (token.Payload.TryGetValue("role", out var userRoleName) && (string)userRoleName == roleName)
+        var userRolesName = token.Claims.Where(h => h.Type == "role").ToList();
+
+        if (userRolesName.Any(h=>h.Value == roleName))
         {
             return true;
         }

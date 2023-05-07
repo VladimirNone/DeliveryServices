@@ -3,6 +3,7 @@ import { FC, MouseEvent } from "react"
 import { Button, Col, Container, NavbarBrand } from "react-bootstrap";
 import styles from '@/styles/Home.module.css'
 import { useRouter } from "next/router";
+import Image from "next/image";
 
 const Header: FC<{isAuthed: boolean, dropJwtToken: () => void}> = ({isAuthed, dropJwtToken}) => {
     const router = useRouter();
@@ -31,21 +32,21 @@ const Header: FC<{isAuthed: boolean, dropJwtToken: () => void}> = ({isAuthed, dr
             <Col sm={5} md={6} className="d-flex justify-content-center align-items-center">
                 <Link href="/">
                     <NavbarBrand>
-                        My Brand!
+                        <Image src="/2_logo.svg" alt="logo" width={220} height={80}/>
                     </NavbarBrand>
                 </Link>
             </Col>
-            <Col sm={7} md={6} className="d-flex justify-content-end">
-                <div className={`col-${isAuthed ? '4' : '6'} col-sm-4 p-1 ${styles.headerButton}`}>
-                    <Link href='/cart'>
-                        <Button className="w-100">Корзина</Button>
+            <Col sm={7} md={6} className="d-flex justify-content-end align-items-center">
+                <Col xs={isAuthed ? 4 : 6} sm={4} className={`p-1 ${styles.headerButton}`}>
+                    <Link href='/cart' className="btn btn-primary w-100">
+                        Корзина
                     </Link>
-                </div>
+                </Col>
                 { isAuthed ? 
                     <>
                         <Col xs={4} sm={4} className={`p-1 ${styles.headerButton}`}>
-                            <Link href='/profile'>
-                                <Button className="w-100">Профиль</Button>
+                            <Link href='/profile' className="btn btn-primary w-100">
+                                Профиль
                             </Link>
                         </Col>
                         <Col xs={4} sm={4} className={`p-1 ${styles.headerButton}`}>
@@ -54,8 +55,8 @@ const Header: FC<{isAuthed: boolean, dropJwtToken: () => void}> = ({isAuthed, dr
                     </>
                     :
                     <Col xs={6} sm={8} className={`p-1 ${styles.headerButton}`}>
-                        <Link href='/login'>
-                            <Button className="w-100 text-nowrap">Войти/Регистрация</Button>
+                        <Link href='/login' className="btn btn-primary w-100 text-nowrap">
+                            Войти/Регистрация
                         </Link>
                     </Col>
                 }

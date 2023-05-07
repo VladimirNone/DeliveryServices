@@ -5,8 +5,9 @@ using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Neo4j.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+
 
 namespace WepPartDeliveryProject.Controllers
 {
@@ -17,6 +18,7 @@ namespace WepPartDeliveryProject.Controllers
     {
         private readonly IRepositoryFactory _repositoryFactory;
         private readonly ApplicationSettings _appSettings;
+        private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
 
         public AdminController(IRepositoryFactory repositoryFactory, IConfiguration configuration, IMapper mapper)
@@ -25,6 +27,7 @@ namespace WepPartDeliveryProject.Controllers
             _appSettings = new ApplicationSettings();
             configuration.GetSection("ApplicationSettings").Bind(_appSettings);
 
+            _configuration = configuration;
             _repositoryFactory = repositoryFactory;
             _mapper = mapper;
         }
@@ -50,6 +53,15 @@ namespace WepPartDeliveryProject.Controllers
             var pageEnded = dishes.Count() < 4;
 
             return Ok(new { dishes = dishes.GetRange(0, dishes.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : dishes.Count), pageEnded });
+        }
+
+        [HttpGet("getDish/{id}")]
+        public async Task<IActionResult> GetDish(Guid id)
+        {
+            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(id);
+            var dishCategory = await _repositoryFactory.GetRepository<Dish>().GetRelationsOfNodesAsync<ContainsDish, Category>(dish);
+
+            return Ok(new { dish, category = dishCategory.First().NodeFrom });
         }
 
         [HttpGet("getUsers")]
@@ -139,7 +151,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpPost("changeDeleteStatusOfDish")]
         public async Task<IActionResult> ChangeDeleteStatusOfDish(ManipulateDishDataInDTO inputData)
         {
-            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(inputData.Id);
+            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(inputData.Id.ToString());
             if (dish == null)
             {
                 return BadRequest("Данные о блюде не обнаружены");
@@ -154,7 +166,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpPost("changeVisibleStatusOfDish")]
         public async Task<IActionResult> ChangeVisibleStatusOfDish(ManipulateDishDataInDTO inputData)
         {
-            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(inputData.Id);
+            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(inputData.Id.ToString());
             if (dish == null)
             {
                 return BadRequest("Данные о блюде не обнаружены");
@@ -167,29 +179,86 @@ namespace WepPartDeliveryProject.Controllers
         }
 
         [HttpPost("changeDish")]
-        public async Task<IActionResult> ChangeDish(ManipulateDishDataInDTO inputData)
+        public async Task<IActionResult> ChangeDish([FromForm] ManipulateDishDataInDTO inputData)
         {
-            var dishToChange = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(inputData.Id);
+            var dishRepo = _repositoryFactory.GetRepository<Dish>();
+            var dishToChange = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(inputData.Id.ToString());
             if(dishToChange == null)
             {
                 return BadRequest("Данные о блюде не обнаружены");
             }
 
+            var category = Category.CategoriesFromDb.SingleOrDefault(h => h.Id.ToString() == inputData.CategoryId);
+
+            var curDishCategory = await dishRepo.GetRelationsOfNodesAsync<ContainsDish, Category>(dishToChange);
+
+            if(curDishCategory != null && curDishCategory.Count !=0 && curDishCategory.First().NodeFromId != category.Id)
+            {
+                await dishRepo.DeleteRelationOfNodesAsync<ContainsDish, Category>(dishToChange, (Category)curDishCategory.First().NodeFrom);
+
+                await dishRepo.RelateNodesAsync(new ContainsDish() { NodeFrom = category, NodeTo = dishToChange });
+            }
+
             _mapper.Map(inputData, dishToChange);
+
+            var newImages = await LoadImagesToDir(inputData.ImagesFiles, category.LinkName, dishToChange.Id.ToString());
+            if(newImages.Count != 0)
+            {
+                dishToChange.Images = newImages;
+            }
 
             await _repositoryFactory.GetRepository<Dish>().UpdateNodeAsync(dishToChange);
 
-            return Ok();
+            return Ok(dishToChange.Id);
         }
 
         [HttpPost("createDish")]
-        public async Task<IActionResult> CreateDish(ManipulateDishDataInDTO inputData)
+        public async Task<IActionResult> CreateDish([FromForm] ManipulateDishDataInDTO inputData)
         {
+            var dishRepo = _repositoryFactory.GetRepository<Dish>();
             var dish = _mapper.Map<Dish>(inputData);
+            dish.Images = new List<string>();
+            var category = Category.CategoriesFromDb.SingleOrDefault(h => h.Id.ToString() == inputData.CategoryId);
 
-            await _repositoryFactory.GetRepository<Dish>().AddNodeAsync(dish);
+            await dishRepo.AddNodeAsync(dish);
+            await dishRepo.RelateNodesAsync(new ContainsDish() { NodeFrom = category, NodeTo = dish});
+
+            dish.Images = await LoadImagesToDir(inputData.ImagesFiles, category.LinkName, dish.Id.ToString());
+            if(dish.Images.Count != 0)
+            {
+                await dishRepo.UpdateNodeAsync(dish);
+            }
 
             return Ok(dish.Id);
+        }
+
+        private async Task<List<string>> LoadImagesToDir(IFormFileCollection? files, string categoryLinkName, string dishId)
+        {
+            var images = new List<string>();
+
+            var pathToPublicClientAppDirectory = _configuration.GetSection("ClientAppSettings:PathToPublicSourceDirecroty").Value;
+            var dirWithDishImages = _configuration.GetSection("ClientAppSettings:DirectoryWithDishImages").Value;
+
+            var pathToDishesDir = Path.Combine(pathToPublicClientAppDirectory, dirWithDishImages);
+            var pathToCategoryDir = Path.Combine(pathToDishesDir, categoryLinkName);
+            var pathToDishDir = Path.Combine(pathToCategoryDir, dishId);
+
+            if(!Directory.Exists(pathToDishDir))
+                Directory.CreateDirectory(pathToDishDir);
+
+            if (files != null)
+            {
+                foreach (var imageFile in files)
+                {
+                    var pathToImage = Path.Combine(pathToDishDir, imageFile.FileName);
+                    using var fileStream = new FileStream(pathToImage, FileMode.Create);
+                    await imageFile.CopyToAsync(fileStream);
+
+                    images.Add(Path.Combine("/", pathToImage.Replace(pathToPublicClientAppDirectory, "").Replace('\\', '/')));
+                }
+            }
+
+            return images;
         }
     }
 }

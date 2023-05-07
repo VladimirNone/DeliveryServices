@@ -19,6 +19,7 @@ interface dishClientInfo {
 interface dishAdminInfo extends dishClientInfo{
     isDeleted: boolean,
     isAvailableForUser: boolean,
+    weight: number,
 }
 
 interface dishCartInfo extends dishClientInfo {

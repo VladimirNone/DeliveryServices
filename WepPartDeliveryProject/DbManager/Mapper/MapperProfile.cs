@@ -33,7 +33,8 @@ namespace DbManager.Mapper
                 .ForMember(dest => dest.Story, opt => opt.MapFrom(src => src.Story));
 
             CreateMap<Dish, ManipulateDishDataInDTO>();
-            CreateMap<ManipulateDishDataInDTO, Dish>();
+            CreateMap<ManipulateDishDataInDTO, Dish>()
+                .ForMember(h=>h.Id, o => o.Ignore());
         }
     }
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FC } from "react"
 import { Col, Container, NavbarBrand } from "react-bootstrap";
 import FooterPanelItem from "../FooterPanelItem";
+import Image from "next/image";
 
 const questionsPanel:footerPanelInfo = 
 {
@@ -56,7 +57,7 @@ const Footer: FC = () => {
             <Col md={4} xs={12} className="order-md-first d-flex justify-content-center align-items-center p-1">
                 <Link href="/">
                     <NavbarBrand>
-                        My Brand!
+                        <Image src="/2_logo.svg" alt="logo" width={220} height={80}/>
                     </NavbarBrand>
                 </Link>
             </Col>

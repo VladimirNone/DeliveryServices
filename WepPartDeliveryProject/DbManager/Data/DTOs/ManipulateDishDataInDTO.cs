@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,13 +9,15 @@ namespace DbManager.Data.DTOs
 {
     public class ManipulateDishDataInDTO
     {
-        public string Id { get; set; }
+        public Guid? Id { get; set; }
         public string? Name { get; set; }
         public string? Description { get; set; }
         public double? Price { get; set; }
         public int? Weight { get; set; }
-        public bool? IsAvailable { get; set; }
+        public bool? IsAvailableForUser { get; set; }
+        public bool? IsDeleted { get; set; }
 
-        public List<string>? Images { get; set; }
+        public string? CategoryId { get; set; }
+        public IFormFileCollection? ImagesFiles { get; set; }
     }
 }

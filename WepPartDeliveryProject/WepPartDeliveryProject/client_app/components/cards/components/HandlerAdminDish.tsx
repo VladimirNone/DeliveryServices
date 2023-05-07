@@ -26,13 +26,13 @@ const HandlerAdminDish: FC<HandlerAdminDishProps> = ({ dishId, dishDeleted, isVi
         <>
             <Row className='ms-1 d-flex justify-content-center'>
                 <Col xs='auto' className='mt-1 mt-xxl-0'>
-                    <Link href={"/admin/changeDish/" + dishId} className={`btn btn-secondary`}>
+                    <Link href={"/admin/changeDish?dishId=" + dishId} className={`btn btn-secondary`}>
                         Изменить блюдо
                     </Link>
                 </Col>
                 <Col xs='auto' className='mt-1 mt-xxl-0'>
                     <Button onClick={handleDeleteStateDish} className={`btn btn-secondary`}>
-                        {dishDeleted ? "Удалить блюдо" : "Восстановить блюдо"}
+                        {dishDeleted ? "Восстановить блюдо" : "Удалить блюдо"}
                     </Button>
                 </Col>
                 <Col xs='auto' className='mt-1 mt-xxl-0'>

@@ -23,7 +23,7 @@ namespace DbManager
             services.AddSingleton<IGraphClient, BoltGraphClient>(op => {
                         var graphClient = new BoltGraphClient(settings.Neo4jConnection, settings.Neo4jUser, settings.Neo4jPassword);
                         graphClient.ConnectAsync().Wait();
-                        PrepareData(graphClient, configuration.GetSection("ClientAppSettings:PathToPublicSourceDirecroty").Value);
+                        PrepareData(graphClient, configuration.GetSection("ClientAppSettings:PathToPublicSourceDirecroty").Value, configuration.GetSection("ClientAppSettings:DirectoryWithDishImages").Value);
                         return graphClient;
                     });
 
@@ -40,12 +40,11 @@ namespace DbManager
             services.AddTransient<IGeneralRepository<User>, UserRepository>();
         }
 
-        private static void PrepareData(IGraphClient graphClient, string pathToPublicClientAppDirectory)
+        private static void PrepareData(IGraphClient graphClient, string pathToPublicClientAppDirectory, string dirWithDishImages)
         {
             var categoryRepo = new GeneralRepository<Category>(graphClient);
             var dishRepo = new GeneralRepository<Dish>(graphClient);
 
-            var dirWithDishImages = "dishes";
             var pathToDishesDir = Path.Combine(pathToPublicClientAppDirectory, dirWithDishImages);
 
             OrderState.OrderStatesFromDb = new GeneralRepository<OrderState>(graphClient).GetNodesAsync().Result;

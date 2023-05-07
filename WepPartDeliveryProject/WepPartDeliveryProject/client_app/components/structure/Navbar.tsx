@@ -80,7 +80,7 @@ const MainNavbar: FC<{isAdmin:boolean}> = ({isAdmin}) => {
         <Form className="d-flex col-lg-4 col-md-5 col-8 order-md-4 order-2 ">
           <Form.Control className='w-100' placeholder="Поиск" aria-describedby="basic-addon2" value={searchValue} onChange={changeSearchValue}/>
           <Button variant="outline-secondary" className='ms-1' id="button-addon2">
-            <Link href={`/search?searchText=${searchValue.toLowerCase().trim()}`}>
+            <Link href={searchValue.trim() != "" ? `/search?searchText=${searchValue.toLowerCase().trim()}` : '/'}>
               <Image src="\loupe.svg" width="20" height="20" alt="Поиск" />
             </Link>
           </Button>

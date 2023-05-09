@@ -104,6 +104,7 @@ namespace DbManager.Neo4j.Implementations
         {
             /*MATCH (node:Order)-[relation:HASORDERSTATE]-(relatedNode:OrderState {NumberOfStage: 16}) 
             WITH date.truncate('month', datetime(relation.TimeStartState)) as time , sum(node.Price) as sum, count(relatedNode) as count 
+            where time > date("2022-11-01") and time < date("2023-03-01")
             RETURN time, sum, count order by time*/
 
             var res = await dbContext.Cypher
@@ -124,6 +125,57 @@ namespace DbManager.Neo4j.Implementations
                 .ResultsAsync;
 
             return res.Select(h => (h.time.Month+"."+h.time.Year, h.sum, h.count)).ToList();
+        }
+
+        public async Task<List<(string, int, int)>> GetCountFinishedOrderAndClientsStatistic()
+        {
+            /*MATCH (node:Client)-[relation:ORDERED]-(relatedNode:Order)-[relation2:HASORDERSTATE]-(relatedNode2:OrderState {NumberOfStage: 16})
+            with count(relatedNode) as countOfOrders, collect(distinct node.Login) as clients, date.truncate('month', datetime(relation2.TimeStartState)) as time
+            RETURN countOfOrders, size(clients) as countOfClients, time order by time */
+
+            var res = await dbContext.Cypher
+                .Match($"(node:{typeof(Client).Name})-[relation:{typeof(Ordered).Name.ToUpper()}]-(relatedNode:{typeof(Order).Name})-[relation2:{typeof(HasOrderState).Name.ToUpper()}]-(relatedNode2:{typeof(OrderState).Name} {{NumberOfStage: $NumberOfFinishStage}})")
+                .WithParams(new
+                {
+                    NumberOfFinishStage = (int)OrderStateEnum.Finished,
+                })
+                .With("count(relatedNode) as countOfOrders, collect(distinct node.Login) as clients, date.truncate('month', datetime(relation2.TimeStartState)) as time")
+                //where time > date("2022-11-01") and time < date("2023-03-01")
+                .Return((time, countOfOrders, countOfClients) => new
+                {
+                    time = time.As<DateTime>(),
+                    countOfOrders = countOfOrders.As<int>(),
+                    countOfClients = countOfClients.As<int>(),
+                })
+                .ChangeQueryForPaginationAnonymousType(new[] { "time" })
+                .ResultsAsync;
+
+            return res.Select(h => (h.time.Month + "." + h.time.Year, h.countOfOrders, h.countOfClients)).ToList();
+        }
+
+        public async Task<List<(string, List<Order>)>> GetCancelledOrderGroupedByMonthStatistic()
+        {
+            /* MATCH(node:Order)-[relation: HASORDERSTATE]-(relatedNode:OrderState {NumberOfStage: 32})
+            with node, date.truncate('month', datetime(relation.TimeStartState)) as time
+            RETURN node, time order by time */
+
+            var res = await dbContext.Cypher
+                .Match($"(node:{typeof(Order).Name})-[relation:{typeof(HasOrderState).Name.ToUpper()}]-(relatedNode:{typeof(OrderState).Name} {{NumberOfStage: $NumberOfFinishStage}})")
+                .WithParams(new
+                {
+                    NumberOfFinishStage = (int)OrderStateEnum.Cancelled,
+                })
+                .With("node, date.truncate('month', datetime(relation.TimeStartState)) as time")
+                //where time > date("2022-11-01") and time < date("2023-03-01")
+                .Return((node, time) => new
+                {
+                    time = time.As<DateTime>(),
+                    node = node.CollectAs<Order>(),
+                })
+                .ChangeQueryForPaginationAnonymousType(new[] { "time" })
+                .ResultsAsync;
+
+            return res.Select(h => (h.time.Month + "." + h.time.Year, h.node.ToList())).ToList();
         }
     }
 }

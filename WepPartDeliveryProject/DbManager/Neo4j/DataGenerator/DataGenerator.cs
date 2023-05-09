@@ -71,9 +71,22 @@ namespace DbManager.Neo4j.DataGenerator
                 var state = (OrderState)curOrderState.NodeTo;
                 var faker = new Faker("ru");
                 var previousStageTimeStart = curOrderState.TimeStartState.AddHours(-5);
+                //если заказ отменен, то он может быть отменен только до завершения заказа
+                var limitStory = state.NumberOfStage == (int)OrderStateEnum.Cancelled ? (int)OrderStateEnum.Finished : state.NumberOfStage;
 
-                for (int i = 0, j = 1; j < state.NumberOfStage; i++, j = (int)Math.Pow(2,i))
+                for (int i = 0, j = 1; j < limitStory; i++, j = (int)Math.Pow(2,i))
                 {
+                    if(j != (int)OrderStateEnum.InQueue && state.NumberOfStage == (int)OrderStateEnum.Cancelled)
+                    {
+                        //с вероятностью 1/3 прекращаем создавать историю, тем самым
+                        //отменяя заказ после случайной стадии
+                        var rand = new Random().Next(0, 3);
+                        if(rand == 0)
+                        {
+                            break;
+                        }
+                    }
+
                     var orderStoryState = new HasOrderState()
                     {
                         TimeStartState = faker.Date.Between(previousStageTimeStart, previousStageTimeStart.AddHours(1)),

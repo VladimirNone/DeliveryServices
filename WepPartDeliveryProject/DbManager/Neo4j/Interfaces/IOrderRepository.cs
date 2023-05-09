@@ -20,5 +20,7 @@ namespace DbManager.Neo4j.Interfaces
         Task<HasOrderState?> MoveOrderToNextStage(string orderId, string comment);
         Task MoveOrderToPreviousStage(string orderId);
         Task<List<(string, double, int)>> GetOrderPriceAndCountStatistic();
+        Task<List<(string, int, int)>> GetCountFinishedOrderAndClientsStatistic();
+        Task<List<(string, List<Order>)>> GetCancelledOrderGroupedByMonthStatistic();
     }
 }

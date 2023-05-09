@@ -1,5 +1,7 @@
 import PanelToHandleStatistics from "@/components/PanelToHandleStatistics";
+import BarChart from "@/components/statisticsCharts/BarChart";
 import LineChart from "@/components/statisticsCharts/LineChart";
+import RadarChart from "@/components/statisticsCharts/RadarChart";
 import ClientLayout from "@/components/structure/ClientLayout";
 import { GetStaticProps } from "next";
 import { FC, useEffect, useState } from "react";
@@ -42,7 +44,7 @@ const Statistics: FC<{ categories: categoryItem[] }> = ({ categories }) => {
             <PanelToHandleStatistics statisticQueries={statisticQueries} buildChart={handleGetQueryDataFromServer} />
             <Row className="d-flex justify-content-center mt-3 mb-3">
                 <Col md={9}>
-                    {selectedQuery != undefined && <LineChart query={selectedQuery}/>}
+                    {selectedQuery != undefined && <BarChart query={selectedQuery}/>}
                 </Col>
             </Row>
         </ClientLayout>

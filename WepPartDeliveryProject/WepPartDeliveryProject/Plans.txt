@@ -22,4 +22,3 @@ Order.ReasonForCancellation - при отмене вылазит почти та
 	- добавляем связи
 
 Разбраться PasswordHash in User. Извлечение из бд
-

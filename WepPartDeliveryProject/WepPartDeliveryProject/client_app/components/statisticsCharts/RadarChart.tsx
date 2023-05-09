@@ -1,33 +1,33 @@
 import { ChartData } from "chart.js";
 import { FC, useEffect, useState } from "react";
-import { Bar } from 'react-chartjs-2';
+import { Radar } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 import {
     Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
+    RadialLinearScale,
+    PointElement,
+    LineElement,
+    Filler,
     Tooltip,
     Legend,
   } from 'chart.js';
   
   ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
+    RadialLinearScale,
+    PointElement,
+    LineElement,
+    Filler,
     Tooltip,
     Legend
   );
 
-  function getRandomInt(max:number) {
+function getRandomInt(max:number) {
     return Math.floor(Math.random() * max);
 }
 
-const BarChart: FC<{ query:statisticQueryInfo }> = ({ query }) => {
-    const [chartData, setChartData] = useState<ChartData<"bar">>();
+const RadarChart: FC<{ query:statisticQueryInfo }> = ({ query }) => {
+    const [chartData, setChartData] = useState<ChartData<"radar">>();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -36,21 +36,22 @@ const BarChart: FC<{ query:statisticQueryInfo }> = ({ query }) => {
                     'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
                 },
             });
-            const resInfo = await resp.json() as statisticQueryDataItem[];
+            const resInfo = await resp.json() as {queryData: statisticQueryDataItem[], nameDatasets:string[]};
     
             const data:{labels:string[], datasets:any} = {
-                labels: resInfo.map((value) => value.x),
+                labels: resInfo.queryData.map((value) => value.x),
                 datasets: [],
             }
             
-            for( let i = 0; i < (query.nameDatasets?.length ?? 1); i++)
+            for( let i = 0; i < resInfo.nameDatasets.length; i++)
             {
                 data.datasets.push({
-                    label: query.nameDatasets == null ? query.nameQuery : query.nameDatasets[i],
-                    data: resInfo.map((value) => value.y[i]),
+                    label: resInfo.nameDatasets[i] ,
+                    data: resInfo.queryData.map(value => value.y[i]),
                     borderColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)})`,
                     backgroundColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)})`,
                     borderWidth: 1,
+                    fill: true,
                 });
             };
 
@@ -66,16 +67,16 @@ const BarChart: FC<{ query:statisticQueryInfo }> = ({ query }) => {
                 font: {
                     weight: 'bold' as 'bold'
                 },
-                align: 'left' as 'left'
+                align: 'top' as 'top'
               }
         },
     };
 
     return (
         <>
-            {chartData != undefined && <Bar plugins={[ChartDataLabels]} options={options} data={chartData}/>}
+            {chartData != undefined && <Radar plugins={[ChartDataLabels]} options={options} data={chartData}/> }
         </>    
     );
 }
 
-export default BarChart;
+export default RadarChart;

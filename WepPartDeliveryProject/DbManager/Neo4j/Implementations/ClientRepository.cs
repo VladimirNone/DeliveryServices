@@ -25,8 +25,8 @@ namespace DbManager.Neo4j.Implementations
 
             var res = await dbContext.Cypher
                 .Match($"(node:{typeof(Client).Name})-[relation:{typeof(Ordered).Name.ToUpper()}]-(relatedNode:{typeof(Order).Name})")
-                //.Where($"")
                 .With("node, sum(relatedNode.Price) as sum, count(relatedNode) as count")
+                //.Where($"")
                 .Return((node, sum, count) => new
                 {
                     client = node.As<Client>(),

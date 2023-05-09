@@ -38,6 +38,7 @@ namespace DbManager
             services.AddTransient<IGeneralRepository<Order>, OrderRepository>();
             services.AddTransient<IGeneralRepository<Dish>, DishRepository>();
             services.AddTransient<IGeneralRepository<User>, UserRepository>();
+            services.AddTransient<IGeneralRepository<Client>, ClientRepository>();
         }
 
         private static void PrepareData(IGraphClient graphClient, string pathToPublicClientAppDirectory, string dirWithDishImages)

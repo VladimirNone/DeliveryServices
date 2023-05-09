@@ -98,3 +98,16 @@ interface orderState {
     nameOfState: string,
     descriptionForClient: string,
 }
+
+interface statisticQueryInfo {
+    nameQuery:string, 
+    linkToQuery: string,
+    chartName: string,
+    needDataRange: boolean,
+    nameDatasets: string[] | null,
+}
+
+interface statisticQueryDataItem {
+    x: string,
+    y: number[],
+}

@@ -19,5 +19,6 @@ namespace DbManager.Neo4j.Interfaces
         Task<List<Order>> GetOrdersByState(Guid kitchenId, Guid orderStateId, int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
         Task<HasOrderState?> MoveOrderToNextStage(string orderId, string comment);
         Task MoveOrderToPreviousStage(string orderId);
+        Task<List<(string, double, int)>> GetOrderPriceAndCountStatistic();
     }
 }

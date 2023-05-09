@@ -53,8 +53,10 @@ namespace DbManager.Neo4j.DataGenerator
             kitchenWorker.PasswordHash = _pswService.GetPasswordHash(kitchenWorker.Login, "kitchenWorker").ToList();
 
             var kitchens = _dataGenerator.GenerateKitchens(3);
-            var orders = _dataGenerator.GenerateOrders(30);
+            var orders = _dataGenerator.GenerateOrders(50);
             var categories = _dataGenerator.GenerateCategories(6);
+
+            var countRandomStateForOrders = 30;
 
             //вставляем узлы в бд
             var orderRepo = _repoFactory.GetRepository<Order>();
@@ -76,7 +78,8 @@ namespace DbManager.Neo4j.DataGenerator
             var workedIns = _dataGenerator.GenerateRelationsWorkedIn(kitchenWorkers.Count, kitchens, new List<KitchenWorker>(kitchenWorkers));
             var cookedBies = _dataGenerator.GenerateRelationsCookedBy(orders.Count, new List<Order>(orders), kitchens);
             var deliveredBies = _dataGenerator.GenerateRelationsDeliveredBy(orders.Count, new List<Order>(orders), deliveryMen);
-            var hasOrderStates = _dataGenerator.GenerateRelationsHasOrderState(orders.Count, new List<Order>(orders), orderStates);
+            var hasOrderStates = _dataGenerator.GenerateRelationsHasOrderState(countRandomStateForOrders, new List<Order>(orders.GetRange(0, countRandomStateForOrders)), orderStates);
+            hasOrderStates.AddRange(_dataGenerator.GenerateRelationsHasOrderState(orders.Count - countRandomStateForOrders, new List<Order>(orders.GetRange(countRandomStateForOrders, 20)), new List<OrderState>() { orderStates.First(h => h.NumberOfStage == (int)OrderStateEnum.Finished) }));
             var ordereds = _dataGenerator.GenerateRelationsOrdered(orders.Count, new List<Order>(orders), clients);
             
             //Генерируем связь OrderedDish. Количество связей будет меньше, т.к. удаляются дублируемые

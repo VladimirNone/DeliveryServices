@@ -40,7 +40,7 @@ namespace DbManager.Neo4j.DataGenerator
                 .RuleFor(h => h.Id, g => Guid.NewGuid())
                 .RuleFor(h => h.Name, g => g.Commerce.ProductName())
                 .RuleFor(h => h.Description, g => g.Lorem.Paragraph())
-                .RuleFor(h => h.Price, g => g.Random.Double() + g.Random.Number(150, 1000))
+                .RuleFor(h => h.Price, g => g.Random.Number(100, 1200))
                 .RuleFor(h => h.Weight, g => g.Random.Number(150, 1200));
 
         public static Faker<Category> GenerateCategory()
@@ -131,7 +131,7 @@ namespace DbManager.Neo4j.DataGenerator
 
         public static Faker<HasOrderState> GenerateHasOrderState(List<Order> orders, List<OrderState> states)
             => new Faker<HasOrderState>("ru")
-                .RuleFor(h => h.TimeStartState, g => g.Date.Between(new DateTime(1980, 10, 10), new DateTime(2003, 10, 10)))
+                .RuleFor(h => h.TimeStartState, g => g.Date.Between(new DateTime(2022, 10, 10), new DateTime(2023, 5, 5)))
                 .RuleFor(h => h.Comment, g => g.Random.Bool() ? g.Lorem.Sentence() : null)
                 .RuleFor(h => h.NodeTo, g => g.Random.ListItem(states))
                 .RuleFor(h => h.NodeFrom, g => g.Random.ListItemWithRemove(orders));

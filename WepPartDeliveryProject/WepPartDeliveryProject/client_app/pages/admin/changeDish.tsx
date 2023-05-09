@@ -83,7 +83,7 @@ const ChangeDish: FC<{ categories: categoryItem[], }> = ({ categories }) => {
         }
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/admin/changeDish`, {
-            method: "POST",
+            method: "PATCH",
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
             },

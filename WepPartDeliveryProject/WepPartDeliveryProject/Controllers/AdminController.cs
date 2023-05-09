@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WepPartDeliveryProject.Controllers
 {
-    //[Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     [Route("[controller]")]
     [ApiController]
     public class AdminController : Controller
@@ -178,7 +178,7 @@ namespace WepPartDeliveryProject.Controllers
             return Ok(dish.IsAvailableForUser);
         }
 
-        [HttpPost("changeDish")]
+        [HttpPatch("changeDish")]
         public async Task<IActionResult> ChangeDish([FromForm] ManipulateDishDataInDTO inputData)
         {
             var dishRepo = _repositoryFactory.GetRepository<Dish>();

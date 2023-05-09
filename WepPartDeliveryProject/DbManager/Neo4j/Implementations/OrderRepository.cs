@@ -99,5 +99,31 @@ namespace DbManager.Neo4j.Implementations
             await RelateNodesAsync(newOrderState);
             await UpdateNodeAsync(order);
         }
+
+        public async Task<List<(string, double, int)>> GetOrderPriceAndCountStatistic()
+        {
+            /*MATCH (node:Order)-[relation:HASORDERSTATE]-(relatedNode:OrderState {NumberOfStage: 16}) 
+            WITH date.truncate('month', datetime(relation.TimeStartState)) as time , sum(node.Price) as sum, count(relatedNode) as count 
+            RETURN time, sum, count order by time*/
+
+            var res = await dbContext.Cypher
+                .Match($"(node:{typeof(Order).Name})-[relation:{typeof(HasOrderState).Name.ToUpper()}]-(relatedNode:{typeof(OrderState).Name} {{NumberOfStage: $NumberOfFinishStage}})")
+                .WithParams(new
+                {
+                    NumberOfFinishStage = (int)OrderStateEnum.Finished,
+                })
+                .With("date.truncate('month', datetime(relation.TimeStartState)) as time , sum(node.Price) as sum, count(relatedNode) as count")
+                //where time > date("2022-11-01") and time < date("2023-03-01")
+                .Return((time, sum, count) => new
+                {
+                    time = time.As<DateTime>(),
+                    sum = sum.As<double>(),
+                    count = count.As<int>(),
+                })
+                .ChangeQueryForPaginationAnonymousType(new[] { "time" })
+                .ResultsAsync;
+
+            return res.Select(h => (h.time.Month+"."+h.time.Year, h.sum, h.count)).ToList();
+        }
     }
 }

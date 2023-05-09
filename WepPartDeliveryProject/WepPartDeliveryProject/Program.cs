@@ -115,18 +115,12 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseHealthChecks("/healthcheck");
-app.Use(async (context, next) =>
-{
-    var req = context.User;
-    await next.Invoke();
-});
+
 app.UseCors();
 
 app.UseAuthentication();
 app.UseRouting();
 app.UseAuthorization();
-
-
 
 app.MapControllers();
 

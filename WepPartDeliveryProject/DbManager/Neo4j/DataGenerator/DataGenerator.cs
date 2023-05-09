@@ -70,7 +70,7 @@ namespace DbManager.Neo4j.DataGenerator
                 var order = (Order)curOrderState.NodeFrom;
                 var state = (OrderState)curOrderState.NodeTo;
                 var faker = new Faker("ru");
-                var previousStageTimeStart = faker.Date.Between(new DateTime(2022, 10, 10), new DateTime(2023, 5, 5));
+                var previousStageTimeStart = curOrderState.TimeStartState.AddHours(-5);
 
                 for (int i = 0, j = 1; j < state.NumberOfStage; i++, j = (int)Math.Pow(2,i))
                 {
@@ -88,7 +88,7 @@ namespace DbManager.Neo4j.DataGenerator
 
                 order.Story.Add(new HasOrderState()
                 {
-                    TimeStartState = faker.Date.Between(previousStageTimeStart, previousStageTimeStart.AddHours(1)),
+                    TimeStartState = curOrderState.TimeStartState,
                     Comment = faker.Lorem.Sentence(),
                     Id = curOrderState.Id,
                     NodeFromId = order.Id,

@@ -34,7 +34,7 @@ namespace DbManager.Neo4j.Implementations
                 orderByProperty[i] = "orders." + orderByProperty[i];
 
             var directionInOrderCB = GetDirection(typeof(CookedBy).Name);
-            var directionInOrderHOS = GetDirection(typeof(HasOrderState).Name);
+            var directionInOrderHOS = GetDirection(typeof(HasOrderState).Name, "rel");
 
             var res = await dbContext.Cypher
                 .Match(
@@ -49,7 +49,7 @@ namespace DbManager.Neo4j.Implementations
                         orderStateId,
                     })
                 .Return(orders => orders.As<Order>())
-                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount)
+                .ChangeQueryForPagination(orderByProperty.Concat(new[] { "rel.TimeStartState desc" }).ToArray(), skipCount, limitCount)
                 .ResultsAsync;
 
             return res.ToList();
@@ -82,14 +82,14 @@ namespace DbManager.Neo4j.Implementations
             return newOrderState;
         }
 
-        public async Task MoveOrderToPreviousStage(string orderId)
+        public async Task<bool> MoveOrderToPreviousStage(string orderId)
         {
             var order = await GetNodeAsync(Guid.Parse(orderId));
             var orderHasState = order.Story.Last();
             var orderState = OrderState.OrderStatesFromDb.Single(h => h.Id == orderHasState.NodeToId);
             //Если заказ только попал в очередь
             if ((OrderStateEnum)orderState.NumberOfStage == OrderStateEnum.InQueue)
-                return;
+                return false;
             
             await DeleteRelationOfNodesAsync<HasOrderState, OrderState>(order, orderState);
             order.Story.Remove(orderHasState);
@@ -98,6 +98,8 @@ namespace DbManager.Neo4j.Implementations
 
             await RelateNodesAsync(newOrderState);
             await UpdateNodeAsync(order);
+
+            return true;
         }
 
         public async Task<List<(string, double, int)>> GetOrderPriceAndCountStatistic()

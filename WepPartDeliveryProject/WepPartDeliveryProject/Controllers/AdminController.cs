@@ -33,11 +33,13 @@ namespace WepPartDeliveryProject.Controllers
         }
 
         [HttpGet("getOrders")]
-        public async Task<IActionResult> GetOrders(int page = 0)
+        public async Task<IActionResult> GetOrders(int page = 0, int numberOfState = 1)
         {
-            var orders = await _repositoryFactory.GetRepository<Order>().GetNodesAsync(_appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1);
-            
-            var ordersDTOs = orders.Select(h=>_mapper.Map<OrderOutDTO>(h)).ToList();
+            var orderRelations = await _repositoryFactory.GetRepository<OrderState>().GetRelationsOfNodesAsync<HasOrderState, Order>(OrderState.OrderStatesFromDb.First(h=>h.NumberOfStage == numberOfState), _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "TimeStartState");
+
+            var orders = orderRelations.Select(h => (Order)h.NodeFrom).ToList();
+
+            var ordersDTOs = _mapper.Map<List<OrderOutDTO>>(orders);
 
             var pageEnded = ordersDTOs.Count() < 4;
 

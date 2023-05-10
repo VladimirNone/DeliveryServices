@@ -57,6 +57,7 @@ interface profileInfo {
 
     //KitchenWorker props
     jobTitle:string | null,
+    gotJob: Date | null,
 
     //Admin props
 
@@ -86,6 +87,7 @@ interface orderInfo {
 
 interface authContextProps {
     isAdmin: boolean,
+    isKitchenWorker: boolean,
     isAuth: boolean,
     toggleIsAuthed: ()=>void,
 }

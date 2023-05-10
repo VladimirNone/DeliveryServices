@@ -122,7 +122,7 @@ namespace DbManager.Neo4j.DataGenerator
 
             foreach (var order in orders)
             {
-                var countDishInOrder = rand.Next(mediumCountDishesInOrder - 1, mediumCountDishesInOrder + 2);
+                var countDishInOrder = rand.Next(1, mediumCountDishesInOrder + 2);
                 relations.AddRange(ObjectGenerator.GenerateOrderedDish(new List<Order>() { order }, dishes).Generate(countDishInOrder));
             }
 

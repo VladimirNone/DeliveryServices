@@ -69,6 +69,11 @@ namespace WepPartDeliveryProject.Controllers
                 await orderRepo.RelateNodesAsync(new OrderedDish() { NodeFrom = order, NodeTo = dish, Count = res[dish.Id.ToString()] });
             }
 
+            var kitchens = await _repositoryFactory.GetRepository<Kitchen>().GetNodesAsync();
+            var randomKitchen = kitchens[new Random().Next(0, kitchens.Count)];
+
+            await orderRepo.RelateNodesAsync(new CookedBy() { NodeFrom = randomKitchen, NodeTo = order });
+
             return Ok();
         }
 
@@ -114,7 +119,7 @@ namespace WepPartDeliveryProject.Controllers
         public async Task<IActionResult> GetOrder(string orderId)
         {
             Order? searchedOrder;
-            if (_jwtService.UserHasRole(Request.Headers.Authorization.FirstOrDefault(), "Admin"))
+            if (_jwtService.UserHasRole(Request.Headers.Authorization.FirstOrDefault(), "Admin") || _jwtService.UserHasRole(Request.Headers.Authorization.FirstOrDefault(), "KitchenWorker"))
             {
                 searchedOrder = await _repositoryFactory.GetRepository<Order>().GetNodeAsync(orderId);
             }
@@ -174,7 +179,7 @@ namespace WepPartDeliveryProject.Controllers
             return Ok();
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, KitchenWorker")]
         [HttpPost("moveToNextStage")]
         public async Task<IActionResult> MoveToNextStage(ManipulateOrderDataInDTO inputData)
         {
@@ -187,14 +192,14 @@ namespace WepPartDeliveryProject.Controllers
             return BadRequest("Заказ находится на финальной стадии и его состояние не может перейти на следующую стадию");
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, KitchenWorker")]
         [HttpPost("moveToPreviousStage")]
         public async Task<IActionResult> MoveToPreviousStage(ManipulateOrderDataInDTO inputData)
         {
             var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>(true);
-            await orderRepo.MoveOrderToPreviousStage(inputData.OrderId);
-
-            return Ok();
+            if (await orderRepo.MoveOrderToPreviousStage(inputData.OrderId))
+                return Ok();
+            return BadRequest("Заказ находится на начальной стадии и его состояние не может перейти на предыдущую стадию");
         }
     }
 }

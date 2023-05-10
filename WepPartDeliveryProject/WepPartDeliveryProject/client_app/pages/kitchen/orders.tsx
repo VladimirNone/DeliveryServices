@@ -19,7 +19,7 @@ export const getStaticProps: GetStaticProps = async () => {
     }
 }
 
-const AdminOrders: FC<{categories:categoryItem[], states:orderState[]}> = ({ categories, states }) => {
+const KitchenOrders: FC<{categories:categoryItem[], states:orderState[]}> = ({ categories, states }) => {
     const [orders, setOrders] = useState<orderCardInfo[]>([]);
     const [page, setPage] = useState(0);
     const [pageEnded, setPageEnded] = useState(true);
@@ -36,13 +36,7 @@ const AdminOrders: FC<{categories:categoryItem[], states:orderState[]}> = ({ cat
         });
 
         if (resp1.ok) {
-
-            const changedOrderIndex = orders.findIndex(el => el.id == orderId);
-            const updatedOrders = [...orders];
-            const deletedStage = updatedOrders[changedOrderIndex].story?.pop();
-
-            if(deletedStage?.orderStateId == orderStateId)
-                setOrders(updatedOrders);
+            setOrders(prevOrders => prevOrders.filter(el => el.id != orderId ));
         }
     }
 
@@ -57,18 +51,19 @@ const AdminOrders: FC<{categories:categoryItem[], states:orderState[]}> = ({ cat
         });
 
         if (resp1.ok) {
-            const newOrderState = await resp1.json() as orderState;
-            const changedOrderIndex = orders.findIndex(el => el.id == orderId);
-            const updatedOrders = [...orders];
-            updatedOrders[changedOrderIndex].story?.push(newOrderState);
-
-            if (newOrderState.orderStateId != orderStateId)
-                setOrders(updatedOrders);
+            setOrders(prevOrders => prevOrders.filter(el => el.id != orderId ));
         }
     }
 
+    const handleSelectState = (selectState: orderState) => {
+        setSelectedState(selectState);
+        setOrders([]);
+        setPage(0);
+    }
+
     const handleShowMoreOrders = async  () => {
-        const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/admin/getOrders?page=${page}&numberOfState=${selectedState.numberOfStage}`, {
+        const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/kitchen/getOrders?page=${page}&numberOfState=${selectedState.numberOfStage}`, {
+            credentials: "include",
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
             }
@@ -85,25 +80,6 @@ const AdminOrders: FC<{categories:categoryItem[], states:orderState[]}> = ({ cat
         }
     }
 
-    const handleDeleteItem = async (orderId:string) => {
-        setOrders(prevOrders => prevOrders.filter(el => el.id != orderId ));
-
-        const resp1 = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/order/cancelOrder`, {
-            method: "POST",
-            headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
-                'Content-Type': 'application/json;charset=utf-8',
-            },
-            body: JSON.stringify({orderId})
-        });
-    }
-
-    const handleSelectState = (selectState: orderState) => {
-        setSelectedState(selectState);
-        setOrders([]);
-        setPage(0);
-    }
-
     useEffect(()=>{
         if(page == 0){
             handleShowMoreOrders();
@@ -113,7 +89,7 @@ const AdminOrders: FC<{categories:categoryItem[], states:orderState[]}> = ({ cat
     return (
         <ClientLayout categories={categories}>
             <PanelToHandleOrders orderStates={states} selectState={handleSelectState}/>
-            {orders.map((order, i)=> <OrderCard key={i} {...order} DeleteOrder={handleDeleteItem} MoveOrderToPreviousStage={handleMoveOrderToPreviousStage} MoveOrderToNextStage={handleMoveOrderToNextStage}/>)}
+            {orders.map((order, i)=> <OrderCard key={i} {...order} DeleteOrder={()=>{}} MoveOrderToPreviousStage={handleMoveOrderToPreviousStage} MoveOrderToNextStage={handleMoveOrderToNextStage}/>)}
             {!pageEnded && (<div>
                     <button className='btn btn-primary w-100 mt-2' onClick={handleShowMoreOrders}>
                         Показать больше
@@ -124,4 +100,4 @@ const AdminOrders: FC<{categories:categoryItem[], states:orderState[]}> = ({ cat
     );
 }
 
-export default AdminOrders;
+export default KitchenOrders;

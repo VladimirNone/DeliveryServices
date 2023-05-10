@@ -60,11 +60,18 @@ const Layout:FC<layoutProps> = ({children}) =>  {
         UpdateJwtToken();
     },[isAuthed]);
 
+    const authContextData = { 
+        isAdmin: roles.includes("Admin"), 
+        isKitchenWorker: roles.includes("KitchenWorker"), 
+        isAuth: isAuthed, 
+        toggleIsAuthed: () => setIsAuthed(true)
+    };
+
     return (
         <>
             <Header isAuthed={isAuthed} dropJwtToken={DropJwtToken}/>
-            <MainNavbar isAdmin={roles.includes("Admin")} />
-            <AuthContext.Provider value = {{ isAdmin: roles.includes("Admin"), isAuth: isAuthed, toggleIsAuthed: () => setIsAuthed(true)}}>
+            <MainNavbar isAdmin={authContextData.isAdmin} isKitchenWorker={authContextData.isKitchenWorker} />
+            <AuthContext.Provider value = {authContextData}>
                 {children}
             </AuthContext.Provider>
             <Footer />

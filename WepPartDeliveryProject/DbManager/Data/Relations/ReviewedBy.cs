@@ -9,6 +9,7 @@ namespace DbManager.Data.Relations
     public class ReviewedBy : Relation<Client, Order>
     {
         public int ClientRating { get; set; }
+        [Neo4jDateTime]
         public DateTime TimeCreated { get; set; }
         public string? Review { get; set; }
     }

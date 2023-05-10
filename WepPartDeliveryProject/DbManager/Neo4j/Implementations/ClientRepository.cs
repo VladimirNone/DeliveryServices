@@ -17,7 +17,7 @@ namespace DbManager.Neo4j.Implementations
         {
         }
 
-        public async Task<List<(Client, double, int)>> GetTopClientBySumPriceOrder(int topCount)
+        public async Task<List<(Client, double, int)>> GetTopClientBySumPriceOrderStatistic(int topCount)
         {
             /*match (c:Client)-[r:ORDERED]-(o:Order)
             with c, sum(o.Price) as sum, count(o) as count

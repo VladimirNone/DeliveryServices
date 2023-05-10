@@ -8,6 +8,7 @@ namespace DbManager.Data.Relations
     /// </summary>
     public class WorkedIn : Relation<KitchenWorker, Kitchen>
     {
-        public DateTime? GotJob { get; set; }
+        [Neo4jDateTime]
+        public DateTime GotJob { get; set; }
     }
 }

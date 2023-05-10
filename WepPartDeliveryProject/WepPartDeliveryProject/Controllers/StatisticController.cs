@@ -9,7 +9,7 @@ using DbManager.Data.Relations;
 
 namespace WepPartDeliveryProject.Controllers
 {
-    //[Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     [Route("[controller]")]
     [ApiController]
     public class StatisticController : Controller
@@ -91,7 +91,7 @@ namespace WepPartDeliveryProject.Controllers
 
             var clientRepo = (IClientRepository)_repositoryFactory.GetRepository<Client>(true);
 
-            var topClients = await clientRepo.GetTopClientBySumPriceOrder(10);
+            var topClients = await clientRepo.GetTopClientBySumPriceOrderStatistic(10);
             topClients.Reverse();
 
             foreach (var item in topClients)

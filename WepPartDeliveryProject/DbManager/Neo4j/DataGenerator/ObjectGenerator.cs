@@ -40,8 +40,8 @@ namespace DbManager.Neo4j.DataGenerator
                 .RuleFor(h => h.Id, g => Guid.NewGuid())
                 .RuleFor(h => h.Name, g => g.Commerce.ProductName())
                 .RuleFor(h => h.Description, g => g.Lorem.Paragraph())
-                .RuleFor(h => h.Price, g => g.Random.Number(100, 1200))
-                .RuleFor(h => h.Weight, g => g.Random.Number(150, 1200));
+                .RuleFor(h => h.Price, g => g.Random.Number(100, 800))
+                .RuleFor(h => h.Weight, g => g.Random.Number(150, 1000));
 
         public static Faker<Category> GenerateCategory()
             => new Faker<Category>("ru")
@@ -112,7 +112,7 @@ namespace DbManager.Neo4j.DataGenerator
             => new Faker<OrderedDish>("ru")
                 .RuleFor(h => h.NodeTo, g => g.Random.ListItem(dishes))
                 .RuleFor(h => h.NodeFrom, g => g.Random.ListItem(orders))
-                .RuleFor(h => h.Count, g => g.Random.Number(1, 5));
+                .RuleFor(h => h.Count, g => g.Random.Number(1, g.Random.Number(1,3)));
 
         public static Faker<CookedBy> GenerateCookedBy(List<Order> orders, List<Kitchen> kitchens)
             => new Faker<CookedBy>("ru")
@@ -131,7 +131,7 @@ namespace DbManager.Neo4j.DataGenerator
 
         public static Faker<HasOrderState> GenerateHasOrderState(List<Order> orders, List<OrderState> states)
             => new Faker<HasOrderState>("ru")
-                .RuleFor(h => h.TimeStartState, g => g.Date.Between(new DateTime(2022, 10, 10), new DateTime(2023, 5, 5)))
+                .RuleFor(h => h.TimeStartState, g => g.Date.Between(new DateTime(2022, 10, 10), DateTime.Now))
                 .RuleFor(h => h.Comment, g => g.Random.Bool() ? g.Lorem.Sentence() : null)
                 .RuleFor(h => h.NodeTo, g => g.Random.ListItem(states))
                 .RuleFor(h => h.NodeFrom, g => g.Random.ListItemWithRemove(orders));

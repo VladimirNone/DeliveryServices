@@ -47,7 +47,7 @@ const OrderCard: FC<orderCardInfo> = (orderInfo) => {
                                     <Button className='btn btn-secondary w-100' onClick={handleShowStoryClick}>{showStory ? 'Скрыть':'Показать'} историю заказа</Button>
                                 </Col>
                                 {showStory && orderInfo.story?.map((value,i)=><OrderStateItem key={i} {...value}/>)}
-                                {showStory && roleContextData.isAdmin && 
+                                {((showStory && roleContextData.isAdmin) || roleContextData.isKitchenWorker) && 
                                     <Row className='d-flex justify-content-center'>
                                         <Col className='col-auto mt-2'>
                                             <Button className='btn btn-danger w-100' onClick={handleMoveToPreviousOrderStage}>Вернуть к предыдущей стадии</Button>

@@ -9,7 +9,7 @@ interface PanelToHandleUsersProps {
 const PanelToHandleStatistics: FC<PanelToHandleUsersProps> = ({ statisticQueries, buildChart }) => {
     const [selectedQuery, setSelectedQuery] = useState<statisticQueryInfo>();
 
-    const handleSelectRole = (eventKey: string | null): void => {
+    const handleSelectQuery = (eventKey: string | null): void => {
         const selQuery = statisticQueries.find(el => el.nameQuery == eventKey);
         setSelectedQuery(selQuery);
         
@@ -22,7 +22,7 @@ const PanelToHandleStatistics: FC<PanelToHandleUsersProps> = ({ statisticQueries
         <>
             <Row className='g-0 m-1'>
                 <Col xs='auto' className='g-0 me-1'>
-                    <Dropdown onSelect={handleSelectRole}>
+                    <Dropdown onSelect={handleSelectQuery}>
                         <Dropdown.Toggle variant="success" id="dropdown-basic">
                             {selectedQuery == undefined ? "Выберете аналитический запрос" : selectedQuery.nameQuery}
                         </Dropdown.Toggle>

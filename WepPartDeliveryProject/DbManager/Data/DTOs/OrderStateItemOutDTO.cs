@@ -8,7 +8,7 @@ namespace DbManager.Data.DTOs
 {
     public class OrderStateItemOutDTO
     {
-        public DateTime TimeStartState { get; set; }
+        public DateTime? TimeStartState { get; set; }
         public string? Comment { get; set; }
         public Guid OrderStateId { get; set; }
         public int NumberOfStage { get; set; }

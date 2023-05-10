@@ -41,7 +41,18 @@ const AdminPanelMenuItems: Array<linkPanelItem> = [
   },
 ];
 
-const MainNavbar: FC<{isAdmin:boolean}> = ({isAdmin}) => {
+const KitchenPanelMenuItems: Array<linkPanelItem> = [
+  { 
+    itemName:"Заказы кухни",
+    itemHref: "/kitchen/orders",
+  },
+  { 
+    itemName:"Сотрудники кухни",
+    itemHref: "/kitchen/workers",
+  },
+];
+
+const MainNavbar: FC<{isAdmin:boolean, isKitchenWorker: boolean}> = ({isAdmin, isKitchenWorker}) => {
   const [searchValue, setSearchValue] = useState("");
 
   const changeSearchValue = (e:ChangeEvent<HTMLInputElement>):void =>{
@@ -67,6 +78,17 @@ const MainNavbar: FC<{isAdmin:boolean}> = ({isAdmin}) => {
             {isAdmin &&
               <NavDropdown className='mx-auto' title="Админ панель" id="nav-dropdown">
                 {AdminPanelMenuItems.map((value, i) => (
+                  <Nav.Item key={i} className='mx-auto'>
+                    <Link href={value.itemHref} className='dropdown-item pt-2 pb-2'>
+                        {value.itemName}
+                    </Link>
+                  </Nav.Item>))
+                }
+              </NavDropdown>
+            }
+            {isKitchenWorker &&
+              <NavDropdown className='mx-auto' title="Панель кухни" id="nav-dropdown">
+                {KitchenPanelMenuItems.map((value, i) => (
                   <Nav.Item key={i} className='mx-auto'>
                     <Link href={value.itemHref} className='dropdown-item pt-2 pb-2'>
                         {value.itemName}

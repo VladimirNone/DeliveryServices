@@ -66,7 +66,7 @@ const BarChart: FC<{ query:statisticQueryInfo }> = ({ query }) => {
                 font: {
                     weight: 'bold' as 'bold'
                 },
-                align: 'left' as 'left'
+                align: 'center' as 'center'
               }
         },
     };

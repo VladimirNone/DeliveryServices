@@ -130,8 +130,8 @@ namespace DbManager.Neo4j.Implementations
         public async Task<List<(string, int, int)>> GetCountFinishedOrderAndClientsStatistic()
         {
             /*MATCH (node:Client)-[relation:ORDERED]-(relatedNode:Order)-[relation2:HASORDERSTATE]-(relatedNode2:OrderState {NumberOfStage: 16})
-            with count(relatedNode) as countOfOrders, collect(distinct node.Login) as clients, date.truncate('month', datetime(relation2.TimeStartState)) as time
-            RETURN countOfOrders, size(clients) as countOfClients, time order by time */
+            with count(relatedNode) as countOfOrders, count(distinct node) as countOfClients, date.truncate('month', datetime(relation2.TimeStartState)) as time
+            RETURN countOfOrders, countOfClients, time order by time */
 
             var res = await dbContext.Cypher
                 .Match($"(node:{typeof(Client).Name})-[relation:{typeof(Ordered).Name.ToUpper()}]-(relatedNode:{typeof(Order).Name})-[relation2:{typeof(HasOrderState).Name.ToUpper()}]-(relatedNode2:{typeof(OrderState).Name} {{NumberOfStage: $NumberOfFinishStage}})")
@@ -139,7 +139,7 @@ namespace DbManager.Neo4j.Implementations
                 {
                     NumberOfFinishStage = (int)OrderStateEnum.Finished,
                 })
-                .With("count(relatedNode) as countOfOrders, collect(distinct node.Login) as clients, date.truncate('month', datetime(relation2.TimeStartState)) as time")
+                .With("count(relatedNode) as countOfOrders, count(distinct node) as countOfClients, date.truncate('month', datetime(relation2.TimeStartState)) as time")
                 //where time > date("2022-11-01") and time < date("2023-03-01")
                 .Return((time, countOfOrders, countOfClients) => new
                 {
@@ -176,6 +176,28 @@ namespace DbManager.Neo4j.Implementations
                 .ResultsAsync;
 
             return res.Select(h => (h.time.Month + "." + h.time.Year, h.node.ToList())).ToList();
+        }
+
+        public async Task<List<(Kitchen, int, int)>> GetCountOrdersAndOrderedDishesForEveryKitchenStatistic()
+        {
+            /*match(k:Kitchen)-[]-(o:Order)-[r:ORDEREDDISH]-(d:Dish)
+            with k, count(distinct o) as countO, sum(r.Count) as sumD
+            return k,countO, sumD */
+
+            var res = await dbContext.Cypher
+                .Match($"(node:{typeof(Kitchen).Name})-[relation:{typeof(CookedBy).Name.ToUpper()}]-(relatedNode:{typeof(Order).Name})-[relation2:{typeof(OrderedDish).Name.ToUpper()}]-(relatedNode2:{typeof(Dish).Name})")
+                .With("node, count(distinct relatedNode) as countO, sum(relation2.Count) as sumD")
+                //where time > date("2022-11-01") and time < date("2023-03-01")
+                .Return((node, countO, sumD) => new
+                {
+                    kitchen = node.As<Kitchen>(),
+                    countOfOrders = countO.As<int>(),
+                    sumOfDishes = sumD.As<int>(),
+                })
+                .ChangeQueryForPaginationAnonymousType(new string[0])
+                .ResultsAsync;
+
+            return res.Select(h => (h.kitchen, h.countOfOrders, h.sumOfDishes)).ToList();
         }
     }
 }

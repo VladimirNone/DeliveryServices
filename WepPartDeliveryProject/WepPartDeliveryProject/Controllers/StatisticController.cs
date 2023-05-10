@@ -36,7 +36,8 @@ namespace WepPartDeliveryProject.Controllers
             new StatisticQueryInfoOutDTO(){ NameQuery = "Количество отмененных заказов на каждой стадии", LinkToQuery = "query4", ChartName = "radar", NeedDataRange = true},
             new StatisticQueryInfoOutDTO(){ NameQuery = "Сколько в среднем клиенты оформляют заказов, если оформляют", LinkToQuery = "query5", ChartName = "bar", NeedDataRange = true, NameDatasets = new List<string>(){ "Количество заказов", "Количество клиентов, оформивших заказы" } },
             new StatisticQueryInfoOutDTO(){ NameQuery = "Средняя продолжительность пребывания заказа в стадии", LinkToQuery = "query6", ChartName = "line", NeedDataRange = true},
-            new StatisticQueryInfoOutDTO(){ NameQuery = "Сравнение показателей по месяцам", LinkToQuery = "query7", ChartName = "radar", NeedDataRange = true},
+            new StatisticQueryInfoOutDTO(){ NameQuery = "Количество выполненных заказов и приготовленных блюд в каждой из кухонь", LinkToQuery = "query7", ChartName = "bar", NeedDataRange = true, NameDatasets = new List<string>(){ "Количество выполненных заказов", "Количество приготовленных блюд" } },
+            new StatisticQueryInfoOutDTO(){ NameQuery = "Топ-10 самых популярных блюд", LinkToQuery = "query8", ChartName = "line", NeedDataRange = true, },
         };
 
         [AllowAnonymous]
@@ -171,6 +172,78 @@ namespace WepPartDeliveryProject.Controllers
             foreach (var item in resData)
             {
                 resQueryData.Add(new StatisticQueryDataItemOutDTO() { Y = new List<double>() { item.Item2, item.Item3 }, X = item.Item1 });
+            }
+
+            return Ok(resQueryData);
+        }
+
+        [HttpGet("query6")]
+        public async Task<IActionResult> GetQuery6()
+        {
+            var resQueryData = new List<StatisticQueryDataItemOutDTO>();
+
+            var resData = await ((IOrderRepository)_repositoryFactory.GetRepository<Order>(true)).GetNodesAsync(limitCount:100);
+
+            for (int i = 0, j = 1; i < OrderState.OrderStatesFromDb.Count; i++, j *= 2)
+            {
+                if (j == (int)OrderStateEnum.Cancelled || j == (int)OrderStateEnum.Finished)
+                {
+                    break;
+                }
+                var curState = OrderState.OrderStatesFromDb.First(h => h.NumberOfStage == j);
+
+                var orderMinutesBetweenCurStateAndNext = new List<int>();
+                var needRemoveOrders = new List<Order>();
+                foreach (var order in resData)
+                {
+                    //количество состояний в истории должно быть на одну больше чем нужно, чтобы было ОТ и ДО
+                    if(order.Story.Count > i + 1)
+                    {
+                        orderMinutesBetweenCurStateAndNext.Add((order.Story[i+1].TimeStartState - order.Story[i].TimeStartState).Minutes);
+                    }
+                    else
+                    {
+                        //удаляем потому что нам известно, что эти заказы закончились на текущей стадии
+                        needRemoveOrders.Add(order);
+                    }
+                }
+
+                resData = resData.Except(needRemoveOrders).ToList();
+
+                resQueryData.Add(new StatisticQueryDataItemOutDTO() { Y = new List<double>() { orderMinutesBetweenCurStateAndNext.Sum()/ orderMinutesBetweenCurStateAndNext.Count }, X = curState.NameOfState });
+            }
+
+            return Ok(resQueryData);
+        }
+
+        [HttpGet("query7")]
+        public async Task<IActionResult> GetQuery7()
+        {
+            var resQueryData = new List<StatisticQueryDataItemOutDTO>();
+
+            var resData = await ((IOrderRepository)_repositoryFactory.GetRepository<Order>(true)).GetCountOrdersAndOrderedDishesForEveryKitchenStatistic();
+
+            foreach (var item in resData)
+            {
+                resQueryData.Add(new StatisticQueryDataItemOutDTO() { Y = new List<double>() { item.Item2, item.Item3 }, X = item.Item1.Address });
+            }
+
+            return Ok(resQueryData);
+        }
+
+        [HttpGet("query8")]
+        public async Task<IActionResult> GetQuery8()
+        {
+            var resQueryData = new List<StatisticQueryDataItemOutDTO>();
+
+            var dishRepo = (IDishRepository)_repositoryFactory.GetRepository<Dish>(true);
+
+            var topDish = await dishRepo.GetTopDishByCountOrderedStatistic(10);
+            topDish.Reverse();
+
+            foreach (var item in topDish)
+            {
+                resQueryData.Add(new StatisticQueryDataItemOutDTO() { Y = new List<double>() { item.Item2 }, X = item.Item1.Name });
             }
 
             return Ok(resQueryData);

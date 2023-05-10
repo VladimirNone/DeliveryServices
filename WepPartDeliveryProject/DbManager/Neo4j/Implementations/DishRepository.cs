@@ -1,4 +1,6 @@
-﻿using DbManager.Data.Nodes;
+﻿using DbManager.Data;
+using DbManager.Data.Nodes;
+using DbManager.Data.Relations;
 using DbManager.Neo4j.Interfaces;
 using Neo4jClient;
 using System;
@@ -32,6 +34,27 @@ namespace DbManager.Neo4j.Implementations
                 .ResultsAsync;
 
             return res.ToList();
+        }
+
+        public async Task<List<(Dish, int)>> GetTopDishByCountOrderedStatistic(int topCount)
+        {
+            /*match (o:Order)-[r:ORDEREDDISH]-(d:Dish) 
+            with count(r) as countR, d
+            return d, countR order by countR desc limit 10*/
+
+            var res = await dbContext.Cypher
+                .Match($"(node:{typeof(Order).Name})-[relation:{typeof(OrderedDish).Name.ToUpper()}]-(relatedNode:{typeof(Dish).Name})")
+                .With("relatedNode, count(relation) as countR")
+                //where time > date("2022-11-01") and time < date("2023-03-01")
+                .Return((relatedNode, countR) => new
+                {
+                    dish = relatedNode.As<Dish>(),
+                    countOfOrdereds = countR.As<int>(),
+                })
+                .ChangeQueryForPaginationAnonymousType(new[] { "countR desc" }, limitCount: topCount)
+                .ResultsAsync;
+
+            return res.Select(h => (h.dish, h.countOfOrdereds)).ToList();
         }
     }
 }

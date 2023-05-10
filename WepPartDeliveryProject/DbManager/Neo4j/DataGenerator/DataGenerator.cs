@@ -116,7 +116,15 @@ namespace DbManager.Neo4j.DataGenerator
 
         public List<OrderedDish> GenerateRelationsOrderedDish(int count, List<Order> orders, List<Dish> dishes)
         {
-            var relations = ObjectGenerator.GenerateOrderedDish(orders, dishes).Generate(count);
+            var mediumCountDishesInOrder = count / orders.Count;
+            var rand = new Random();
+            List<OrderedDish> relations = new List<OrderedDish>();
+
+            foreach (var order in orders)
+            {
+                var countDishInOrder = rand.Next(mediumCountDishesInOrder - 1, mediumCountDishesInOrder + 2);
+                relations.AddRange(ObjectGenerator.GenerateOrderedDish(new List<Order>() { order }, dishes).Generate(countDishInOrder));
+            }
 
             relations = ExcludeDuplicate(relations);
 

@@ -112,7 +112,7 @@ namespace DbManager.Neo4j.DataGenerator
             => new Faker<OrderedDish>("ru")
                 .RuleFor(h => h.NodeTo, g => g.Random.ListItem(dishes))
                 .RuleFor(h => h.NodeFrom, g => g.Random.ListItem(orders))
-                .RuleFor(h => h.Count, g => g.Random.Number(1, 10));
+                .RuleFor(h => h.Count, g => g.Random.Number(1, 5));
 
         public static Faker<CookedBy> GenerateCookedBy(List<Order> orders, List<Kitchen> kitchens)
             => new Faker<CookedBy>("ru")

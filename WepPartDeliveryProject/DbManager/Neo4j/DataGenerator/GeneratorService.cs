@@ -24,6 +24,7 @@ namespace DbManager.Neo4j.DataGenerator
         public async Task GenerateAll()
         {
             var mediumCountDishesInOrder = 3;
+            var countRandomStateForOrders = 350;
 
             //генерируем узлы
             var orderStates = _dataGenerator.GenerateOrderStates();
@@ -55,8 +56,6 @@ namespace DbManager.Neo4j.DataGenerator
             var kitchens = _dataGenerator.GenerateKitchens(3);
             var orders = _dataGenerator.GenerateOrders(1000);
             var categories = _dataGenerator.GenerateCategories(6);
-
-            var countRandomStateForOrders = 350;
 
             //вставляем узлы в бд
             var orderRepo = _repoFactory.GetRepository<Order>();
@@ -141,6 +140,8 @@ namespace DbManager.Neo4j.DataGenerator
                 await _repoFactory.GetRepository<KitchenWorker>().SetNewNodeType<User>(item.Id.ToString());
             foreach (var item in deliveryMen)
                 await _repoFactory.GetRepository<DeliveryMan>().SetNewNodeType<User>(item.Id.ToString());
+
+
         }
     }
 }

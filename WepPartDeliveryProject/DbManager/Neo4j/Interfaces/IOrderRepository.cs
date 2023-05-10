@@ -22,5 +22,6 @@ namespace DbManager.Neo4j.Interfaces
         Task<List<(string, double, int)>> GetOrderPriceAndCountStatistic();
         Task<List<(string, int, int)>> GetCountFinishedOrderAndClientsStatistic();
         Task<List<(string, List<Order>)>> GetCancelledOrderGroupedByMonthStatistic();
+        Task<List<(Kitchen, int, int)>> GetCountOrdersAndOrderedDishesForEveryKitchenStatistic();
     }
 }

@@ -39,12 +39,18 @@ const Statistics: FC<{ categories: categoryItem[] }> = ({ categories }) => {
         fetchData();
     }, []);
 
+    const drawChart:any = {
+        "line": <LineChart query={selectedQuery as statisticQueryInfo}/>,
+        "bar": <BarChart query={selectedQuery as statisticQueryInfo}/>,
+        "radar": <RadarChart query={selectedQuery as statisticQueryInfo}/>,
+    }
+
     return (
         <ClientLayout categories={categories}>
             <PanelToHandleStatistics statisticQueries={statisticQueries} buildChart={handleGetQueryDataFromServer} />
             <Row className="d-flex justify-content-center mt-3 mb-3">
                 <Col md={9}>
-                    {selectedQuery != undefined && <BarChart query={selectedQuery}/>}
+                    {selectedQuery != undefined && drawChart[selectedQuery.chartName]}
                 </Col>
             </Row>
         </ClientLayout>

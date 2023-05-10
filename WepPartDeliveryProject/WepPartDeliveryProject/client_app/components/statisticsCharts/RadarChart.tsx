@@ -48,8 +48,8 @@ const RadarChart: FC<{ query:statisticQueryInfo }> = ({ query }) => {
                 data.datasets.push({
                     label: resInfo.nameDatasets[i] ,
                     data: resInfo.queryData.map(value => value.y[i]),
-                    borderColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)})`,
-                    backgroundColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)})`,
+                    borderColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)}, 0.5)`,
+                    backgroundColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)}, 0.3)`,
                     borderWidth: 1,
                     fill: true,
                 });

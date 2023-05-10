@@ -10,5 +10,6 @@ namespace DbManager.Neo4j.Interfaces
     public interface IDishRepository : IGeneralRepository<Dish>
     {
         Task<List<Dish>> SearchDishesByNameAndDescription(string searchText, int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
+        Task<List<(Dish, int)>> GetTopDishByCountOrderedStatistic(int topCount);
     }
 }

@@ -18,17 +18,20 @@ namespace DbManager.Neo4j.Implementations
         {
         }
 
-        public async Task<List<Order>> GetOrdersByState(string kitchenId, string nameOfState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+        public async Task<List<Order>> GetOrdersByStateRelatedWithNode<TNode>(string nodeId, string nameOfState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+            where TNode : INode
         {
-            return await GetOrdersByState(Guid.Parse(kitchenId),OrderState.OrderStatesFromDb.Single(h=>h.NameOfState == nameOfState).Id, skipCount, limitCount, orderByProperty);
+            return await GetOrdersByStateRelatedWithNode<TNode>(Guid.Parse(nodeId),OrderState.OrderStatesFromDb.Single(h=>h.NameOfState == nameOfState).Id, skipCount, limitCount, orderByProperty);
         }
 
-        public async Task<List<Order>> GetOrdersByState(string kitchenId, OrderStateEnum orderState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+        public async Task<List<Order>> GetOrdersByStateRelatedWithNode<TNode>(string nodeId, OrderStateEnum orderState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+            where TNode : INode
         {
-            return await GetOrdersByState(Guid.Parse(kitchenId), OrderState.OrderStatesFromDb.Single(h => (OrderStateEnum)h.NumberOfStage == orderState).Id, skipCount, limitCount, orderByProperty);
+            return await GetOrdersByStateRelatedWithNode<TNode>(Guid.Parse(nodeId), OrderState.OrderStatesFromDb.Single(h => (OrderStateEnum)h.NumberOfStage == orderState).Id, skipCount, limitCount, orderByProperty);
         }
 
-        public async Task<List<Order>> GetOrdersByState(Guid kitchenId, Guid orderStateId, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+        public async Task<List<Order>> GetOrdersByStateRelatedWithNode<TNode>(Guid nodeId, Guid orderStateId, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+            where TNode : INode
         {
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "orders." + orderByProperty[i];
@@ -38,14 +41,14 @@ namespace DbManager.Neo4j.Implementations
 
             var res = await dbContext.Cypher
                 .Match(
-                    $"(kitchen:{typeof(Kitchen).Name} {{Id: $kitchenId}})" +
+                    $"(node:{typeof(TNode).Name} {{Id: $nodeId}})" +
                     $"{directionInOrderCB}" +
                     $"(orders:{typeof(Order).Name})" +
                     $"{directionInOrderHOS}" +
                     $"(orderState:{typeof(OrderState).Name} {{Id: $orderStateId}})")
                 .WithParams(new
                     {
-                        kitchenId,
+                        nodeId,
                         orderStateId,
                     })
                 .Return(orders => orders.As<Order>())

@@ -46,6 +46,15 @@ namespace WepPartDeliveryProject.Controllers
             return Ok(new { dishes = dishes.GetRange(0, dishes.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : dishes.Count), pageEnded });
         }
 
+        [AllowAnonymous]
+        [HttpGet("getOrderStates")]
+        public async Task<IActionResult> GetOrderStates()
+        {
+            var states = _mapper.Map<List<OrderStateItemOutDTO>>(OrderState.OrderStatesFromDb);
+
+            return Ok(states);
+        }
+
         [HttpGet("getCategoriesList")]
         public IActionResult GetCategoriesList()
         {

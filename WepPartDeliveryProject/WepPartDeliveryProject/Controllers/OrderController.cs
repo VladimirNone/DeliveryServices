@@ -119,7 +119,9 @@ namespace WepPartDeliveryProject.Controllers
         public async Task<IActionResult> GetOrder(string orderId)
         {
             Order? searchedOrder;
-            if (_jwtService.UserHasRole(Request.Headers.Authorization.FirstOrDefault(), "Admin") || _jwtService.UserHasRole(Request.Headers.Authorization.FirstOrDefault(), "KitchenWorker"))
+            if (_jwtService.UserHasRole(Request.Headers.Authorization.FirstOrDefault(), "Admin") 
+                || _jwtService.UserHasRole(Request.Headers.Authorization.FirstOrDefault(), "KitchenWorker")
+                || _jwtService.UserHasRole(Request.Headers.Authorization.FirstOrDefault(), "DeliveryMan"))
             {
                 searchedOrder = await _repositoryFactory.GetRepository<Order>().GetNodeAsync(orderId);
             }
@@ -179,7 +181,7 @@ namespace WepPartDeliveryProject.Controllers
             return Ok();
         }
 
-        [Authorize(Roles = "Admin, KitchenWorker")]
+        [Authorize(Roles = "Admin, KitchenWorker, DeliveryMan")]
         [HttpPost("moveToNextStage")]
         public async Task<IActionResult> MoveToNextStage(ManipulateOrderDataInDTO inputData)
         {

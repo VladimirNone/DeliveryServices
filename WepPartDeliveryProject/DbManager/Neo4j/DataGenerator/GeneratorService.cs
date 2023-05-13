@@ -41,7 +41,7 @@ namespace DbManager.Neo4j.DataGenerator
             client.Login = "item@item";
             client.PasswordHash = _pswService.GetPasswordHash(client.Login, "item").ToList();
 
-            var deliveryMen = _dataGenerator.GenerateDeliveryMen(5);
+            var deliveryMen = _dataGenerator.GenerateDeliveryMen(7);
 
             var deliveryMan = deliveryMen[0];
             deliveryMan.Login = "deliveryMan@deliveryMan";

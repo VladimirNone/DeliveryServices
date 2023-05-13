@@ -36,14 +36,16 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(
         policy =>
         {
-            policy.WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value)
-            //.WithHeaders(HeaderNames.ContentType, HeaderNames.Cookie)
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
-            /*            policy.AllowAnyOrigin()
+            policy
+                .WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value)
+                //.WithHeaders(HeaderNames.ContentType, HeaderNames.Cookie)
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+
+            /*            policy
+                            .AllowAnyOrigin()
                             .AllowAnyHeader()
-            .WithMethods("GET", "POST")
                             .AllowAnyMethod();*/
         });
 });
@@ -84,10 +86,10 @@ services.AddAuthentication(options =>
         };
     });
 
-services.AddAuthorization(options =>
+/*services.AddAuthorization(options =>
 {
     options.AddPolicy("role-policy", x => { x.RequireClaim("role"); });
-});
+});*/
 
 var app = builder.Build();
 
@@ -111,12 +113,20 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 });
 
+app.UseCors();
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseHealthChecks("/healthcheck");
 
-app.UseCors();
+app.Use(async (context, requestDel) =>
+{
+
+    await requestDel.Invoke(context);
+});
+
+
 
 app.UseAuthentication();
 app.UseRouting();

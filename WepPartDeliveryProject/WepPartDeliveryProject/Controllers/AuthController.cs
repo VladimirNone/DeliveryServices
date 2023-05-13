@@ -86,7 +86,7 @@ namespace WepPartDeliveryProject.Controllers
             {
                 return BadRequest("Ваш аккаунт был заблокирован!");
             }
-
+            var l = userNode.RefreshToken.ToString();
             if (inputRefreshToken == userNode.RefreshToken.ToString() && userNode.RefreshTokenCreated.AddDays(60) > DateTime.Now)
             {
                 var userRoles = await userRepo.GetUserRoles(userId);

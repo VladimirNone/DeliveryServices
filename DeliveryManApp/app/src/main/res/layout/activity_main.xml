@@ -30,6 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:hint="Ваш логин"
+            android:text="deliveryMan@deliveryMan"
             android:inputType="text"
             android:minHeight="48dp"
             android:textSize="18sp" />
@@ -47,6 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:hint="Ваш пароль"
+            android:text="deliveryMan"
             android:inputType="textPassword"
             android:minHeight="48dp"
             android:textSize="18sp" />
@@ -57,6 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="Войти"
+            android:onClick="loginClick"
             android:textSize="18sp" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

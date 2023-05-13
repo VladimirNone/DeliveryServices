@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WepPartDeliveryProject.Controllers
 {
-    //[Authorize(Roles = "KitchenWorker")]
+    [Authorize(Roles = "KitchenWorker")]
     [Route("[controller]")]
     [ApiController]
     public class KitchenController : Controller
@@ -28,15 +28,6 @@ namespace WepPartDeliveryProject.Controllers
             _mapper = mapper;
         }
 
-        [AllowAnonymous]
-        [HttpGet("getOrderStates")]
-        public async Task<IActionResult> GetOrderStates()
-        {
-            var states = _mapper.Map<List<OrderStateItemOutDTO>>(OrderState.OrderStatesFromDb);
-
-            return Ok(states);
-        }
-
         [HttpGet("getOrders")]
         public async Task<IActionResult> GetOrderQueue(int page = 0, int numberOfState = 1)
         {
@@ -51,7 +42,7 @@ namespace WepPartDeliveryProject.Controllers
             var workedIns = await _repositoryFactory.GetRepository<KitchenWorker>().GetRelationsOfNodesAsync<WorkedIn, Kitchen>(userId);
             var kitchen = (Kitchen)workedIns.FirstOrDefault().NodeTo;
 
-            var orders = await orderRepo.GetOrdersByState(kitchen.Id.ToString(), (OrderStateEnum)numberOfState, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1);
+            var orders = await orderRepo.GetOrdersByStateRelatedWithNode<Kitchen>(kitchen.Id.ToString(), (OrderStateEnum)numberOfState, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1);
 
             var ordersOut = _mapper.Map<List<OrderOutDTO>>(orders);
 

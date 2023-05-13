@@ -14,9 +14,12 @@ namespace DbManager.Neo4j.Interfaces
     /// </summary>
     public interface IOrderRepository : IGeneralRepository<Order>
     {
-        Task<List<Order>> GetOrdersByState(string kitchenId, string nameOfState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
-        Task<List<Order>> GetOrdersByState(string kitchenId, OrderStateEnum orderState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
-        Task<List<Order>> GetOrdersByState(Guid kitchenId, Guid orderStateId, int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
+        Task<List<Order>> GetOrdersByStateRelatedWithNode<TNode>(string nodeId, string nameOfState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+            where TNode : INode;
+        Task<List<Order>> GetOrdersByStateRelatedWithNode<TNode>(string nodeId, OrderStateEnum orderState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+            where TNode : INode;
+        Task<List<Order>> GetOrdersByStateRelatedWithNode<TNode>(Guid nodeId, Guid orderStateId, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+            where TNode : INode;
         Task<HasOrderState?> MoveOrderToNextStage(string orderId, string comment);
         Task<bool> MoveOrderToPreviousStage(string orderId);
         Task<List<(string, double, int)>> GetOrderPriceAndCountStatistic();

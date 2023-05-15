@@ -18,7 +18,8 @@
         app:layout_constraintRight_toLeftOf="@id/textInputLayout"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_default="percent"
-        app:layout_constraintWidth_percent="0.35" />
+        app:layout_constraintWidth_percent="0.35"
+        android:onClick="logoutClick"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout"

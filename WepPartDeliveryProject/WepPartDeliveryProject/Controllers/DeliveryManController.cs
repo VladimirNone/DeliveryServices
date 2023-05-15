@@ -45,7 +45,7 @@ namespace WepPartDeliveryProject.Controllers
 
             var ordersOut = _mapper.Map<List<OrderOutDTO>>(orders);
 
-            var pageEnded = ordersOut.Count() < 4;
+            var pageEnded = ordersOut.Count() < _appSettings.CountOfItemsOnWebPage + 1;
 
             return Ok(new { orders = ordersOut.GetRange(0, ordersOut.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : ordersOut.Count), pageEnded });
         }

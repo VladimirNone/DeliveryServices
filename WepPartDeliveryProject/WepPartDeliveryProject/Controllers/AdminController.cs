@@ -41,7 +41,7 @@ namespace WepPartDeliveryProject.Controllers
 
             var ordersDTOs = _mapper.Map<List<OrderOutDTO>>(orders);
 
-            var pageEnded = ordersDTOs.Count() < 4;
+            var pageEnded = ordersDTOs.Count() < _appSettings.CountOfItemsOnWebPage + 1;
 
             return Ok(new { orders = ordersDTOs.GetRange(0, ordersDTOs.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : ordersDTOs.Count), pageEnded });
         }
@@ -52,7 +52,7 @@ namespace WepPartDeliveryProject.Controllers
             var dishes = await ((IDishRepository)_repositoryFactory.GetRepository<Dish>(true))
                 .SearchDishesByNameAndDescription(searchText, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
 
-            var pageEnded = dishes.Count() < 4;
+            var pageEnded = dishes.Count() < _appSettings.CountOfItemsOnWebPage + 1;
 
             return Ok(new { dishes = dishes.GetRange(0, dishes.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : dishes.Count), pageEnded });
         }
@@ -73,12 +73,12 @@ namespace WepPartDeliveryProject.Controllers
 
             var rightUsers = usersAsTuples.Select(h => _mapper.Map(h.Item2, _mapper.Map<UserForAdminOutDTO>(h.Item1))).ToList();
             
-            var pageEnded = rightUsers.Count() < 4;
+            var pageEnded = rightUsers.Count() < _appSettings.CountOfItemsOnWebPage + 1;
 
             return Ok(new { users = rightUsers.GetRange(0, rightUsers.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : rightUsers.Count), pageEnded });
         }
 
-        [HttpGet("getRoles")]
+        [HttpGet("getRoles")]   
         public IActionResult GetRoles()
         {
             return Ok(((IUserRepository)_repositoryFactory.GetRepository<User>(true)).UserRolePriority.Keys.ToList());

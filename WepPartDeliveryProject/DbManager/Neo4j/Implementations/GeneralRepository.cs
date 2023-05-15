@@ -346,7 +346,10 @@ namespace DbManager.Neo4j.Implementations
         /// <returns>String with directed relation</returns>
         protected string GetDirection(string nameRelation, string? relationInstanceName = "", bool? relationInEntity = null)
         {
-            var direction = $"-[{relationInstanceName}:{nameRelation.ToUpper()}]-";
+            string direction = "-[]-";
+            if(!string.IsNullOrEmpty(nameRelation))
+                direction = $"-[{relationInstanceName}:{nameRelation.ToUpper()}]-";
+
             if (relationInEntity == null)
                 return direction;
 

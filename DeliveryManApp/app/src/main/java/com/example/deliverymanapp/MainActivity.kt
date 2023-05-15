@@ -149,4 +149,13 @@ class MainActivity : AppCompatActivity() {
         val passwordValue : String = findViewById<EditText>(R.id.PasswordEditText).text.toString()
         fetchLogin(loginValue, passwordValue)
     }
+
+//    fun logoutClick(view: View) {
+//        cookieManager?.cookieStore?.removeAll()
+//
+//        val editor = sharedPreferences?.edit()
+//        editor?.remove(nameUserId)
+//        editor?.remove(nameRefreshToken)
+//        editor?.apply()
+//    }
 }

@@ -36,7 +36,7 @@ namespace DbManager.Neo4j.Implementations
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "orders." + orderByProperty[i];
 
-            var directionInOrderCB = GetDirection(typeof(CookedBy).Name);
+            var directionInOrderCB = GetDirection("");
             var directionInOrderHOS = GetDirection(typeof(HasOrderState).Name, "rel");
 
             var res = await dbContext.Cypher

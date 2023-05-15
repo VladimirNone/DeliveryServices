@@ -41,12 +41,11 @@ namespace WepPartDeliveryProject.Controllers
             //обычному пользователю не должен быть доступен удаленный или недоступный продукт
             var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesAsync(_appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
 
-            var pageEnded = dishes.Count() < 4;
+            var pageEnded = dishes.Count() < _appSettings.CountOfItemsOnWebPage + 1;
 
             return Ok(new { dishes = dishes.GetRange(0, dishes.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : dishes.Count), pageEnded });
         }
 
-        [AllowAnonymous]
         [HttpGet("getOrderStates")]
         public async Task<IActionResult> GetOrderStates()
         {
@@ -95,7 +94,7 @@ namespace WepPartDeliveryProject.Controllers
             var dishes = await ((IDishRepository)_repositoryFactory.GetRepository<Dish>(true))
                 .SearchDishesByNameAndDescription(searchText, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
 
-            var pageEnded = dishes.Count() < 4;
+            var pageEnded = dishes.Count() < _appSettings.CountOfItemsOnWebPage + 1;
 
             return Ok(new { dishes = dishes.GetRange(0, dishes.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage: dishes.Count), pageEnded});
         }

@@ -51,6 +51,25 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
+        public async Task UpdateNodesPropertiesAsync(TNode node)
+        {
+            var properties = typeof(TNode).GetProperties();
+            var query = dbContext.Cypher
+                .Match($"(updateNode:{typeof(TNode).Name} {{Id: $id}})");
+
+            foreach (var property in properties)
+            {
+                query = query.Set($"updateNode.{property.Name} = $updatedEntity.{property.Name}");
+            }
+
+            await query.WithParams(new
+            {
+                id = node.Id,
+                updatedEntity = node
+            })
+                .ExecuteWithoutResultsAsync();
+        }
+
         public async Task<TNode> GetNodeAsync(string id)
             => await GetNodeAsync(Guid.Parse(id));
 

@@ -105,6 +105,28 @@ namespace DbManager.Neo4j.Implementations
             return true;
         }
 
+        public async Task CreateOrderRelationInDB(Order order, string? userId, List<Dish> dishes, Kitchen kitchen, DeliveryMan deliveryMan, Dictionary<string, int> countOfDishes, string? comment)
+        {
+            if(userId != null)
+                await RelateNodesAsync(new Ordered() { NodeFromId = Guid.Parse(userId), NodeTo = order });
+
+            foreach (var dish in dishes)
+            {
+                await RelateNodesAsync(new OrderedDish() { NodeFrom = order, NodeTo = dish, Count = countOfDishes[dish.Id.ToString()] });
+            }
+
+            await RelateNodesAsync(new CookedBy() { NodeFrom = kitchen, NodeTo = order });
+
+            await RelateNodesAsync(new DeliveredBy() { NodeFrom = deliveryMan, NodeTo = order });
+
+            var firstState = OrderState.OrderStatesFromDb.First(h => h.NumberOfStage == (int)OrderStateEnum.InQueue);
+            var relationCancel = new HasOrderState() { Comment = comment, NodeFromId = order.Id, NodeToId = firstState.Id, TimeStartState = DateTime.Now };
+
+            order.Story.Add(relationCancel);
+            await RelateNodesAsync(relationCancel);
+            await UpdateNodeAsync(order);
+        }
+
         public async Task<List<(string, double, int)>> GetOrderPriceAndCountStatistic()
         {
             /*MATCH (node:Order)-[relation:HASORDERSTATE]-(relatedNode:OrderState {NumberOfStage: 16}) 

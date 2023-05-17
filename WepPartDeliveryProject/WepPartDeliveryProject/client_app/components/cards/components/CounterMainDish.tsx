@@ -31,18 +31,18 @@ const CounterMainDish: FC<{dishId: string}> = ({dishId}) => {
     return (
         <>
             <div className='d-flex justify-content-end pe-md-3'>
-                <Button onClick={() => handleClick(1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>
+                <button onClick={() => handleClick(1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>
                     +
-                </Button>
+                </button>
                 <div className={`d-flex align-items-center justify-content-center ${styles.cardCountBtnAndP}`}>
                     <p className='m-0'>
                         {count}
                     </p>
                 </div>
-                <Button onClick={() => handleClick(-1)} className={`btn btn-secondary me-2 ${styles.cardCountBtnAndP}`}>
+                <button onClick={() => handleClick(-1)} className={`btn btn-secondary me-2 ${styles.cardCountBtnAndP}`}>
                     -
-                </Button>
-                <Button className='btn btn-primary' onClick={addCountDishToCookies}>
+                </button>
+                <Button onClick={addCountDishToCookies}>
                     Добавить в корзину
                 </Button>
             </div>

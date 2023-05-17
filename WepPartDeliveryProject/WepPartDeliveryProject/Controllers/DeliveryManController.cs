@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WepPartDeliveryProject.Controllers
 {
-    //[Authorize(Roles = "DeliveryMan")]
+    [Authorize(Roles = "DeliveryMan")]
     [Route("[controller]")]
     [ApiController]
     public class DeliveryManController : Controller

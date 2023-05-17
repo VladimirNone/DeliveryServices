@@ -7,6 +7,7 @@ namespace DbManager.Data
         public string Login { get; set; }
         public List<byte> PasswordHash { get; set; }
         public string PhoneNumber { get; set; }
+        public string Address { get; set; }
         public string Name { get; set; }
         [Neo4jDateTime]
         public DateTime? Born { get; set; }

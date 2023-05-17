@@ -23,11 +23,18 @@ namespace DbManager.Neo4j.Interfaces
         Task AddNodesAsync(List<TNode> newNodes);
 
         /// <summary>
-        /// Update existing node
+        /// Replace existing node
+        /// </summary>
+        /// <param name="node">The node, which will be replaced</param>
+        /// <returns></returns>
+        Task UpdateNodeAsync(TNode node);
+
+        /// <summary>
+        /// Update existing node properties
         /// </summary>
         /// <param name="node">The node, which will be updated</param>
         /// <returns></returns>
-        Task UpdateNodeAsync(TNode node);
+        Task UpdateNodesPropertiesAsync(TNode node);
 
         /// <summary>
         /// Get the node with the specified id. If DB return count of nodes < 1, then function throw Exception

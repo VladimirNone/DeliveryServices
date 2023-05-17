@@ -11,5 +11,6 @@ namespace DbManager.Data.DTOs
         public int? NewCount { get; set; }
         public string? OrderId { get; set; }
         public string? DishId { get; set; }
+        public string? ReasonOfCancel { get; set; }
     }
 }

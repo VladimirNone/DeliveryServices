@@ -1,5 +1,4 @@
 ﻿using DbManager.Data.DTOs;
-using DbManager.Data;
 using DbManager.Data.Nodes;
 using DbManager.Neo4j.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -7,7 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using DbManager.Data.Relations;
 using AutoMapper;
-using DbManager.Neo4j.Implementations;
+using DbManager.Data;
+using System.Xml.Linq;
 
 namespace WepPartDeliveryProject.Controllers
 {
@@ -45,8 +45,9 @@ namespace WepPartDeliveryProject.Controllers
             return Ok(dishes);
         }
 
+        [AllowAnonymous]
         [HttpPost("placeAnOrder")]
-        public async Task<IActionResult> PlaceAnOrder()
+        public async Task<IActionResult> PlaceAnOrder(PlaceAnOrderInDTO inputData)
         {
             var jsonData = Request.Cookies["cartDishes"];
             var userId = Request.Cookies["X-UserId"];
@@ -57,22 +58,23 @@ namespace WepPartDeliveryProject.Controllers
 
             var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesByPropertyAsync("Id", res.Keys.ToArray());
 
-            var order = new Order() { SumWeight = dishes.Sum(h=>h.Weight), Price = dishes.Sum(h => h.Price), DeliveryAddress = "Test Street" };
+            var order = new Order() { 
+                SumWeight = dishes.Sum(h=>h.Weight), 
+                Price = dishes.Sum(h => h.Price), 
+                DeliveryAddress = inputData.DeliveryAddress, 
+                PhoneNumber = inputData.PhoneNumber };
 
-            var orderRepo = _repositoryFactory.GetRepository<Order>();
+            var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>(true);
 
             await orderRepo.AddNodeAsync(order);
-            await orderRepo.RelateNodesAsync(new Ordered() { NodeFromId = Guid.Parse(userId), NodeTo = order });
-
-            foreach (var dish in dishes)
-            {
-                await orderRepo.RelateNodesAsync(new OrderedDish() { NodeFrom = order, NodeTo = dish, Count = res[dish.Id.ToString()] });
-            }
 
             var kitchens = await _repositoryFactory.GetRepository<Kitchen>().GetNodesAsync();
             var randomKitchen = kitchens[new Random().Next(0, kitchens.Count)];
 
-            await orderRepo.RelateNodesAsync(new CookedBy() { NodeFrom = randomKitchen, NodeTo = order });
+            var deliveryMen = await _repositoryFactory.GetRepository<DeliveryMan>().GetNodesAsync();
+            var randomdelMan = deliveryMen[new Random().Next(0, deliveryMen.Count)];
+
+            await orderRepo.CreateOrderRelationInDB(order, userId, dishes, randomKitchen, randomdelMan, res, inputData.Comment);
 
             return Ok();
         }
@@ -101,7 +103,7 @@ namespace WepPartDeliveryProject.Controllers
         }
 
         [HttpGet("getClientOrders")]
-        public async Task<IActionResult> GetClientOrders(int page = 0)
+        public async Task<IActionResult> GetClientOrders(int page = 0, int numberOfState = 1)
         {
             var userId = Request.Cookies["X-UserId"];
             if (userId == null)
@@ -109,10 +111,15 @@ namespace WepPartDeliveryProject.Controllers
                 return BadRequest("You don't have refresh token. You need to login or signup to system");
             }
 
-            var ordereds = await _repositoryFactory.GetRepository<Client>().GetRelationsOfNodesAsync<Ordered, Order>(userId);
-            var orders = ordereds.Select(h => _mapper.Map<OrderOutDTO>((Order)h.NodeTo)).ToList();
+            var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>(true);
 
-            return Ok(orders);
+            var orders = await orderRepo.GetOrdersByStateRelatedWithNode<Client>(userId, (OrderStateEnum)numberOfState, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1);
+
+            var ordersOut = _mapper.Map<List<OrderOutDTO>>(orders);
+
+            var pageEnded = ordersOut.Count() < _appSettings.CountOfItemsOnWebPage + 1;
+
+            return Ok(new { orders = ordersOut.GetRange(0, ordersOut.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : ordersOut.Count), pageEnded });
         }
 
         [HttpGet("getOrder/{orderId}")]
@@ -170,13 +177,24 @@ namespace WepPartDeliveryProject.Controllers
             return Ok();
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Client")]
         [HttpPost("cancelOrder")]
         public async Task<IActionResult> CancelOrder(ManipulateOrderDataInDTO inputData)
         {
-            var order = await _repositoryFactory.GetRepository<Order>().GetNodeAsync(inputData.OrderId);
+            var orderRepo = _repositoryFactory.GetRepository<Order>();
 
-            await _repositoryFactory.GetRepository<Order>().DeleteNodeWithAllRelations(order);
+            var order = await orderRepo.GetNodeAsync(inputData.OrderId);
+            var orderHasState = order.Story.Last();
+            var orderState = OrderState.OrderStatesFromDb.Single(h => h.Id == orderHasState.NodeToId);
+
+            await orderRepo.DeleteRelationOfNodesAsync<HasOrderState, OrderState>(order, orderState);
+
+            var cancelState = OrderState.OrderStatesFromDb.First(h => h.NumberOfStage == (int)OrderStateEnum.Cancelled);
+            var relationCancel = new HasOrderState() { Comment = inputData.ReasonOfCancel, NodeFromId = order.Id, NodeToId = cancelState.Id, TimeStartState = DateTime.Now };
+
+            order.Story.Add(relationCancel);
+            await orderRepo.RelateNodesAsync(relationCancel);
+            await orderRepo.UpdateNodeAsync(order);
 
             return Ok();
         }

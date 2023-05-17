@@ -5,7 +5,15 @@ import styles from '@/styles/Home.module.css'
 import { useRouter } from "next/router";
 import Image from "next/image";
 
-const Header: FC<{isAuthed: boolean, dropJwtToken: () => void}> = ({isAuthed, dropJwtToken}) => {
+interface HeaderProps { 
+    isAdmin: boolean, 
+    isKitchenWorker: boolean,
+    isDeliveryMan: boolean,
+    isAuthed: boolean, 
+    dropJwtToken: () => void
+}
+
+const Header: FC<HeaderProps> = ({isAuthed, dropJwtToken, isAdmin, isKitchenWorker, isDeliveryMan}) => {
     const router = useRouter();
 
     const logoutClickHandler = async (e:MouseEvent):Promise<void> => {
@@ -27,6 +35,8 @@ const Header: FC<{isAuthed: boolean, dropJwtToken: () => void}> = ({isAuthed, dr
         
     }
 
+    const cartButtonVisibility:boolean = !(isAdmin || isKitchenWorker || isDeliveryMan);
+
     return (
         <Container fluid="xl" className="row pt-2 mx-auto">
             <Col sm={5} md={6} className="d-flex justify-content-center align-items-center">
@@ -37,11 +47,11 @@ const Header: FC<{isAuthed: boolean, dropJwtToken: () => void}> = ({isAuthed, dr
                 </Link>
             </Col>
             <Col sm={7} md={6} className="d-flex justify-content-end align-items-center">
-                <Col xs={isAuthed ? 4 : 6} sm={4} className={`p-1 ${styles.headerButton}`}>
+                {cartButtonVisibility &&  <Col xs={isAuthed ? 4 : 6} sm={4} className={`p-1 ${styles.headerButton}`}>
                     <Link href='/cart' className="btn btn-primary w-100">
                         Корзина
                     </Link>
-                </Col>
+                </Col>}
                 { isAuthed ? 
                     <>
                         <Col xs={4} sm={4} className={`p-1 ${styles.headerButton}`}>

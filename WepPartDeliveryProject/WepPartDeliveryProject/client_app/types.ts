@@ -50,6 +50,7 @@ interface profileInfo {
     name:string,
     born:string | null,
     isBlocked: boolean | null,
+    address: string | null,
     roles: string | null,
 
     // Client props
@@ -68,6 +69,7 @@ interface orderCardInfo {
     price: number,
     sumWeight: number,
     deliveryAddress: string,
+    phoneNumber: string,
     DeleteOrder: (orderId:string)=>void,
     MoveOrderToNextStage: (orderId:string, orderStateId:string)=>void,
     MoveOrderToPreviousStage: (orderId:string, orderStateId:string)=>void,
@@ -87,6 +89,8 @@ interface orderInfo {
 
 interface authContextProps {
     isAdmin: boolean,
+    isClient: boolean,
+    isDeliveryMan: boolean,
     isKitchenWorker: boolean,
     isAuth: boolean,
     toggleIsAuthed: ()=>void,

@@ -41,7 +41,8 @@ namespace DbManager.Neo4j.DataGenerator
                 .RuleFor(h => h.Name, g => g.Commerce.ProductName())
                 .RuleFor(h => h.Description, g => g.Lorem.Paragraph())
                 .RuleFor(h => h.Price, g => g.Random.Number(100, 800))
-                .RuleFor(h => h.Weight, g => g.Random.Number(150, 1000));
+                .RuleFor(h => h.Weight, g => g.Random.Number(150, 1000))
+                .RuleFor(h => h.IsAvailableForUser, g => true);
 
         public static Faker<Category> GenerateCategory()
             => new Faker<Category>("ru")
@@ -50,8 +51,9 @@ namespace DbManager.Neo4j.DataGenerator
                 .RuleFor(h => h.Description, g => g.Lorem.Paragraph());
 
         public static Faker<Order> GenerateOrder()
-            => new Faker<Order>("ru")
+            => new Faker<Order>("ru") 
                 .RuleFor(h => h.Id, g => Guid.NewGuid())
+                .RuleFor(h => h.PhoneNumber, g => g.Phone.PhoneNumber("+7!!!!!!!!!!"))
                 .RuleFor(h => h.DeliveryAddress, g => g.Address.StreetAddress());
 
         public static Faker<Kitchen> GenerateKitchen()
@@ -68,6 +70,7 @@ namespace DbManager.Neo4j.DataGenerator
                 .RuleFor(h => h.Name, g => g.Person.FullName)
                 .RuleFor(h => h.Login, g => g.Internet.Email())
                 .RuleFor(h => h.PhoneNumber, g => g.Phone.PhoneNumber("+7!!!!!!!!!!"))
+                .RuleFor(h => h.Address, g => g.Address.StreetAddress())
                 .RuleFor(h => h.PasswordHash, (g, o) => pswService.GetPasswordHash(o.Login, g.Internet.Password()).ToList());
 
         public static Faker<Client> GenerateClient(IPasswordService pswService)
@@ -80,6 +83,7 @@ namespace DbManager.Neo4j.DataGenerator
                 .RuleFor(h => h.Login, g => g.Internet.Email())
                 .RuleFor(h => h.Bonuses, g => Math.Round(g.Random.Double() + g.Random.Number(150, 1000), 2))
                 .RuleFor(h => h.PhoneNumber, g => g.Phone.PhoneNumber("+7!!!!!!!!!!"))
+                .RuleFor(h => h.Address, g => g.Address.StreetAddress())
                 .RuleFor(h => h.PasswordHash, (g, o) => pswService.GetPasswordHash(o.Login, g.Internet.Password()).ToList());
 
         public static Faker<DeliveryMan> GenerateDeliveryMan(IPasswordService pswService)
@@ -92,6 +96,7 @@ namespace DbManager.Neo4j.DataGenerator
                 .RuleFor(h => h.Login, g => g.Internet.Email())
                 .RuleFor(h => h.MaxWeight, g => g.Random.Number(4000, 50000))
                 .RuleFor(h => h.PhoneNumber, g => g.Phone.PhoneNumber("+7!!!!!!!!!!"))
+                .RuleFor(h => h.Address, g => g.Address.StreetAddress())
                 .RuleFor(h => h.PasswordHash, (g, o) => pswService.GetPasswordHash(o.Login, g.Internet.Password()).ToList());
 
         public static Faker<KitchenWorker> GenerateKitchenWorker(IPasswordService pswService)
@@ -104,6 +109,7 @@ namespace DbManager.Neo4j.DataGenerator
                 .RuleFor(h => h.Login, g => g.Internet.Email())
                 .RuleFor(h => h.JobTitle, g => g.Name.JobTitle())
                 .RuleFor(h => h.PhoneNumber, g => g.Phone.PhoneNumber("+7!!!!!!!!!!"))
+                .RuleFor(h => h.Address, g => g.Address.StreetAddress())
                 .RuleFor(h => h.PasswordHash, (g, o) => pswService.GetPasswordHash(o.Login, g.Internet.Password()).ToList());
 
         //---------------------------------------------GenerateRelations-------------------------------------------------------------

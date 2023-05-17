@@ -19,7 +19,7 @@ export const getStaticProps: GetStaticProps = async () => {
 
 const Order: FC<{ categories: categoryItem[]}> = ({ categories }) => {
     const router = useRouter();
-    const [orderInfo, setOrderInfo] = useState<orderInfo>({ order: {id:"", deliveryAddress: "", price:0, sumWeight:0, DeleteOrder: ()=>{}, MoveOrderToNextStage: ()=>{}, MoveOrderToPreviousStage: ()=>{} }, orderedDishes: []});
+    const [orderInfo, setOrderInfo] = useState<orderInfo>({ order: {id:"", deliveryAddress: "", price:0, sumWeight:0, phoneNumber: '', DeleteOrder: ()=>{}, MoveOrderToNextStage: ()=>{}, MoveOrderToPreviousStage: ()=>{} }, orderedDishes: []});
     const orderId = router.query["orderId"];
 
     useEffect(() => {

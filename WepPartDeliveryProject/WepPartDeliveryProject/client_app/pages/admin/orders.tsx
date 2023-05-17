@@ -8,7 +8,7 @@ export const getStaticProps: GetStaticProps = async () => {
     const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getCategoriesList`);
     const categories = await resp.json() as categoryItem[];
 
-    const resp1 = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/kitchen/getOrderStates`);
+    const resp1 = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getOrderStates`);
     const states = await resp1.json() as orderState[];
 
     return {

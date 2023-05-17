@@ -24,6 +24,7 @@ namespace WepPartDeliveryProject.Controllers
         private readonly IRepositoryFactory _repositoryFactory;
         private readonly ApplicationSettings _appSettings;
         private readonly IMapper _mapper;
+        private readonly int countCharInDishDescription = 160;
 
         public MainController(IRepositoryFactory repositoryFactory, IConfiguration configuration, IMapper mapper)
         {
@@ -42,6 +43,8 @@ namespace WepPartDeliveryProject.Controllers
             var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesAsync(_appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
 
             var pageEnded = dishes.Count() < _appSettings.CountOfItemsOnWebPage + 1;
+
+            PrepareDish(dishes);
 
             return Ok(new { dishes = dishes.GetRange(0, dishes.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : dishes.Count), pageEnded });
         }
@@ -64,7 +67,6 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getDishIds")]
         public async Task<IActionResult> GetDishIds()
         {
-            //обычному пользователю не должен быть доступен удаленный или недоступный продукт
             var dishIds = (await _repositoryFactory.GetRepository<Dish>().GetNodesAsync()).Select(h=>h.Id).ToList();
             return Ok(dishIds);
         }
@@ -73,18 +75,40 @@ namespace WepPartDeliveryProject.Controllers
         public async Task<IActionResult> GetDish(Guid id)
         {
             var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(id);
-            //обычному пользователю не должен быть доступен удаленный или недоступный продукт
+
+            var userId = Request.Cookies["X-UserId"];
+            if (userId != null)
+            {
+                if (dish.IsDeleted || !dish.IsAvailableForUser)
+                {
+                    return BadRequest("Данный продукт был скрыт или удален");
+                }
+            }
+
             return Ok(dish);
+        }
+
+        [HttpGet("getDishAbilityInfo/{id}")]
+        public async Task<IActionResult> GetDishAbilityInfo(Guid id)
+        {
+            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(id);
+
+            var userCanAbilityToViewDish = !dish.IsDeleted && dish.IsAvailableForUser;
+
+            return Ok(userCanAbilityToViewDish);
         }
 
         [HttpGet("getDishesList/{category}")]
         public async Task<IActionResult> GetDishesList(string category)
         {
-            //обычному пользователю не должен быть доступен удаленный или недоступный продукт
             var choicedCategory = Category.CategoriesFromDb.Single(h=>h.LinkName == category);
             var categoryDishes = await _repositoryFactory.GetRepository<Category>().GetRelationsOfNodesAsync<ContainsDish, Dish>(choicedCategory, orderByProperty: "Name");
 
-            return Ok(categoryDishes.Select(h=>h.NodeTo).ToList());
+            var dishes = categoryDishes.Select(h => (Dish)h.NodeTo).ToList();
+
+            PrepareDish(dishes);
+
+            return Ok(dishes);
         }
 
         [HttpGet("getSearchedDishes")]
@@ -95,6 +119,8 @@ namespace WepPartDeliveryProject.Controllers
                 .SearchDishesByNameAndDescription(searchText, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
 
             var pageEnded = dishes.Count() < _appSettings.CountOfItemsOnWebPage + 1;
+
+            PrepareDish(dishes);
 
             return Ok(new { dishes = dishes.GetRange(0, dishes.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage: dishes.Count), pageEnded});
         }
@@ -112,6 +138,21 @@ namespace WepPartDeliveryProject.Controllers
             var user = _mapper.Map<ProfileUserOutDTO>(await _repositoryFactory.GetRepository<User>().GetNodeAsync(userId));
 
             return Ok(user);
+        }
+
+        private void PrepareDish(List<Dish> dishes)
+        {
+            for (int i = 0; i < dishes.Count; i++)
+            {
+                var dish = dishes[i];
+                if (dish.IsDeleted || !dish.IsAvailableForUser)
+                {
+                    dishes.Remove(dish);
+                    i--;
+                }
+                else if (dish.Description.Length > countCharInDishDescription)
+                    dish.Description = dish.Description.Substring(0, countCharInDishDescription - 3) + "...";
+            }
         }
     }
 }

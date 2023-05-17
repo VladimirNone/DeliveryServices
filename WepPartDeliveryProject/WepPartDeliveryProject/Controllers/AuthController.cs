@@ -57,7 +57,7 @@ namespace WepPartDeliveryProject.Controllers
                 user.RefreshToken = Guid.NewGuid();
                 user.RefreshTokenCreated = DateTime.Now;
 
-                await _repositoryFactory.GetRepository<User>().UpdateNodeAsync(user);
+                await _repositoryFactory.GetRepository<User>().UpdateNodesPropertiesAsync(user);
 
                 AddCookieDataToResponse(user.RefreshToken.ToString(), user.Id.ToString());
 
@@ -95,7 +95,7 @@ namespace WepPartDeliveryProject.Controllers
 
                 userNode.RefreshTokenCreated = DateTime.Now;
 
-                await userRepo.UpdateNodeAsync(userNode);
+                await userRepo.UpdateNodesPropertiesAsync(userNode);
 
                 AddCookieDataToResponse(userNode.RefreshToken.ToString());
                 
@@ -108,11 +108,14 @@ namespace WepPartDeliveryProject.Controllers
         }
 
         [HttpPost("signup")]
-        public async Task<IActionResult> Signup(UserLoginInDTO data)
+        public async Task<IActionResult> Signup(UserSignupInDTO data)
         {
             var user = new User() { 
                 Login = data.Login, 
-                Name = data.Login, 
+                Name = data.Name,
+                Born = data.Born,
+                Address = data.Address,
+                PhoneNumber = data.PhoneNumber,
                 RefreshToken = Guid.NewGuid(), 
                 RefreshTokenCreated = DateTime.Now, 
                 PasswordHash = _pswService.GetPasswordHash(data.Login, data.Password).ToList(), 

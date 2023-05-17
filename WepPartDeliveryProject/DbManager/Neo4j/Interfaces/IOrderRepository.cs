@@ -26,5 +26,6 @@ namespace DbManager.Neo4j.Interfaces
         Task<List<(string, int, int)>> GetCountFinishedOrderAndClientsStatistic();
         Task<List<(string, List<Order>)>> GetCancelledOrderGroupedByMonthStatistic();
         Task<List<(Kitchen, int, int)>> GetCountOrdersAndOrderedDishesForEveryKitchenStatistic();
+        Task CreateOrderRelationInDB(Order order, string? userId, List<Dish> dishes, Kitchen kitchen, DeliveryMan deliveryMan, Dictionary<string, int> countOfDishes, string? comment);
     }
 }

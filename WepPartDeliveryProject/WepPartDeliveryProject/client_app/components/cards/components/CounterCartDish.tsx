@@ -53,7 +53,7 @@ const CounterCartDish: FC<{ dishId: string, cancelDish: (dishId: string) => void
                     </Row>
                 </Col>
                 <Col xs={12} md={4} className='d-flex justify-content-md-start justify-content-center mt-2'>
-                    <Button className='btn btn-primary' onClick={changeCountDishToCookies}>
+                    <Button onClick={changeCountDishToCookies}>
                         Изменить количество
                     </Button>
                 </Col>

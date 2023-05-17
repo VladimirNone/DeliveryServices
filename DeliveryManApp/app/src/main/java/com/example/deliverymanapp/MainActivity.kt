@@ -97,12 +97,10 @@ class MainActivity : AppCompatActivity() {
                     editor?.putString("jwtToken", jwtToken.jwtToken)
                     editor?.apply()
 
-
                     runOnUiThread {
                         val listIntent = Intent(this@MainActivity, OrderListActivity::class.java)
                         startActivity(listIntent)
                     }
-                    Toast.makeText(this@MainActivity, "Jwt токен был обновлен", Toast.LENGTH_LONG).show()
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }
@@ -129,7 +127,6 @@ class MainActivity : AppCompatActivity() {
                 try {
                     saveCookieDataToSharedPreferences(response)
                     fetchRefreshToken()
-                    Toast.makeText(this@MainActivity, "Авторизация завершена", Toast.LENGTH_LONG).show()
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }

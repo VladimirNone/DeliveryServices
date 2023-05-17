@@ -28,9 +28,9 @@ class AdapterOrders (context: Context, private val resource: Int, private var or
         tvAddress.text = "Адрес: ${orders[position].deliveryAddress}"
 
         view.setOnClickListener{ v -> run{
-            Toast.makeText(context, "Clicked item :"+" "+position, Toast.LENGTH_SHORT).show()
             val intent = Intent(context, OrderActivity::class.java)
             intent.putExtra("orderId", orders[position].id);
+            intent.putExtra("canChangeState", orders[position].canDelManChangestate);
             context.startActivity(intent);
         }}
 

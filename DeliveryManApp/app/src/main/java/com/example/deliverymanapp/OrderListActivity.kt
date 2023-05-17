@@ -1,12 +1,16 @@
 package com.example.deliverymanapp
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
@@ -14,13 +18,19 @@ import com.android.volley.toolbox.Volley
 import com.example.deliverymanapp.dto.OrderItemDTO
 import com.example.deliverymanapp.dto.OrderStateItemDTO
 import com.example.deliverymanapp.dto.OrdersDTO
+import com.google.android.gms.location.*
+import com.google.android.gms.tasks.CancellationToken
+import com.google.android.gms.tasks.CancellationTokenSource
+import com.google.android.gms.tasks.OnTokenCanceledListener
 import com.google.gson.Gson
 import org.json.JSONException
 import java.net.CookieHandler
 import java.net.CookieManager
 
+
 class OrderListActivity : AppCompatActivity() {
     private var mRequestQueue: RequestQueue? = null
+    private var sharedPreferences :SharedPreferences? = null
     private var states = arrayOf<OrderStateItemDTO>()
     private val gson: Gson = Gson()
     private var url:String = ""
@@ -34,6 +44,7 @@ class OrderListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_order_list)
 
         mRequestQueue = Volley.newRequestQueue(this)
+        sharedPreferences = getSharedPreferences("my_preference", Context.MODE_PRIVATE)
         url = resources.getString(R.string.url)
 
         fetchListOfStates()
@@ -46,13 +57,12 @@ class OrderListActivity : AppCompatActivity() {
             { response ->
                 try {
                     states = gson.fromJson(response, Array<OrderStateItemDTO>::class.java)
-                    // create an array adapter and pass the required parameter
-                    // in our case pass the context, drop down layout , and array.
+
                     val arrayAdapter = ArrayAdapter(this, R.layout.dropdown_item, states.map { it.nameOfState })
                     val headerView = findViewById<View>(R.id.header)
-                    // get reference to the autocomplete text view
+
                     val autocompleteTV = headerView.findViewById<AutoCompleteTextView>(R.id.autoCompleteTextView)
-                    // set adapter to the autocomplete tv to the arrayAdapter
+
                     autocompleteTV.setAdapter(arrayAdapter)
 
                 } catch (e: JSONException) {
@@ -77,16 +87,28 @@ class OrderListActivity : AppCompatActivity() {
             orders.clear()
             LoadAndAddOrdersToList()
         }
+
+        val headerView = findViewById<View>(R.id.header)
+
+        val autocompleteTV = headerView.findViewById<AutoCompleteTextView>(R.id.autoCompleteTextView)
+        autocompleteTV.clearFocus()
     }
 
     private fun LoadAndAddOrdersToList(){
-        val req = StringRequest(
+        val req = object : StringRequest(
             Request.Method.GET, "${url}/DeliveryMan/getOrders?page=${page}&numberOfState=${selectedState?.numberOfStage}",
             { response ->
                 try {
                     val ordersInput = gson.fromJson(response, OrdersDTO::class.java)
                     orders.addAll(ordersInput.orders)
                     lastPage = ordersInput.pageEnded
+
+                    if(selectedState != null)
+                    {
+                        val res:Boolean = (selectedState!!.numberOfStage == 4 || selectedState!!.numberOfStage == 8)
+                        orders.forEach{it.canDelManChangestate = res}
+                    }
+
 
                     val showMoreButton = findViewById<Button>(R.id.showMoreButton)
                     if(lastPage){
@@ -110,6 +132,13 @@ class OrderListActivity : AppCompatActivity() {
                     Toast.makeText(this@OrderListActivity, "Bad request", Toast.LENGTH_SHORT).show()
                 }
             })
+        {
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Authorization"] = "Bearer " + sharedPreferences?.getString("jwtToken", "")
+                return headers
+            }
+        }
 
         /* Add your Requests to the RequestQueue to execute */
         mRequestQueue!!.add(req)

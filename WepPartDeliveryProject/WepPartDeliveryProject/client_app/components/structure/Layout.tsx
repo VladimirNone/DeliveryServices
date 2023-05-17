@@ -62,6 +62,8 @@ const Layout:FC<layoutProps> = ({children}) =>  {
 
     const authContextData = { 
         isAdmin: roles.includes("Admin"), 
+        isClient: roles.includes("Client"), 
+        isDeliveryMan: roles.includes("DeliveryMan"), 
         isKitchenWorker: roles.includes("KitchenWorker"), 
         isAuth: isAuthed, 
         toggleIsAuthed: () => setIsAuthed(true)
@@ -69,8 +71,8 @@ const Layout:FC<layoutProps> = ({children}) =>  {
 
     return (
         <>
-            <Header isAuthed={isAuthed} dropJwtToken={DropJwtToken}/>
-            <MainNavbar isAdmin={authContextData.isAdmin} isKitchenWorker={authContextData.isKitchenWorker} />
+            <Header {...authContextData} isAuthed={isAuthed} dropJwtToken={DropJwtToken}/>
+            <MainNavbar {...authContextData} />
             <AuthContext.Provider value = {authContextData}>
                 {children}
             </AuthContext.Provider>

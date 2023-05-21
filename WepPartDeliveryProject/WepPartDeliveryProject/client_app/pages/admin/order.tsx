@@ -19,7 +19,7 @@ export const getStaticProps: GetStaticProps = async () => {
 
 const Order: FC<{ categories: categoryItem[]}> = ({ categories }) => {
     const router = useRouter();
-    const [orderInfo, setOrderInfo] = useState<orderInfo>({ order: {id:"", deliveryAddress: "", price:0, sumWeight:0, DeleteOrder: ()=>{}, MoveOrderToNextStage: ()=>{}, MoveOrderToPreviousStage: ()=>{} }, orderedDishes: []});
+    const [orderInfo, setOrderInfo] = useState<orderInfo>({ order: {id:"", deliveryAddress: "", phoneNumber:'', price:0, sumWeight:0, DeleteOrder: ()=>{}, MoveOrderToNextStage: ()=>{}, MoveOrderToPreviousStage: ()=>{} }, orderedDishes: []});
     const orderId = router.query["orderId"];
 
     const handleDeleteOrder = async () => {
@@ -34,6 +34,9 @@ const Order: FC<{ categories: categoryItem[]}> = ({ categories }) => {
 
         if (resp1.ok) {
             router.push("/profile/orderStory");
+        }
+        else{
+            alert(await resp1.text());
         }
     }
 
@@ -55,6 +58,10 @@ const Order: FC<{ categories: categoryItem[]}> = ({ categories }) => {
                 body: JSON.stringify({ orderId, dishId })
             });
 
+            if(!response.ok){
+                alert(await response.text());
+            }
+
             if (orderInfo.orderedDishes.length == 0) {
                 await handleDeleteOrder();
             }
@@ -72,8 +79,13 @@ const Order: FC<{ categories: categoryItem[]}> = ({ categories }) => {
                 }, 
             });
             
-            const orderInfo = await resp.json() as orderInfo;
-            setOrderInfo(orderInfo);
+            if(resp.ok){
+                const orderInfo = await resp.json() as orderInfo;
+                setOrderInfo(orderInfo);
+            }
+            else{
+                alert(await resp.text())
+            }
         }
         fetchData();
     }, [orderId, router]);
@@ -81,7 +93,9 @@ const Order: FC<{ categories: categoryItem[]}> = ({ categories }) => {
     return (
         <>
             <ClientLayout categories={categories}>
-                <OrderCard {...orderInfo.order} DeleteOrder={handleDeleteOrder}/>
+                <OrderCard {...orderInfo.order} DeleteOrder={handleDeleteOrder} canWriteReview={false}/>
+                {orderInfo.order.clientRating != null && <h3>Оценка клиента: {orderInfo.order.clientRating}</h3>}
+                {orderInfo.order.review != null && <h3>Отзыв клиента: {orderInfo.order.review}</h3>}
                 <Row className="mt-3 ">
                     <Col >
                         <h3>Список блюд из заказа: </h3>

@@ -106,10 +106,11 @@ class MainActivity : AppCompatActivity() {
                 }
             },
             {
-                    error -> run {
-                Toast.makeText(this@MainActivity, "Bad request", Toast.LENGTH_SHORT).show()
+                error -> run {
+                    Toast.makeText(this@MainActivity, "Bad request", Toast.LENGTH_SHORT).show()
+                }
             }
-            })
+        )
 
         /* Add your Requests to the RequestQueue to execute */
         mRequestQueue!!.add(req)

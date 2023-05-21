@@ -3,18 +3,53 @@ import { Card, Col, Row } from 'react-bootstrap';
 import Link from 'next/link';
 import { AuthContext } from '../contexts/AuthContext';
 import OrderStateItem from './components/OrderStateItem';
+import CancelOrderModal from '../models/CancelOrderModal';
+import ReviewOrderModal from '../models/ReviewOrderModal';
 
 const OrderCard: FC<orderCardInfo> = (orderInfo) => {
     const authContextData = useContext<authContextProps>(AuthContext);
     const [showStory, setShowStory] = useState(false);
-    let clientCanCancelOrder:Boolean = false;
-    if(orderInfo.story != null ){
-        const curOrderStatus = orderInfo.story[orderInfo.story.length-1];
-        clientCanCancelOrder = (authContextData.isClient && curOrderStatus.numberOfStage != 16 && curOrderStatus.numberOfStage != 32) as Boolean;
+    const [showCancelModel, setShowCancelModal] = useState(false);
+    const [showReviewModel, setShowReviewModal] = useState(false);
+
+    const handleShowCancelModal = () =>{
+        setShowCancelModal(true);
     }
 
-    const handleCancelClick = (): void => {
-        orderInfo.DeleteOrder(orderInfo.id);
+    const handleCloseCancelModal = () =>{
+        setShowCancelModal(false);
+    }
+
+    const handleShowReviewModal = () =>{
+        setShowReviewModal(true);
+    }
+
+    const handleCloseReviewModal = () =>{
+        setShowReviewModal(false);
+    }
+
+    const handleCancelClick = (reasonOfCancel:string): void => {
+        orderInfo.DeleteOrder(orderInfo.id, reasonOfCancel);
+        setShowCancelModal(false);
+    }
+
+    const handleSendReviewClick = async (review:string, rating:number)=>{
+        const resp1 = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/order/reviewOrder`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
+                'Content-Type': 'application/json;charset=utf-8',
+            },
+            body: JSON.stringify({ orderId: orderInfo.id, review, clientRating:rating })
+        });
+
+        if (resp1.ok) {
+            setShowReviewModal(false);
+        }
+        else{
+            alert(await resp1.text());
+        }
     }
 
     const handleShowStoryClick = (): void => {
@@ -29,6 +64,18 @@ const OrderCard: FC<orderCardInfo> = (orderInfo) => {
     const handleMoveToPreviousOrderStage = ():void => {
         const orderStory = orderInfo.story as orderState[];
         orderInfo.MoveOrderToPreviousStage(orderInfo.id, orderStory[orderStory.length - 1].orderStateId)
+    }
+
+    let clientCanCancelOrder:Boolean = false;
+    if(orderInfo.story != null ){
+        const curOrderStatus = orderInfo.story[orderInfo.story.length-1];
+        clientCanCancelOrder = (authContextData.isClient && curOrderStatus.numberOfStage != 16 && curOrderStatus.numberOfStage != 32) as Boolean;
+    }
+
+    let clientCanReviewOrder:Boolean = false;
+    if(orderInfo.story != null ){
+        const curOrderStatus = orderInfo.story[orderInfo.story.length-1];
+        clientCanReviewOrder = (authContextData.isClient && curOrderStatus.numberOfStage == 16  && orderInfo.canWriteReview) as Boolean;
     }
 
     return (
@@ -57,11 +104,11 @@ const OrderCard: FC<orderCardInfo> = (orderInfo) => {
                                 </Col>
                                 {(authContextData.isAdmin || clientCanCancelOrder) &&
                                     <Col className='col-10 col-lg-auto mt-2'>
-                                        <button className='btn btn-danger w-100' onClick={handleCancelClick}>Отменить</button>
+                                        <button className='btn btn-danger w-100' onClick={handleShowCancelModal}>Отменить</button>
                                     </Col>}
-                                {(authContextData.isClient || clientCanCancelOrder) &&
+                                {clientCanReviewOrder &&
                                     <Col className='col-10 col-lg-auto mt-2'>
-                                        <button className='btn btn-danger w-100' onClick={handleCancelClick}>Написать отзыв</button>
+                                        <button className='btn btn-primary w-100' onClick={handleShowReviewModal}>Написать отзыв</button>
                                     </Col>}
                                 <Col className='col-10 col-lg-auto mt-2'>
                                     <button className='btn btn-secondary w-100' onClick={handleShowStoryClick}>{showStory ? 'Скрыть':'Показать'} историю заказа</button>
@@ -78,10 +125,13 @@ const OrderCard: FC<orderCardInfo> = (orderInfo) => {
                                     </Row>
                                 }
                             </Row>
+                            
                         </Card.Body>
                     </Col>
                 </Row>
             </Card>
+            {showCancelModel && <CancelOrderModal show={showCancelModel} closeModel={handleCloseCancelModal} commitCancelOrder={handleCancelClick}/>}
+            {showReviewModel && <ReviewOrderModal show={showReviewModel} closeModel={handleCloseReviewModal} commitAction={handleSendReviewClick}/>}
         </>
     );
 }

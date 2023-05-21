@@ -32,6 +32,9 @@ const Header: FC<HeaderProps> = ({isAuthed, dropJwtToken, isAdmin, isKitchenWork
             dropJwtToken();
             router.push("/");
         }
+        else{
+            alert(await resp.text());
+        }
         
     }
 

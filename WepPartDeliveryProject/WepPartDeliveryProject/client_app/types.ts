@@ -70,10 +70,13 @@ interface orderCardInfo {
     sumWeight: number,
     deliveryAddress: string,
     phoneNumber: string,
-    DeleteOrder: (orderId:string)=>void,
+    DeleteOrder: (orderId:string,  reasonOfCancel:string)=>void,
     MoveOrderToNextStage: (orderId:string, orderStateId:string)=>void,
     MoveOrderToPreviousStage: (orderId:string, orderStateId:string)=>void,
     story?: orderState[],
+    review?:string,
+    clientRating?:number,
+    canWriteReview?: boolean,
 }
 
 interface orderedDishClientInfo {

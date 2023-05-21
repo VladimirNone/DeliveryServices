@@ -15,6 +15,9 @@ const DishOrderCard: FC<orderedDishClientInfo> = ({count, dishInfo, orderId}) =>
             },
             body: JSON.stringify({newCount, orderId, dishId})
         });
+        if(!response.ok){
+            alert(await response.text())
+        }
     }
 
     return (

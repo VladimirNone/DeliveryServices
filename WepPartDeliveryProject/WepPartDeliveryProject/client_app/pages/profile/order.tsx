@@ -33,12 +33,14 @@ const Order: FC<{ categories: categoryItem[]}> = ({ categories }) => {
                 }, 
             });
 
-            if(!resp.ok){
-                router.push("/profile/orderStory");
+            if(resp.ok){
+                const orderInfo = await resp.json() as orderInfo;
+                setOrderInfo(orderInfo);
             }
-
-            const orderInfo = await resp.json() as orderInfo;
-            setOrderInfo(orderInfo);
+            else{
+                router.push("/profile/orderStory");
+                //alert(await resp.text());
+            }
         }
         fetchData();
     }, [orderId, router]);
@@ -46,7 +48,9 @@ const Order: FC<{ categories: categoryItem[]}> = ({ categories }) => {
     return (
         <>
             <ClientLayout categories={categories}>
-                <OrderCard {...orderInfo.order}/>
+                <OrderCard {...orderInfo.order} canWriteReview={orderInfo.order.clientRating == null}/>
+                {orderInfo.order.clientRating != null && <h3>Оценка клиента: {orderInfo.order.clientRating}</h3>}
+                {orderInfo.order.review != null && <h3>Отзыв клиента: {orderInfo.order.review}</h3>}
                 <Row className="mt-3 ">
                     <Col >
                         <h3>Список блюд из заказа: </h3>

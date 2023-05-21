@@ -37,7 +37,7 @@ namespace WepPartDeliveryProject.Controllers
         }
 
         [HttpGet("getDishesForMainPage")]
-        public async Task<IActionResult> GetTestList(int page = 0)
+        public async Task<IActionResult> GetDishesForMainPage(int page = 0)
         {
             //обычному пользователю не должен быть доступен удаленный или недоступный продукт
             var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesAsync(_appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");

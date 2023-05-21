@@ -4,7 +4,7 @@ import ClientLayout from '@/components/structure/ClientLayout'
 import { GetStaticProps } from 'next'
 import DishCartCard from '@/components/cards/DishCartCard'
 import { useCookies } from 'react-cookie'
-import PlaceAnOrderModel from '@/components/models/PlaceAnOrderModel'
+import PlaceAnOrderModal from '@/components/models/PlaceAnOrderModal'
 import { stringify } from 'querystring'
 
 export const getStaticProps: GetStaticProps = async () => {
@@ -37,8 +37,14 @@ const Cart: FC<{ categories: categoryItem[] }> = ({ categories }) => {
             const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/order/getCart`, {
                 credentials: 'include',
             });
-            const cartDishes = await resp.json() as dishClientInfo[];
-            setDishes(cartDishes);
+            if(resp.ok){
+                const cartDishes = await resp.json() as dishClientInfo[];
+                setDishes(cartDishes);
+            }
+            else{
+                alert(await resp.text());
+            }
+
         }
         fetchData();
     }, []);
@@ -69,7 +75,7 @@ const Cart: FC<{ categories: categoryItem[] }> = ({ categories }) => {
             setShow(false);
         }
         else {
-            alert(await response.text())
+            alert(await response.text());
         }
     }
 
@@ -94,7 +100,7 @@ const Cart: FC<{ categories: categoryItem[] }> = ({ categories }) => {
                     )
                 }
             </main>
-            {show && <PlaceAnOrderModel show={show} closeModel={handleCloseModal} commitAction={handlePlaceAnOrder}/>}
+            {show && <PlaceAnOrderModal show={show} closeModel={handleCloseModal} commitAction={handlePlaceAnOrder}/>}
         </ClientLayout>
     )
 }

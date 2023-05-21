@@ -81,7 +81,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getRoles")]   
         public IActionResult GetRoles()
         {
-            return Ok(((IUserRepository)_repositoryFactory.GetRepository<User>(true)).UserRolePriority.Keys.ToList());
+            return Ok(((IUserRepository)_repositoryFactory.GetRepository<User>(true)).UserRolePriority.Keys.ToList().Except(new List<String>() { "User"}));
         }
 
         [HttpPost("addUserRole")]

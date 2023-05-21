@@ -74,19 +74,15 @@ namespace WepPartDeliveryProject.Controllers
 
             var userId = Request.Cookies["X-UserId"];
             if (userId == null)
-            {
-                return BadRequest("You don't have refresh token. You need to login or signup to system");
-            }
+                return BadRequest("У вас отсутсвует refresh token. Вам необходимо авторизоваться или зарегистрироваться.");
 
             var inputRefreshToken = Request.Cookies["X-Refresh-Token"];
 
             var userNode = await userRepo.GetNodeAsync(userId);
 
             if (userNode.IsBlocked)
-            {
                 return BadRequest("Ваш аккаунт был заблокирован!");
-            }
-            var l = userNode.RefreshToken.ToString();
+
             if (inputRefreshToken == userNode.RefreshToken.ToString() && userNode.RefreshTokenCreated.AddDays(60) > DateTime.Now)
             {
                 var userRoles = await userRepo.GetUserRoles(userId);
@@ -101,10 +97,8 @@ namespace WepPartDeliveryProject.Controllers
                 
                 return Ok(jwtTokenInfo);
             }
-            else
-            {
-                return BadRequest("You refresh token don't work. You need to login or signup to system");
-            }
+
+            return BadRequest("You refresh token don't work. You need to login or signup to system");
         }
 
         [HttpPost("signup")]

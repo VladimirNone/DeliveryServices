@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2023-05-18T10:56:02.293Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 YaBrowser/23.3.4.603 Yowser/2.5 Safari/537.36" etag="CqMlck3e6JPzIsJIy1S1" version="21.3.0" type="device">
+<mxfile host="app.diagrams.net" modified="2023-05-20T17:30:29.441Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 YaBrowser/23.3.4.603 Yowser/2.5 Safari/537.36" etag="aHFxpgsc7yBBBTtukX2S" version="21.3.2" type="device">
   <diagram name="Страница 1" id="uw1EA5nJfDs6XLrswQ4S">
-    <mxGraphModel dx="674" dy="554" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1050" dy="569" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -164,7 +164,7 @@
         <mxCell id="G5MXZtjFW26itnjo3iaV-21" value="Создать продукт" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="770" y="240" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="G5MXZtjFW26itnjo3iaV-24" value="Заказ" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="G5MXZtjFW26itnjo3iaV-24" value="Описание заказ" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="770" y="310" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="G5MXZtjFW26itnjo3iaV-26" value="Сотрудники кухни" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
@@ -183,18 +183,18 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="G5MXZtjFW26itnjo3iaV-38" value="Авторизация" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="550" y="680" width="120" height="60" as="geometry" />
+          <mxGeometry x="336" y="770" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="G5MXZtjFW26itnjo3iaV-43" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="G5MXZtjFW26itnjo3iaV-40" target="G5MXZtjFW26itnjo3iaV-41" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="G5MXZtjFW26itnjo3iaV-40" value="История заказов курьера" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="550" y="770" width="120" height="60" as="geometry" />
+          <mxGeometry x="500" y="770" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="G5MXZtjFW26itnjo3iaV-41" value="Описание заказа" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="550" y="860" width="120" height="60" as="geometry" />
+          <mxGeometry x="660" y="770" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="xTDoqyGdfAdkKN87sUrl-2" value="Авторизованный пользователь" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+        <mxCell id="xTDoqyGdfAdkKN87sUrl-2" value="Авторизованный пользователь" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="336" y="450" width="60" height="30" as="geometry" />
         </mxCell>
       </root>

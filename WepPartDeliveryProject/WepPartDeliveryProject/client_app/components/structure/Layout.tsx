@@ -32,7 +32,7 @@ const Layout:FC<layoutProps> = ({children}) =>  {
     };
 
     const UpdateJwtToken = async () => {
-        //Если пользователь не авторизован и при этом
+        //Если пользователь авторизован и при этом
         //Если с jwt токеном все ок, то нет смысла его обновлять
         if(JwtTokenIsValid() && isAuthed == true)
             return;

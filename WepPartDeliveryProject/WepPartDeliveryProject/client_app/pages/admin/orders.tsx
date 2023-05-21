@@ -36,13 +36,15 @@ const AdminOrders: FC<{categories:categoryItem[], states:orderState[]}> = ({ cat
         });
 
         if (resp1.ok) {
-
             const changedOrderIndex = orders.findIndex(el => el.id == orderId);
             const updatedOrders = [...orders];
             const deletedStage = updatedOrders[changedOrderIndex].story?.pop();
 
             if(deletedStage?.orderStateId == orderStateId)
                 setOrders(updatedOrders);
+        }
+        else{
+            alert(await resp1.text());
         }
     }
 
@@ -65,6 +67,9 @@ const AdminOrders: FC<{categories:categoryItem[], states:orderState[]}> = ({ cat
             if (newOrderState.orderStateId != orderStateId)
                 setOrders(updatedOrders);
         }
+        else{
+            alert(await resp1.text());
+        }
     }
 
     const handleShowMoreOrders = async  () => {
@@ -73,15 +78,16 @@ const AdminOrders: FC<{categories:categoryItem[], states:orderState[]}> = ({ cat
                 'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
             }
         });
-        const loadedData = await resp.json() as {orders: orderCardInfo[], pageEnded: boolean};
     
         if(resp.ok){
+            const loadedData = await resp.json() as {orders: orderCardInfo[], pageEnded: boolean};
             setPage(page + 1);
             setOrders(orders.concat(loadedData.orders));
             setPageEnded(loadedData.pageEnded);
         }
         else{
             setPageEnded(true);
+            alert(await resp.text());
         }
     }
 
@@ -96,6 +102,10 @@ const AdminOrders: FC<{categories:categoryItem[], states:orderState[]}> = ({ cat
             },
             body: JSON.stringify({orderId})
         });
+
+        if(!resp1.ok){
+            alert(await resp1.text());
+        }
     }
 
     const handleSelectState = (selectState: orderState) => {

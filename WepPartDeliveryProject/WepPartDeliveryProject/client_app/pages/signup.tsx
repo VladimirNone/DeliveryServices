@@ -78,6 +78,9 @@ class Signup extends Component<WithRouterProps, SignupState> {
             this.context.toggleIsAuthed();
             this.props.router.push('/');
         }
+        else{
+            alert(await response.text());
+        }
     }
 
     render() {

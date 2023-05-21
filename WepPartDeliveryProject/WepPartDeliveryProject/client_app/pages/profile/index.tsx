@@ -17,8 +17,13 @@ const ProfileInfo: FC = () => {
                     'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
                 }, 
             });
-            const profileInfo = await resp.json() as profileInfo;
-            setProfileInfo(profileInfo);
+            if(resp.ok){
+                const profileInfo = await resp.json() as profileInfo;
+                setProfileInfo(profileInfo);
+            }
+            else{
+                alert(await resp.text());
+            }
         }
         fetchData();
     }, []);

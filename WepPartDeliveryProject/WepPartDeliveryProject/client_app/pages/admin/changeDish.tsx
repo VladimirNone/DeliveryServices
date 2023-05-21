@@ -34,9 +34,14 @@ const ChangeDish: FC<{ categories: categoryItem[], }> = ({ categories }) => {
                 }, 
             });
             
-            const dishInfo = await resp.json() as {dish: dishAdminInfo, category: categoryItem};
-            setDish(dishInfo.dish);
-            setSelectedCategory(dishInfo.category);
+            if(resp.ok){
+                const dishInfo = await resp.json() as {dish: dishAdminInfo, category: categoryItem};
+                setDish(dishInfo.dish);
+                setSelectedCategory(dishInfo.category);
+            }
+            else{
+                alert(await resp.text());
+            }
         }
         fetchData();
     }, [dishId, router]);
@@ -92,6 +97,9 @@ const ChangeDish: FC<{ categories: categoryItem[], }> = ({ categories }) => {
 
         if(response.ok){
             router.push("/dishes/"+ await response.json());
+        }
+        else{
+            alert(await response.text());
         }
     }
 

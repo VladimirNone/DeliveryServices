@@ -34,26 +34,33 @@ const LineChart: FC<{ query:statisticQueryInfo }> = ({ query }) => {
                     'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
                 },
             });
-            const resInfo = await resp.json() as statisticQueryDataItem[];
-    
-            const datasets:ChartData<"line">[] = [];
-            
-            for( let i = 0; i < (query.nameDatasets?.length ?? 1); i++)
-            {
-                datasets.push({
-                    labels: resInfo.map((value) => value.x),
-                    datasets: [
-                        {
-                            label: query.nameDatasets == null ? query.nameQuery : query.nameDatasets[i] ,
-                            data: resInfo.map((value) => value.y[i]),
-                            borderColor: 'rgb(255, 99, 132)',
-                            backgroundColor: '#7E07A9',
-                        },
-                    ],
-                });
-            };
 
-            setChartsData(datasets);
+            if(resp.ok){
+                const resInfo = await resp.json() as statisticQueryDataItem[];
+    
+                const datasets:ChartData<"line">[] = [];
+                
+                for( let i = 0; i < (query.nameDatasets?.length ?? 1); i++)
+                {
+                    datasets.push({
+                        labels: resInfo.map((value) => value.x),
+                        datasets: [
+                            {
+                                label: query.nameDatasets == null ? query.nameQuery : query.nameDatasets[i] ,
+                                data: resInfo.map((value) => value.y[i]),
+                                borderColor: 'rgb(255, 99, 132)',
+                                backgroundColor: '#7E07A9',
+                            },
+                        ],
+                    });
+                };
+    
+                setChartsData(datasets);
+            }
+            else{
+                alert(await resp.text());
+            }
+           
         }
         fetchData();
     }, [query]);

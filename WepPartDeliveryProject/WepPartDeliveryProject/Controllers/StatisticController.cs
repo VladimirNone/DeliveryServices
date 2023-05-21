@@ -30,14 +30,14 @@ namespace WepPartDeliveryProject.Controllers
 
         public static List<StatisticQueryInfoOutDTO> Statistics { get; } = new List<StatisticQueryInfoOutDTO>()
         {
-            new StatisticQueryInfoOutDTO(){ NameQuery = "Количество и суммарная стоимость заказов по месяцам", LinkToQuery = "query1", ChartName = "line", NeedDataRange = true, NameDatasets = new List<string>(){ "Стоимость заказов", "Количество заказов" } },
-            new StatisticQueryInfoOutDTO(){ NameQuery = "Топ-10 клиентов по стоимости заказов", LinkToQuery = "query2", ChartName = "line", NeedDataRange = true, NameDatasets = new List<string>(){ "Стоимость заказов", "Количество заказов" } },
-            new StatisticQueryInfoOutDTO(){ NameQuery = "Топ доставщиков по количеству заказов", LinkToQuery = "query3", ChartName = "line", NeedDataRange = true},
-            new StatisticQueryInfoOutDTO(){ NameQuery = "Количество отмененных заказов на каждой стадии", LinkToQuery = "query4", ChartName = "radar", NeedDataRange = true},
-            new StatisticQueryInfoOutDTO(){ NameQuery = "Сколько в среднем клиенты оформляют заказов, если оформляют", LinkToQuery = "query5", ChartName = "bar", NeedDataRange = true, NameDatasets = new List<string>(){ "Количество заказов", "Количество клиентов, оформивших заказы" } },
-            new StatisticQueryInfoOutDTO(){ NameQuery = "Средняя продолжительность пребывания заказа в стадии", LinkToQuery = "query6", ChartName = "line", NeedDataRange = true},
-            new StatisticQueryInfoOutDTO(){ NameQuery = "Количество выполненных заказов и приготовленных блюд в каждой из кухонь", LinkToQuery = "query7", ChartName = "bar", NeedDataRange = true, NameDatasets = new List<string>(){ "Количество выполненных заказов", "Количество приготовленных блюд" } },
-            new StatisticQueryInfoOutDTO(){ NameQuery = "Топ-10 самых популярных блюд", LinkToQuery = "query8", ChartName = "line", NeedDataRange = true, },
+            new StatisticQueryInfoOutDTO(){ NameQuery = "Количество и суммарная стоимость заказов по месяцам",                      LinkToQuery = "query1", ChartName = "line", NeedDataRange = true, NameDatasets = new List<string>(){ "Стоимость заказов", "Количество заказов" } },
+            new StatisticQueryInfoOutDTO(){ NameQuery = "Топ-10 клиентов по стоимости заказов",                                     LinkToQuery = "query2", ChartName = "line", NeedDataRange = true, NameDatasets = new List<string>(){ "Стоимость заказов", "Количество заказов" } },
+            new StatisticQueryInfoOutDTO(){ NameQuery = "Топ доставщиков по количеству заказов",                                    LinkToQuery = "query3", ChartName = "line", NeedDataRange = true},
+            new StatisticQueryInfoOutDTO(){ NameQuery = "Количество отмененных заказов на каждой стадии",                           LinkToQuery = "query4", ChartName = "radar",NeedDataRange = true},
+            new StatisticQueryInfoOutDTO(){ NameQuery = "Сколько в среднем клиенты оформляют заказов, если оформляют",              LinkToQuery = "query5", ChartName = "bar",  NeedDataRange = true, NameDatasets = new List<string>(){ "Количество заказов", "Количество клиентов, оформивших заказы" } },
+            new StatisticQueryInfoOutDTO(){ NameQuery = "Средняя продолжительность пребывания заказа в стадии",                     LinkToQuery = "query6", ChartName = "line", NeedDataRange = true},
+            new StatisticQueryInfoOutDTO(){ NameQuery = "Количество выполненных заказов и приготовленных блюд в каждой из кухонь",  LinkToQuery = "query7", ChartName = "bar",  NeedDataRange = true, NameDatasets = new List<string>(){ "Количество выполненных заказов", "Количество приготовленных блюд" } },
+            new StatisticQueryInfoOutDTO(){ NameQuery = "Топ-10 самых популярных блюд",                                             LinkToQuery = "query8", ChartName = "line", NeedDataRange = true},
         };
 
         [AllowAnonymous]
@@ -58,28 +58,6 @@ namespace WepPartDeliveryProject.Controllers
             {
                 resQueryData.Add(new StatisticQueryDataItemOutDTO() { Y = new List<double>() { item.Item2, item.Item3 }, X = item.Item1 });
             }
-
-/*            var finishedOrderState = OrderState.OrderStatesFromDb.First(h => h.NumberOfStage == (int)OrderStateEnum.Finished);
-            var finishedRelationsOrder = await _repositoryFactory
-                .GetRepository<OrderState>()
-                .GetRelationsOfNodesAsync<HasOrderState, Order>(finishedOrderState);
-
-            finishedRelationsOrder.Sort((x,y) => x.TimeStartState.CompareTo(y.TimeStartState));
-
-            foreach (var item in finishedRelationsOrder)
-            {
-                var xName = item.TimeStartState.Month + "." + item.TimeStartState.Year;
-                var foundedQueryItem = resQueryData.Find(h => h.X == xName);
-                if (foundedQueryItem != null)
-                {
-                    foundedQueryItem.Y[0] += ((Order)item.NodeFrom).Price;
-                    foundedQueryItem.Y[1]++;
-                }
-                else
-                {
-                    resQueryData.Add(new StatisticQueryDataItemOutDTO() { Y = new List<double>() { ((Order)item.NodeFrom).Price, 1 }, X = xName });
-                }
-            }*/
 
             return Ok(resQueryData);
         }

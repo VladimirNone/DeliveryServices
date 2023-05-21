@@ -159,7 +159,7 @@ namespace DbManager.Neo4j.DataGenerator
             {
                 for (int j = i + 1; j < relations.Count; j++)
                 {
-                    if (relations[j].NodeFrom.Id == relations[j].NodeFrom.Id && relations[i].NodeTo.Id == relations[j].NodeTo.Id && !relationsForRemove.Contains(relations[j]))
+                    if (relations[i].NodeFrom.Id == relations[j].NodeFrom.Id && relations[i].NodeTo.Id == relations[j].NodeTo.Id)
                     {
                         relationsForRemove.Add(relations[j]);
                     }

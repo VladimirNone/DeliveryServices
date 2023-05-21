@@ -36,25 +36,32 @@ const BarChart: FC<{ query:statisticQueryInfo }> = ({ query }) => {
                     'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
                 },
             });
-            const resInfo = await resp.json() as statisticQueryDataItem[];
-    
-            const data:{labels:string[], datasets:any} = {
-                labels: resInfo.map((value) => value.x),
-                datasets: [],
-            }
-            
-            for( let i = 0; i < (query.nameDatasets?.length ?? 1); i++)
-            {
-                data.datasets.push({
-                    label: query.nameDatasets == null ? query.nameQuery : query.nameDatasets[i],
-                    data: resInfo.map((value) => value.y[i]),
-                    borderColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)})`,
-                    backgroundColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)})`,
-                    borderWidth: 1,
-                });
-            };
 
-            setChartData(data);
+            if(resp.ok){
+                const resInfo = await resp.json() as statisticQueryDataItem[];
+    
+                const data:{labels:string[], datasets:any} = {
+                    labels: resInfo.map((value) => value.x),
+                    datasets: [],
+                }
+                
+                for( let i = 0; i < (query.nameDatasets?.length ?? 1); i++)
+                {
+                    data.datasets.push({
+                        label: query.nameDatasets == null ? query.nameQuery : query.nameDatasets[i],
+                        data: resInfo.map((value) => value.y[i]),
+                        borderColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)})`,
+                        backgroundColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)})`,
+                        borderWidth: 1,
+                    });
+                };
+    
+                setChartData(data);
+            }
+            else{
+                alert(await resp.text());
+            }
+
         }
         fetchData();
     }, [query]);

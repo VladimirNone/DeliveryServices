@@ -57,7 +57,7 @@ const Dish: FC<dishPageProps> = ({ categories, dish }) => {
                 setAbility(abilityRes);
             }
             else {
-                alert(await resp1.text())
+                alert(await resp1.text());
             }
         }
         fetchData();

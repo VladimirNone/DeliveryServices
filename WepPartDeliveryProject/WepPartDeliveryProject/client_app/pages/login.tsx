@@ -52,6 +52,9 @@ class Login extends Component<WithRouterProps, LoginState> {
             this.context.toggleIsAuthed();
             this.props.router.push('/');
         }
+        else{
+            alert(await response.text());
+        }
     }
 
     render() {

@@ -86,10 +86,6 @@ services.AddAuthentication(options =>
         };
     });
 
-/*services.AddAuthorization(options =>
-{
-    options.AddPolicy("role-policy", x => { x.RequireClaim("role"); });
-});*/
 
 var app = builder.Build();
 
@@ -119,14 +115,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseHealthChecks("/healthcheck");
-
-app.Use(async (context, requestDel) =>
-{
-
-    await requestDel.Invoke(context);
-});
-
-
 
 app.UseAuthentication();
 app.UseRouting();

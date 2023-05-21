@@ -1,0 +1,472 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="DbManager.Data.Nodes.Admin" Collapsed="true">
+    <Position X="16.5" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Nodes\Admin.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Data.Nodes.Category" Collapsed="true">
+    <Position X="21.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAABAAgAAAAABAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Nodes\Category.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Data.Nodes.Client" Collapsed="true">
+    <Position X="18.75" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAA=</HashCode>
+      <FileName>Data\Nodes\Client.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Data.Nodes.DeliveryMan" Collapsed="true">
+    <Position X="21" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Nodes\DeliveryMan.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Data.Nodes.Dish" Collapsed="true">
+    <Position X="23.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAQAgAAAAAAAAAAQAACAAABAAAAAAAQAAAAQ=</HashCode>
+      <FileName>Data\Nodes\Dish.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Data.Nodes.Kitchen" Collapsed="true">
+    <Position X="25.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Nodes\Kitchen.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Data.Nodes.KitchenWorker" Collapsed="true">
+    <Position X="14.25" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAA=</HashCode>
+      <FileName>Data\Nodes\KitchenWorker.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Data.Nodes.Order" Collapsed="true">
+    <Position X="14" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAgQAAAAAEADCAQAAAAAAAAAAAAIAAgAAAAAQ=</HashCode>
+      <FileName>Data\Nodes\Order.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Data.Nodes.OrderState" Collapsed="true">
+    <Position X="19.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAABAAACIAAA=</HashCode>
+      <FileName>Data\Nodes\OrderState.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Data.Relations.ContainsDish" Collapsed="true">
+    <Position X="18.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Relations\ContainsDish.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.Relations.CookedBy" Collapsed="true">
+    <Position X="20.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Relations\CookedBy.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.Relations.DeliveredBy" Collapsed="true">
+    <Position X="22.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Relations\DeliveredBy.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.Relations.HasOrderState" Collapsed="true">
+    <Position X="24" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Relations\HasOrderState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.Relations.Ordered" Collapsed="true">
+    <Position X="25.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Relations\Ordered.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.Relations.OrderedDish" Collapsed="true">
+    <Position X="13.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Relations\OrderedDish.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.Relations.ReviewedBy" Collapsed="true">
+    <Position X="15.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAQCAAAAAAAA=</HashCode>
+      <FileName>Data\Relations\ReviewedBy.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.Relations.WorkedIn" Collapsed="true">
+    <Position X="17" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Relations\WorkedIn.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.Node" Collapsed="true">
+    <Position X="17.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Node.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Data.Relation&lt;TFrom, TTo&gt;" Collapsed="true">
+    <Position X="19.5" Y="2" Width="2" />
+    <TypeIdentifier>
+      <HashCode>QAACAAAAgAAQBAAAAAAAAAAAAAAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Relation.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Data.User" Collapsed="true">
+    <Position X="16.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAQAAAAAAMAAAAQAQAAAAAAgACAAAQAAAAAAA=</HashCode>
+      <FileName>Data\User.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Neo4j.Implementations.ClientRepository" Collapsed="true">
+    <Position X="21.5" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Neo4j\Implementations\ClientRepository.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Neo4j.Implementations.DeliveryManRepository" Collapsed="true">
+    <Position X="13.5" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAA=</HashCode>
+      <FileName>Neo4j\Implementations\DeliveryManRepository.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Neo4j.Implementations.DishRepository" Collapsed="true">
+    <Position X="15.5" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAA=</HashCode>
+      <FileName>Neo4j\Implementations\DishRepository.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Neo4j.Implementations.GeneralRepository&lt;TNode&gt;" Collapsed="true">
+    <Position X="17.5" Y="10.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>BAAEAAABCAAMCAIAAQAEACARACBAAAAAAABBCAgAAAA=</HashCode>
+      <FileName>Neo4j\Implementations\GeneralRepository.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Neo4j.Implementations.OrderRepository" Collapsed="true">
+    <Position X="17.5" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CEIQAABEAAAAAAAAAAAAAAAAgAAAAQAAAAAAAAAAAAA=</HashCode>
+      <FileName>Neo4j\Implementations\OrderRepository.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.Neo4j.Implementations.UserRepository" Collapsed="true">
+    <Position X="19.5" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAIAAAIAAEAAAAAAAAAAACAAAAAAAAAg=</HashCode>
+      <FileName>Neo4j\Implementations\UserRepository.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DbManager.GraphHealthCheck" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="6.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAECAAAAAAAAAAAAAAAAAAAAEAAAAAAA=</HashCode>
+      <FileName>GraphHealthCheck.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="DbManager.Neo4jSettings" Collapsed="true">
+    <Position X="10.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAIAAAAAABAAAAAAIAAAAAAAAAA=</HashCode>
+      <FileName>Neo4jSettings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.ServiceRegistration" Collapsed="true">
+    <Position X="5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAACAA=</HashCode>
+      <FileName>ServiceRegistration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Neo4j.Implementations.RepositoryFactory" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="1.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAQAAAAEAAAAEAAAAAAAAAIAAAAA=</HashCode>
+      <FileName>Neo4j\Implementations\RepositoryFactory.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="DbManager.Services.PasswordService" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="6.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAIAAAAA=</HashCode>
+      <FileName>Services\PasswordService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="DbManager.Mapper.MapperProfile" Collapsed="true">
+    <Position X="6.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Mapper\MapperProfile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.DTOs.JwtTokenInfoOutDTO" Collapsed="true">
+    <Position X="8.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAEAAAACA=</HashCode>
+      <FileName>Data\DTOs\JwtTokenInfoOutDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.DTOs.KitchenWorkerOutDTO" Collapsed="true">
+    <Position X="10.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAIAAAAQAQAAAAAAgCAAAAQAAAIAAA=</HashCode>
+      <FileName>Data\DTOs\KitchenWorkerOutDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.DTOs.ManipulateDishDataInDTO" Collapsed="true">
+    <Position X="1.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAQAgAgAAAAAACAQAACAAAAAAAAAAAQAAAAQ=</HashCode>
+      <FileName>Data\DTOs\ManipulateDishDataInDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.DTOs.ManipulateOrderDataInDTO" Collapsed="true">
+    <Position X="3.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAAAAAAAAAAAABAAACEAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\DTOs\ManipulateOrderDataInDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.DTOs.ManipulateUserDataInDTO" Collapsed="true">
+    <Position X="5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAABAAAAAAgAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\DTOs\ManipulateUserDataInDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.DTOs.OrderOutDTO" Collapsed="true">
+    <Position X="3.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAQAAAAAAADCAQAAAAAAAAAAAAQCAAAAAAAA=</HashCode>
+      <FileName>Data\DTOs\OrderOutDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.DTOs.OrderStateItemOutDTO" Collapsed="true">
+    <Position X="5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAACAAgAAAAAAAAAAAAEAAAAAAAAAACIAAA=</HashCode>
+      <FileName>Data\DTOs\OrderStateItemOutDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.DTOs.PlaceAnOrderInDTO" Collapsed="true">
+    <Position X="8.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAAAAAACAAQAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\DTOs\PlaceAnOrderInDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.DTOs.ProfileUserOutDTO" Collapsed="true">
+    <Position X="10.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAEAAAAAIAAAAQAQAAAAAAAAAAAAQAAAIAAA=</HashCode>
+      <FileName>Data\DTOs\ProfileUserOutDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.DTOs.ReviewOrderInDTO" Collapsed="true">
+    <Position X="3.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQCAAAAAAAA=</HashCode>
+      <FileName>Data\DTOs\ReviewOrderInDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.DTOs.StatisticQueryDataItemOutDTO" Collapsed="true">
+    <Position X="6.75" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYAA=</HashCode>
+      <FileName>Data\DTOs\StatisticQueryDataItemOutDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.DTOs.StatisticQueryInfoOutDTO" Collapsed="true">
+    <Position X="8.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAACAAEAAAAAAAAAAEAAAAAAACAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\DTOs\StatisticQueryInfoOutDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.DTOs.UserForAdminOutDTO" Collapsed="true">
+    <Position X="10.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAIAAAAQAQAAgAAAgAAAAAQAAAAAAA=</HashCode>
+      <FileName>Data\DTOs\UserForAdminOutDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.DTOs.UserLoginInDTO" Collapsed="true">
+    <Position X="1.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAQAAAAAAA=</HashCode>
+      <FileName>Data\DTOs\UserLoginInDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Data.DTOs.UserSignupInDTO" Collapsed="true">
+    <Position X="3.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAIAAAAQAQAAAAAAAACAAAQAAAAAAA=</HashCode>
+      <FileName>Data\DTOs\UserSignupInDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Neo4j.DataGenerator.BogusExtentions" Collapsed="true">
+    <Position X="1.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Neo4j\DataGenerator\BogusExtentions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Neo4j.DataGenerator.DataGenerator" Collapsed="true">
+    <Position X="3.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>UAQIAACSAAACQAAAACAAAAAAgIAAAAAKIBBAAAoABAA=</HashCode>
+      <FileName>Neo4j\DataGenerator\DataGenerator.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Neo4j.DataGenerator.GeneratorService" Collapsed="true">
+    <Position X="5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAEAAAAAAAAAAIAAAAIAAAAA=</HashCode>
+      <FileName>Neo4j\DataGenerator\GeneratorService.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Neo4j.DataGenerator.ObjectGenerator" Collapsed="true">
+    <Position X="1.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAEAAAFQAAEBAAQAECAAACAAABgAACAAABBACgAAAA=</HashCode>
+      <FileName>Neo4j\DataGenerator\ObjectGenerator.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DbManager.Neo4j.Neo4jExtentions" Collapsed="true">
+    <Position X="8.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAA=</HashCode>
+      <FileName>Neo4j\Neo4jExtentions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="DbManager.Data.IModel" Collapsed="true">
+    <Position X="24.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\IModel.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="DbManager.Data.INode" Collapsed="true">
+    <Position X="23" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\INode.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="DbManager.Data.IRelation" Collapsed="true">
+    <Position X="25.25" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAgAAQBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\IRelation.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="DbManager.Neo4j.Interfaces.IClientRepository" Collapsed="true">
+    <Position X="19.5" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Neo4j\Interfaces\IClientRepository.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="DbManager.Neo4j.Interfaces.IDeliveryManRepository" Collapsed="true">
+    <Position X="21.5" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAA=</HashCode>
+      <FileName>Neo4j\Interfaces\IDeliveryManRepository.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="DbManager.Neo4j.Interfaces.IDishRepository" Collapsed="true">
+    <Position X="13.5" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAA=</HashCode>
+      <FileName>Neo4j\Interfaces\IDishRepository.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="DbManager.Neo4j.Interfaces.IGeneralRepository&lt;TNode&gt;" Collapsed="true">
+    <Position X="17.25" Y="8" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>BAAEAAABCAAECAIAAAAEACARACBAAAAAAABBCAgAAAA=</HashCode>
+      <FileName>Neo4j\Interfaces\IGeneralRepository.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="DbManager.Neo4j.Interfaces.IOrderRepository" Collapsed="true">
+    <Position X="15.5" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CEIQAABEAAAAAAAAAAAAAAAAgAAAAQAAAAAAAAAAAAA=</HashCode>
+      <FileName>Neo4j\Interfaces\IOrderRepository.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="DbManager.Neo4j.Interfaces.IRepositoryFactory" Collapsed="true">
+    <Position X="25.25" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Neo4j\Interfaces\IRepositoryFactory.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="DbManager.Neo4j.Interfaces.IUserRepository" Collapsed="true">
+    <Position X="17.5" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAIAAAAAAEAAAAAAAAAAACAAAAAAAAAg=</HashCode>
+      <FileName>Neo4j\Interfaces\IUserRepository.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="DbManager.Services.IPasswordService" Collapsed="true">
+    <Position X="23.5" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAIAAAAA=</HashCode>
+      <FileName>Services\IPasswordService.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="DbManager.Data.OrderStateEnum" Collapsed="true">
+    <Position X="23.5" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAACAAAAAAAAQAAQAAAAAAAAAAEAAAAIAAAAA=</HashCode>
+      <FileName>Data\OrderStateEnum.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

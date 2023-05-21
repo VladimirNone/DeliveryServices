@@ -1,16 +1,12 @@
 package com.example.deliverymanapp
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
@@ -19,9 +15,6 @@ import com.example.deliverymanapp.dto.OrderItemDTO
 import com.example.deliverymanapp.dto.OrderStateItemDTO
 import com.example.deliverymanapp.dto.OrdersDTO
 import com.google.android.gms.location.*
-import com.google.android.gms.tasks.CancellationToken
-import com.google.android.gms.tasks.CancellationTokenSource
-import com.google.android.gms.tasks.OnTokenCanceledListener
 import com.google.gson.Gson
 import org.json.JSONException
 import java.net.CookieHandler
@@ -85,7 +78,7 @@ class OrderListActivity : AppCompatActivity() {
 
         if(selectedState != null){
             orders.clear()
-            LoadAndAddOrdersToList()
+            loadAndAddOrdersToList()
         }
 
         val headerView = findViewById<View>(R.id.header)
@@ -94,7 +87,7 @@ class OrderListActivity : AppCompatActivity() {
         autocompleteTV.clearFocus()
     }
 
-    private fun LoadAndAddOrdersToList(){
+    private fun loadAndAddOrdersToList(){
         val req = object : StringRequest(
             Request.Method.GET, "${url}/DeliveryMan/getOrders?page=${page}&numberOfState=${selectedState?.numberOfStage}",
             { response ->
@@ -103,12 +96,10 @@ class OrderListActivity : AppCompatActivity() {
                     orders.addAll(ordersInput.orders)
                     lastPage = ordersInput.pageEnded
 
-                    if(selectedState != null)
-                    {
+                    if(selectedState != null) {
                         val res:Boolean = (selectedState!!.numberOfStage == 4 || selectedState!!.numberOfStage == 8)
                         orders.forEach{it.canDelManChangestate = res}
                     }
-
 
                     val showMoreButton = findViewById<Button>(R.id.showMoreButton)
                     if(lastPage){
@@ -145,7 +136,7 @@ class OrderListActivity : AppCompatActivity() {
     }
 
     fun showMoreOrdersClick(view: View) {
-        LoadAndAddOrdersToList()
+        loadAndAddOrdersToList()
     }
 
     fun logoutClick(view: View) {

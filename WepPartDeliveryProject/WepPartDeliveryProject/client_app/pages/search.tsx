@@ -21,33 +21,39 @@ const Search: FC<{ categories: categoryItem[] }> = ({ categories }) => {
     //нулевая страница загружается при переходе на страницу
     const [page, setPage] = useState(1);
     const [pageEnded, setPageEnded] = useState(false);
-    
+
     const router = useRouter();
     const searchTextFromParam = router.query.searchText;
 
     useEffect(() => {
         const fetchData = async () => {
             const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getSearchedDishes?searchText=${searchTextFromParam}`);
-            const loadedData = await resp.json() as {dishes: dishClientInfo[], pageEnded: boolean};
+            if (resp.ok) {
+                const loadedData = await resp.json() as { dishes: dishClientInfo[], pageEnded: boolean };
 
-            setDishes(loadedData.dishes);
+                setDishes(loadedData.dishes);
 
-            setPageEnded(loadedData.pageEnded);
+                setPageEnded(loadedData.pageEnded);
+            }
+            else {
+                alert(await resp.text());
+            }
         }
         fetchData();
     }, [searchTextFromParam])
 
     const handleShowMoreDishes = async () => {
         const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getSearchedDishes?searchText=${searchTextFromParam}&page=${page}`);
-        const loadedData = await resp.json() as {dishes: dishClientInfo[], pageEnded: boolean};
 
-        if(resp.ok){
+        if (resp.ok) {
+            const loadedData = await resp.json() as { dishes: dishClientInfo[], pageEnded: boolean };
             setPage(page + 1);
             setDishes(dishes.concat(loadedData.dishes));
             setPageEnded(loadedData.pageEnded);
         }
-        else{
-          setPageEnded(true);
+        else {
+            setPageEnded(true);
+            alert(await resp.text());
         }
     }
 

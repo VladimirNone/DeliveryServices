@@ -33,8 +33,14 @@ const Statistics: FC<{ categories: categoryItem[] }> = ({ categories }) => {
                     'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
                 },
             });
-            const resInfo = await resp.json() as statisticQueryInfo[];
-            setStatisticQueries(resInfo);
+            if(resp.ok){
+                const resInfo = await resp.json() as statisticQueryInfo[];
+                setStatisticQueries(resInfo);
+            }
+            else{
+                alert(await resp.text());
+            }
+
         }
         fetchData();
     }, []);

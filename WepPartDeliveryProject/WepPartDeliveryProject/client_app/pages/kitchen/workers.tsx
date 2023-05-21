@@ -25,10 +25,13 @@ const Workers: FC<{categories:categoryItem[]}> = ({ categories}) => {
                     'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
                 }
             });
-            const loadedData = await resp.json() as profileInfo[];
         
             if(resp.ok){
+                const loadedData = await resp.json() as profileInfo[];
                 setWorkers(loadedData);
+            }
+            else{
+                alert(await resp.text());
             }
         }
         fetchData();

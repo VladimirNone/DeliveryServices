@@ -48,15 +48,16 @@ const Users: FC<{categories:categoryItem[]}> = ({ categories}) => {
                 'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
             }
         });
-        const loadedData = await resp.json() as {users: profileInfo[], pageEnded: boolean};
     
         if(resp.ok){
+            const loadedData = await resp.json() as {users: profileInfo[], pageEnded: boolean};
             setPage(page + 1);
             setUsers(users.concat(loadedData.users));
             setPageEnded(loadedData.pageEnded);
         }
         else{
             setPageEnded(true);
+            alert(await resp.text());
         }
     }
 
@@ -77,6 +78,9 @@ const Users: FC<{categories:categoryItem[]}> = ({ categories}) => {
                 return value;
             }))
         }
+        else{
+            alert(await resp1.text());
+        }
     }
 
     const handleUnblockUser = async () => {
@@ -95,6 +99,9 @@ const Users: FC<{categories:categoryItem[]}> = ({ categories}) => {
                     value.isBlocked = false; 
                 return value;
             }))
+        }
+        else{
+            alert(await resp1.text());
         }
     }
 
@@ -116,6 +123,9 @@ const Users: FC<{categories:categoryItem[]}> = ({ categories}) => {
                 return value;
             }))
         }
+        else{
+            alert(await resp1.text());
+        }
     }
 
     const handleRemoveRoleTokUser = async (oldRole:string) => {
@@ -136,6 +146,9 @@ const Users: FC<{categories:categoryItem[]}> = ({ categories}) => {
                 return value;
             }))
         }
+        else{
+            alert(await resp1.text());
+        }
     }
 
     useEffect(()=>{
@@ -148,10 +161,13 @@ const Users: FC<{categories:categoryItem[]}> = ({ categories}) => {
                         'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
                     }
                 });
-                const loadedData = await resp.json() as string[];
             
                 if(resp.ok){
+                    const loadedData = await resp.json() as string[];
                     setRoles(loadedData);
+                }
+                else{
+                    alert(await resp.text());
                 }
             }
             fetchData();

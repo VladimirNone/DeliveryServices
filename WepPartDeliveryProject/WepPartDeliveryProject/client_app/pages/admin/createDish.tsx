@@ -76,6 +76,9 @@ const CreateDish: FC<{ categories: categoryItem[], }> = ({ categories }) => {
         if(response.ok){
             router.push("/dishes/"+ await response.json());
         }
+        else{
+            alert(await response.text());
+        }
     }
 
     return (

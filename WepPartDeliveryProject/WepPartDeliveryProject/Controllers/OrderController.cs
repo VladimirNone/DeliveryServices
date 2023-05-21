@@ -147,9 +147,11 @@ namespace WepPartDeliveryProject.Controllers
 
             if (searchedOrder != null)
             {
+                var reviewedOrder = await _repositoryFactory.GetRepository<Order>().GetRelationsOfNodesAsync<ReviewedBy, Client>(searchedOrder);
                 var orderedDishes = await _repositoryFactory.GetRepository<Order>().GetRelationsOfNodesAsync<OrderedDish, Dish>(searchedOrder);
 
                 var preparedOrder = _mapper.Map<OrderOutDTO>(searchedOrder);
+                _mapper.Map(reviewedOrder[0], preparedOrder);
                 preparedOrder.Story = _mapper.Map<List<OrderStateItemOutDTO>>(searchedOrder.Story);
 
                 return Ok(new { order = preparedOrder, orderedDishes = orderedDishes.Select(h=> new {count = h.Count, dishInfo = h.NodeTo}) });
@@ -220,6 +222,38 @@ namespace WepPartDeliveryProject.Controllers
             if (await orderRepo.MoveOrderToPreviousStage(inputData.OrderId))
                 return Ok();
             return BadRequest("Заказ находится на начальной стадии и его состояние не может перейти на предыдущую стадию");
+        }
+
+        [Authorize(Roles = "Client")]
+        [HttpPost("reviewOrder")]
+        public async Task<IActionResult> ReviewOrder(ReviewOrderInDTO inputData)
+        {
+            var userId = Request.Cookies["X-UserId"];
+            if (userId == null)
+            {
+                return BadRequest("You don't have refresh token. You need to login or signup to system");
+            }
+
+            var orderRepo = _repositoryFactory.GetRepository<Order>();
+
+            var reviews = await orderRepo.GetRelationBetweenTwoNodesAsync<ReviewedBy, Client>(new Order() { Id = Guid.Parse(inputData.OrderId) }, new Client() { Id = Guid.Parse(userId) });
+            if(reviews != null)
+            {
+                return BadRequest("Вы уже оставили отзыв о данном заказе");
+            }
+
+            var reviewRelation = new ReviewedBy()
+            {
+                NodeFromId = Guid.Parse(userId),
+                NodeToId = Guid.Parse(inputData.OrderId),
+                Review = inputData.Review,
+                ClientRating = inputData.ClientRating,
+                TimeCreated = DateTime.Now,
+            };
+
+            await orderRepo.RelateNodesAsync(reviewRelation);
+
+            return Ok();
         }
     }
 }

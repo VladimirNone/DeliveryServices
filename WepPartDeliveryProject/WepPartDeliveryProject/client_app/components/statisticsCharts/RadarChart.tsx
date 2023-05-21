@@ -36,26 +36,32 @@ const RadarChart: FC<{ query:statisticQueryInfo }> = ({ query }) => {
                     'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
                 },
             });
-            const resInfo = await resp.json() as {queryData: statisticQueryDataItem[], nameDatasets:string[]};
-    
-            const data:{labels:string[], datasets:any} = {
-                labels: resInfo.queryData.map((value) => value.x),
-                datasets: [],
-            }
-            
-            for( let i = 0; i < resInfo.nameDatasets.length; i++)
-            {
-                data.datasets.push({
-                    label: resInfo.nameDatasets[i] ,
-                    data: resInfo.queryData.map(value => value.y[i]),
-                    borderColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)}, 0.5)`,
-                    backgroundColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)}, 0.3)`,
-                    borderWidth: 1,
-                    fill: true,
-                });
-            };
 
-            setChartData(data);
+            if(resp.ok){
+                const resInfo = await resp.json() as {queryData: statisticQueryDataItem[], nameDatasets:string[]};
+    
+                const data:{labels:string[], datasets:any} = {
+                    labels: resInfo.queryData.map((value) => value.x),
+                    datasets: [],
+                }
+                
+                for( let i = 0; i < resInfo.nameDatasets.length; i++)
+                {
+                    data.datasets.push({
+                        label: resInfo.nameDatasets[i] ,
+                        data: resInfo.queryData.map(value => value.y[i]),
+                        borderColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)}, 0.5)`,
+                        backgroundColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)}, 0.3)`,
+                        borderWidth: 1,
+                        fill: true,
+                    });
+                };
+    
+                setChartData(data);
+            }
+            else{
+                alert(await resp.text());
+            }
         }
         fetchData();
     }, [query]);

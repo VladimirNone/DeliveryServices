@@ -39,15 +39,17 @@ const Dishes: FC<{categories:categoryItem[]}> = ({ categories}) => {
                 'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
             }
         });
-        const loadedData = await resp.json() as {dishes: dishAdminInfo[], pageEnded: boolean};
     
         if(resp.ok){
+            const loadedData = await resp.json() as {dishes: dishAdminInfo[], pageEnded: boolean};
+
             setPage(page + 1);
             setDishes(dishes.concat(loadedData.dishes));
             setPageEnded(loadedData.pageEnded);
         }
         else{
             setPageEnded(true);
+            alert(await resp.text());
         }
     }
 
@@ -71,6 +73,9 @@ const Dishes: FC<{categories:categoryItem[]}> = ({ categories}) => {
                 return prevDishes.slice();
             });
         }
+        else{
+            alert(await resp1.text());
+        }
     }
 
     const handleChangeVisibleStatusOfDish = async (dishId:string) => {
@@ -93,6 +98,9 @@ const Dishes: FC<{categories:categoryItem[]}> = ({ categories}) => {
 
                 return prevDishes.slice();
             });
+        }
+        else{
+            alert(await resp1.text());
         }
     }
 

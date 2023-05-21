@@ -38,6 +38,9 @@ const KitchenOrders: FC<{categories:categoryItem[], states:orderState[]}> = ({ c
         if (resp1.ok) {
             setOrders(prevOrders => prevOrders.filter(el => el.id != orderId ));
         }
+        else{
+            alert(await resp1.text());
+        }
     }
 
     const handleMoveOrderToNextStage = async (orderId:string, orderStateId:string) => {
@@ -52,6 +55,9 @@ const KitchenOrders: FC<{categories:categoryItem[], states:orderState[]}> = ({ c
 
         if (resp1.ok) {
             setOrders(prevOrders => prevOrders.filter(el => el.id != orderId ));
+        }
+        else{
+            alert(await resp1.text());
         }
     }
 
@@ -68,15 +74,16 @@ const KitchenOrders: FC<{categories:categoryItem[], states:orderState[]}> = ({ c
                 'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
             }
         });
-        const loadedData = await resp.json() as {orders: orderCardInfo[], pageEnded: boolean};
     
         if(resp.ok){
+            const loadedData = await resp.json() as {orders: orderCardInfo[], pageEnded: boolean};
             setPage(page + 1);
             setOrders(orders.concat(loadedData.orders));
             setPageEnded(loadedData.pageEnded);
         }
         else{
             setPageEnded(true);
+            alert(await resp.text());
         }
     }
 

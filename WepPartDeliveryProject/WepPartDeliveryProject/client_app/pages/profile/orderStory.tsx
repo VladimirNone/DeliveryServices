@@ -1,6 +1,6 @@
 import PanelToHandleOrders from "@/components/PanelToHandleOrders";
 import OrderCard from "@/components/cards/OrderCard";
-import CancelOrderModel from "@/components/models/CancelOrderModel";
+import CancelOrderModal from "@/components/models/CancelOrderModal";
 import ClientLayout from "@/components/structure/ClientLayout";
 import { GetStaticProps } from "next";
 import { FC, useEffect, useState } from "react";
@@ -25,33 +25,23 @@ const OrderStory: FC<{categories:categoryItem[], states:orderState[]}> = ({ cate
     const [selectedState, setSelectedState] = useState<orderState>(states[0]);
     const [page, setPage] = useState(0);
     const [pageEnded, setPageEnded] = useState(true);
-    const [show, setShow] = useState(false);
-    const [orderIdToDelete, setOrderIdToDelete] = useState<string>("")
 
-    const handleShowModal = (orderId:string) =>{
-        setOrderIdToDelete(orderId);
-        setShow(true);
-    }
-
-    const handleCloseModal = () =>{
-        setShow(false);
-    }
-
-    const handleDeleteItem = async (reasonOfCancel:string) => {
-        const resp1 = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/order/cancelOrder`, {
+    const handleDeleteItem = async (orderId:string, reasonOfCancel:string) => {
+        const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/order/cancelOrder`, {
             method: "POST",
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
                 'Content-Type': 'application/json;charset=utf-8',
             },
-            body: JSON.stringify({orderId: orderIdToDelete, reasonOfCancel})
+            body: JSON.stringify({orderId, reasonOfCancel})
         });
 
-        if(resp1.ok){
-            setOrders(prevOrders => prevOrders.filter(el => el.id != orderIdToDelete ));
+        if(resp.ok){
+            setOrders(prevOrders => prevOrders.filter(el => el.id != orderId ));
         }
-
-        setShow(false);
+        else{
+            alert(await resp.text())
+        }
     }
 
     const handleSelectState = (selectState: orderState) => {
@@ -67,15 +57,17 @@ const OrderStory: FC<{categories:categoryItem[], states:orderState[]}> = ({ cate
                 'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
             }
         });
-        const loadedData = await resp.json() as {orders: orderCardInfo[], pageEnded: boolean};
     
         if(resp.ok){
+            const loadedData = await resp.json() as {orders: orderCardInfo[], pageEnded: boolean};
+
             setPage(page + 1);
             setOrders(orders.concat(loadedData.orders));
             setPageEnded(loadedData.pageEnded);
         }
         else{
             setPageEnded(true);
+            alert(await resp.text())
         }
     }
 
@@ -83,19 +75,18 @@ const OrderStory: FC<{categories:categoryItem[], states:orderState[]}> = ({ cate
         if(page == 0){
             handleShowMoreOrders();
         }
-    }, [page]);
+    }, [page, selectedState]);
 
     return (
         <ClientLayout categories={categories}>
             <PanelToHandleOrders orderStates={states} selectState={handleSelectState}/>
-            {orders.map((order, i)=> <OrderCard key={i} {...order} DeleteOrder={handleShowModal}/>)}
+            {orders.map((order, i)=> <OrderCard key={i} {...order} DeleteOrder={handleDeleteItem} canWriteReview={false}/>)}
             {!pageEnded && (<div>
                     <button className='btn btn-primary w-100 mt-2' onClick={handleShowMoreOrders}>
                         Показать больше
                     </button>
                 </div>)
             }
-            {show && <CancelOrderModel show={show} closeModel={handleCloseModal} commitCancelOrder={handleDeleteItem}/>}
         </ClientLayout>
     );
 }

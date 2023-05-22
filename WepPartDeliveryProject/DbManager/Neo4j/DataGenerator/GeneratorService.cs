@@ -28,7 +28,6 @@ namespace DbManager.Neo4j.DataGenerator
 
             //генерируем узлы
             var orderStates = _dataGenerator.GenerateOrderStates();
-            var dishes = _dataGenerator.GenerateDishes(30);
             var admins = _dataGenerator.GenerateAdmins(2);
 
             var admin = admins[0];
@@ -55,7 +54,10 @@ namespace DbManager.Neo4j.DataGenerator
 
             var kitchens = _dataGenerator.GenerateKitchens(3);
             var orders = _dataGenerator.GenerateOrders(1000);
-            var categories = _dataGenerator.GenerateCategories(6);
+            var categories = new List<Category>();
+            var dishes = new List<Dish>();
+            //генерация категорий и блюд происходит в данном методе!
+            var containsDishes = _dataGenerator.GenerateRelationsContainsDishWithNodes(30, 6, categories, dishes);
 
             //вставляем узлы в бд
             var orderRepo = _repoFactory.GetRepository<Order>();
@@ -73,7 +75,6 @@ namespace DbManager.Neo4j.DataGenerator
             //генерируем связи между узлами. Последовательность важна!
             //создаем новые списки, т.к. эти списки будут изменяться. 
             //так, при генерации связи Ordered будут удаляться заказы из списка, чтобы они не дублировались
-            var containsDishes = _dataGenerator.GenerateRelationsContainsDish(dishes.Count, categories, new List<Dish>(dishes));
             var workedIns = _dataGenerator.GenerateRelationsWorkedIn(kitchenWorkers.Count, kitchens, new List<KitchenWorker>(kitchenWorkers));
             var cookedBies = _dataGenerator.GenerateRelationsCookedBy(orders.Count, new List<Order>(orders), kitchens);
             var deliveredBies = _dataGenerator.GenerateRelationsDeliveredBy(orders.Count, new List<Order>(orders), deliveryMen);

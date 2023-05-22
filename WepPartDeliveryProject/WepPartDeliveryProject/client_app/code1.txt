@@ -1,0 +1,2016 @@
+FooterPanelItem.tsx
+import Link from "next/link";
+import { FC } from "react"
+import { Nav, Container, Navbar } from "react-bootstrap";
+
+const FooterPanelItem : FC<footerPanelInfo> = (contentPanel:footerPanelInfo) =>{
+    return (
+        <Navbar bg="light" expand="md">
+            <Container fluid="xl" className="g-0" >
+                <Navbar.Toggle aria-controls="basic-navbar-nav" className="w-100">{contentPanel.panelName}</Navbar.Toggle>
+                <Navbar.Collapse id="basic-navbar-nav">
+                    <Nav className="me-auto flex-column w-100">
+                        <Nav.Item className='w-100 d-none d-md-block text-center'>
+                            <b>{contentPanel.panelName}</b>
+                        </Nav.Item>
+
+                        {contentPanel.panelItems.map((value, i) =>
+                            (<Nav.Item className="w-100" key={i}>
+                                <Link className="nav-link" href={value.itemHref}>
+                                        {value.itemName}
+                                </Link>
+                            </Nav.Item>)
+                        )}
+                    </Nav>
+                </Navbar.Collapse>
+            </Container>
+        </Navbar>
+    );
+}
+
+export default FooterPanelItem;
+PanelToHandleDishes.tsx
+import Link from 'next/link';
+import React, { ChangeEvent, FC, useState } from 'react';
+import { Button, Col, Dropdown, Form, Image, Row } from 'react-bootstrap';
+
+interface PanelToHandleUsersProps {
+    changeSearchedText: (newSearchedText:string) => void, 
+}
+
+const PanelToHandleDishes: FC<PanelToHandleUsersProps> = ({ changeSearchedText }) => {
+    const [searchValue, setSearchValue] = useState("");
+
+    const changeSearchValue = (e: ChangeEvent<HTMLInputElement>): void => {
+        e.preventDefault();
+        setSearchValue(e.target.value);
+    }
+
+    const handleSearchClick = ():void =>{
+        changeSearchedText(searchValue);
+    }
+
+    return (
+        <>
+            <Row className='pe-md-3'>
+                <Col xs={12} md='auto' className='mt-2 flex-grow-1'>
+                    <Form className="d-flex w-100">
+                        <Form.Control className='w-100' placeholder="Поиск по названию и описанию" aria-describedby="basic-addon2" value={searchValue} onChange={changeSearchValue} />
+                        <Button variant="outline-secondary" className='ms-1' onClick={handleSearchClick}>
+                            <Image src="\loupe.svg" width="20" height="20" alt="Поиск по Id и логину" />
+                        </Button>
+                    </Form>
+                </Col>
+                <Col xs={12} md='auto' className='mt-2 g-0'>
+                    <Row className='ms-1 d-flex justify-content-center'>
+                        <Col xs='auto' className='mt-1 mt-xxl-0'>
+                            <Link href={"/admin/createDish"} className={`btn btn-secondary`}>
+                                Создать новое блюдо
+                            </Link>
+                        </Col>
+                    </Row>
+                </Col>
+            </Row>
+        </>
+    );
+}
+
+export default PanelToHandleDishes;
+
+
+PanelToHandleOrders.tsx
+import React, {  FC, useState } from 'react';
+import { Col, Dropdown, Row } from 'react-bootstrap';
+
+interface PanelToHandleUsersProps {
+    orderStates: orderState[],
+    selectState: (selectedState: orderState) => void;
+}
+
+const PanelToHandleOrders: FC<PanelToHandleUsersProps> = ({ orderStates, selectState }) => {
+    const [selectedState, setSelectedState] = useState<orderState>(orderStates[0]);
+
+    const handleSelectState = (eventKey: string | null): void => {
+        if(eventKey != null)
+        {
+            const selState = orderStates.find(el => el.numberOfStage == Number.parseInt(eventKey));
+        
+            if(selState != undefined){
+                setSelectedState(selState);
+                selectState(selState);
+            }
+        }
+
+    }
+
+    return (
+        <>
+            <Row className='g-0 m-1'>
+                <Col xs='auto' className='g-0 me-1'>
+                    <Dropdown onSelect={handleSelectState}>
+                        <Dropdown.Toggle variant="success" id="dropdown-basic">
+                            {selectedState.nameOfState}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu >
+                            {orderStates.map((value, i) => <Dropdown.Item eventKey={value.numberOfStage} key={i}>{value.nameOfState}</Dropdown.Item>)}
+                        </Dropdown.Menu>
+                    </Dropdown>
+                </Col>
+            </Row>
+        </>
+    );
+}
+
+export default PanelToHandleOrders;
+
+
+PanelToHandleStatistics.tsx
+import React, {  FC, useState } from 'react';
+import { Col, Dropdown, Row } from 'react-bootstrap';
+
+interface PanelToHandleUsersProps {
+    statisticQueries: statisticQueryInfo[],
+    buildChart: (linkQuery: statisticQueryInfo) => void;
+}
+
+const PanelToHandleStatistics: FC<PanelToHandleUsersProps> = ({ statisticQueries, buildChart }) => {
+    const [selectedQuery, setSelectedQuery] = useState<statisticQueryInfo>();
+
+    const handleSelectQuery = (eventKey: string | null): void => {
+        const selQuery = statisticQueries.find(el => el.nameQuery == eventKey);
+        setSelectedQuery(selQuery);
+        
+        if(selQuery != undefined){
+            buildChart(selQuery);
+        }
+    }
+
+    return (
+        <>
+            <Row className='g-0 m-1'>
+                <Col xs='auto' className='g-0 me-1'>
+                    <Dropdown onSelect={handleSelectQuery}>
+                        <Dropdown.Toggle variant="success" id="dropdown-basic">
+                            {selectedQuery == undefined ? "Выберете аналитический запрос" : selectedQuery.nameQuery}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu >
+                            {statisticQueries.map((value, i) => <Dropdown.Item eventKey={value.nameQuery} key={i}>{value.nameQuery}</Dropdown.Item>)}
+                        </Dropdown.Menu>
+                    </Dropdown>
+                </Col>
+            </Row>
+        </>
+    );
+}
+
+export default PanelToHandleStatistics;
+
+
+PanelToHandleUsers.tsx
+import React, { ChangeEvent, FC, MouseEvent, SyntheticEvent, useState } from 'react';
+import { Button, Col, Dropdown, Form, Image, Row } from 'react-bootstrap';
+import Link from 'next/link';
+
+interface PanelToHandleUsersProps {
+    roles: string[], 
+    blockUsers: () => void, 
+    unblockUsers: () => void,
+    addRole: (role:string) => void, 
+    removeRole: (role: string) => void,
+    changeSearchedText: (newSearchedText:string) => void, 
+}
+
+const PanelToHandleUsers: FC<PanelToHandleUsersProps> = ({ roles, blockUsers, unblockUsers, addRole, removeRole, changeSearchedText }) => {
+    const [searchValue, setSearchValue] = useState("");
+    const [selectedRole, setSelectedRole] = useState("Роль");
+
+    const changeSearchValue = (e: ChangeEvent<HTMLInputElement>): void => {
+        e.preventDefault();
+        setSearchValue(e.target.value);
+    }
+
+    const handleSearchClick = ():void =>{
+        changeSearchedText(searchValue);
+    }
+
+    const handleAddRole = (): void => {
+        if(selectedRole != "Роль")
+            addRole(selectedRole);
+        else
+            alert("Вы не выбрали новую роль для пользователей")
+    }
+
+    const handleRemoveRole = (): void => {
+        if(selectedRole != "Роль")
+            removeRole(selectedRole);
+        else
+            alert("Вы не выбрали старую роль пользователей")
+    }
+
+    const handleSelectRole = (eventKey:string|null): void => {
+        setSelectedRole(eventKey ?? "Роль");
+    }
+
+    const handleBlockUsers = (): void => {
+        blockUsers()
+    }
+
+    const handleUnblockUsers = (): void => {
+        unblockUsers()
+    }
+
+    return (
+        <>
+            <Row className='pe-md-3'>
+                <Col xs={12} md='auto' className='mt-2 flex-grow-1'>
+                    <Form className="d-flex w-100">
+                        <Form.Control className='w-100' placeholder="Поиск по Id и логину" aria-describedby="basic-addon2" value={searchValue} onChange={changeSearchValue} />
+                        <Button variant="outline-secondary" className='ms-1' onClick={handleSearchClick}>
+                            <Image src="\loupe.svg" width="20" height="20" alt="Поиск по Id и логину" />
+                        </Button>
+                    </Form>
+                </Col>
+                <Col xs={12} md='auto' className='mt-2 g-0'>
+                    <Row className='ms-1 d-flex justify-content-center'>
+                        <Col xs='auto'  className='mt-1 mt-xxl-0'>
+                            <Row className='g-0 me-1'>
+                                <Col xs='auto' className='g-0 me-1'>
+                                    <Dropdown onSelect={handleSelectRole}>
+                                        <Dropdown.Toggle variant="success" id="dropdown-basic">
+                                            {selectedRole}
+                                        </Dropdown.Toggle>
+                                        <Dropdown.Menu >
+                                            {roles.map((value, i) => <Dropdown.Item eventKey={value} key={i}>{value}</Dropdown.Item>)}
+                                        </Dropdown.Menu>
+                                    </Dropdown>
+                                </Col>
+                                <Col xs='auto' className='g-0 me-1'>
+                                    <Button onClick={handleAddRole} className={`btn btn-danger`}>
+                                        Добавить роль
+                                    </Button>
+                                </Col>
+                                <Col xs='auto' className='g-0 me-1'>
+                                    <Button onClick={handleRemoveRole} className={`btn btn-danger`}>
+                                        Удалить роль
+                                    </Button>
+                                </Col>
+                            </Row>
+                        </Col>
+
+                        <Col xs='auto' className='mt-1 mt-xxl-0'>
+                            <Row className='g-0 me-1 d-flex justify-content-center'>
+                                <Col xs='auto' className='g-0 me-1'>
+                                    <Button onClick={handleBlockUsers} className={`btn btn-danger`}>
+                                        Заблокировать
+                                    </Button>
+                                </Col>
+                                <Col xs='auto' className='g-0 me-1'>
+                                    <Button onClick={handleUnblockUsers} className={`btn btn-danger`}>
+                                        Разблокировать
+                                    </Button>
+                                </Col>
+                            </Row>
+                        </Col>
+                    </Row>
+                </Col>
+            </Row>
+        </>
+    );
+}
+
+export default PanelToHandleUsers;
+
+
+DishAdminCard.tsx
+import React, { FC } from 'react';
+import DishStandartLayout from '../structure/DishStandartLayout';
+import HandlerAdminDish from './components/HandlerAdminDish';
+
+interface DishAdminCard extends dishAdminInfo {
+    changeVisibleState: (dishId:string)=>void, 
+    changeDeletedState: (dishId:string)=>void
+}
+
+const DishAdminCard: FC<DishAdminCard> = (dishInfo) => {
+    return (
+        <DishStandartLayout dishInfo={dishInfo}>
+            <HandlerAdminDish 
+                dishId={dishInfo.id}
+                dishDeleted={dishInfo.isDeleted} 
+                isVisibleForUsers={dishInfo.isAvailableForUser} 
+                changeDeleteStateDish={dishInfo.changeDeletedState}
+                changeVisibleStateDish={dishInfo.changeVisibleState}/>
+        </DishStandartLayout>
+    );
+}
+
+export default DishAdminCard;
+
+
+DishCartCard.tsx
+import React, { FC } from 'react';
+import CounterCartDish from './components/CounterCartDish';
+import DishStandartLayout from '../structure/DishStandartLayout';
+
+const DishCartCard: FC<dishCartInfo> = (dishInfo) => {
+
+    return (
+        <DishStandartLayout dishInfo={dishInfo}>
+            <CounterCartDish dishId={dishInfo.id} cancelDish={dishInfo.DeleteCardFromList}/>
+        </DishStandartLayout>
+    );
+}
+
+export default DishCartCard;
+
+
+DishMainCard.tsx
+import React, { FC } from 'react';
+import CounterMainDish from './components/CounterMainDish';
+import DishStandartLayout from '../structure/DishStandartLayout';
+
+const DishMainCard: FC<dishClientInfo> = (dishInfo) => {
+
+    return (
+        <DishStandartLayout dishInfo={dishInfo}>
+            <CounterMainDish dishId={dishInfo.id}/>
+        </DishStandartLayout>
+    );
+}
+
+export default DishMainCard;
+
+
+DishOrderCard.tsx
+import React, { FC, useContext } from 'react';
+import CounterOrderDish from './components/CounterOrderDish';
+import { AuthContext } from '../contexts/AuthContext';
+import DishStandartLayout from '../structure/DishStandartLayout';
+
+const DishOrderCard: FC<orderedDishClientInfo> = ({count, dishInfo, orderId}) => {
+    const roleContextData = useContext<authContextProps>(AuthContext);
+
+    const changeCountOrderedDish = async (dishId:string, newCount: number) =>{
+        const response = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/order/changeCountOrderedDish`, {
+            method: "POST",
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
+                'Content-Type': 'application/json;charset=utf-8',
+            },
+            body: JSON.stringify({newCount, orderId, dishId})
+        });
+        if(!response.ok){
+            alert(await response.text())
+        }
+    }
+
+    return (
+        <DishStandartLayout dishInfo={dishInfo}>
+            {roleContextData.isAdmin && <CounterOrderDish dishId={dishInfo.id} cancelDish={dishInfo.DeleteCardFromList} changeCountDish={changeCountOrderedDish} countOrdered={count}/>}
+        </DishStandartLayout>
+    );
+}
+
+export default DishOrderCard;
+
+
+OrderCard.tsx
+import React, { FC, useContext, useState } from 'react';
+import { Card, Col, Row } from 'react-bootstrap';
+import Link from 'next/link';
+import { AuthContext } from '../contexts/AuthContext';
+import OrderStateItem from './components/OrderStateItem';
+import CancelOrderModal from '../models/CancelOrderModal';
+import ReviewOrderModal from '../models/ReviewOrderModal';
+
+const OrderCard: FC<orderCardInfo> = (orderInfo) => {
+    const authContextData = useContext<authContextProps>(AuthContext);
+    const [showStory, setShowStory] = useState(false);
+    const [showCancelModel, setShowCancelModal] = useState(false);
+    const [showReviewModel, setShowReviewModal] = useState(false);
+
+    const handleShowCancelModal = () =>{
+        setShowCancelModal(true);
+    }
+
+    const handleCloseCancelModal = () =>{
+        setShowCancelModal(false);
+    }
+
+    const handleShowReviewModal = () =>{
+        setShowReviewModal(true);
+    }
+
+    const handleCloseReviewModal = () =>{
+        setShowReviewModal(false);
+    }
+
+    const handleCancelClick = (reasonOfCancel:string): void => {
+        orderInfo.DeleteOrder(orderInfo.id, reasonOfCancel);
+        setShowCancelModal(false);
+    }
+
+    const handleSendReviewClick = async (review:string, rating:number)=>{
+        const resp1 = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/order/reviewOrder`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
+                'Content-Type': 'application/json;charset=utf-8',
+            },
+            body: JSON.stringify({ orderId: orderInfo.id, review, clientRating:rating })
+        });
+
+        if (resp1.ok) {
+            setShowReviewModal(false);
+        }
+        else{
+            alert(await resp1.text());
+        }
+    }
+
+    const handleShowStoryClick = (): void => {
+        setShowStory(!showStory);
+    }
+
+    const handleMoveToNextOrderStage = ():void => {
+        const orderStory = orderInfo.story as orderState[];
+        orderInfo.MoveOrderToNextStage(orderInfo.id, orderStory[orderStory.length - 1].orderStateId)
+    }
+
+    const handleMoveToPreviousOrderStage = ():void => {
+        const orderStory = orderInfo.story as orderState[];
+        orderInfo.MoveOrderToPreviousStage(orderInfo.id, orderStory[orderStory.length - 1].orderStateId)
+    }
+
+    let clientCanCancelOrder:Boolean = false;
+    if(orderInfo.story != null ){
+        const curOrderStatus = orderInfo.story[orderInfo.story.length-1];
+        clientCanCancelOrder = (authContextData.isClient && curOrderStatus.numberOfStage != 16 && curOrderStatus.numberOfStage != 32) as Boolean;
+    }
+
+    let clientCanReviewOrder:Boolean = false;
+    if(orderInfo.story != null ){
+        const curOrderStatus = orderInfo.story[orderInfo.story.length-1];
+        clientCanReviewOrder = (authContextData.isClient && curOrderStatus.numberOfStage == 16  && orderInfo.canWriteReview) as Boolean;
+    }
+
+    return (
+        <>
+            <Card className="mt-2 bg-light">
+                <Row className="g-0 align-items-center">
+                    <Col className="col-md">
+                        <Card.Body>
+                            <Card.Title>Номер заказа: {orderInfo.id}</Card.Title>
+                            <Row className='mb-2 d-flex justify-content-between'>
+                                <Col className='col-auto'>
+                                    <Card.Text>Стоимость:{orderInfo.price}</Card.Text>
+                                </Col>
+                                <Col className='col-auto'>
+                                    <Card.Text>Адрес доставки: {orderInfo.deliveryAddress}</Card.Text>
+                                </Col>
+                                <Col className='col-auto'>
+                                    <Card.Text>Номер клиента: {orderInfo.phoneNumber}</Card.Text>
+                                </Col>
+                            </Row>
+
+                            {orderInfo.story != null && <Card.Text>Статус: {orderInfo.story[orderInfo.story.length-1].nameOfState}</Card.Text>}
+                            <Row className='d-flex justify-content-center'>
+                                <Col className='col-10 col-lg-auto me-lg-auto mt-2'>
+                                    <Link href={(authContextData.isAdmin ? '/admin':'/profile') + "/order?orderId=" + orderInfo.id} className='btn btn-secondary w-100'>Посмотреть детали</Link>
+                                </Col>
+                                {(authContextData.isAdmin || clientCanCancelOrder) &&
+                                    <Col className='col-10 col-lg-auto mt-2'>
+                                        <button className='btn btn-danger w-100' onClick={handleShowCancelModal}>Отменить</button>
+                                    </Col>}
+                                {clientCanReviewOrder &&
+                                    <Col className='col-10 col-lg-auto mt-2'>
+                                        <button className='btn btn-primary w-100' onClick={handleShowReviewModal}>Написать отзыв</button>
+                                    </Col>}
+                                <Col className='col-10 col-lg-auto mt-2'>
+                                    <button className='btn btn-secondary w-100' onClick={handleShowStoryClick}>{showStory ? 'Скрыть':'Показать'} историю заказа</button>
+                                </Col>
+                                {showStory && orderInfo.story?.map((value,i)=><OrderStateItem key={i} {...value}/>)}
+                                {((showStory && authContextData.isAdmin) || authContextData.isKitchenWorker) && 
+                                    <Row className='d-flex justify-content-center'>
+                                        <Col className='col-auto mt-2'>
+                                            <button className='btn btn-danger w-100' onClick={handleMoveToPreviousOrderStage}>Вернуть к предыдущей стадии</button>
+                                        </Col>
+                                        <Col className='col-auto mt-2'>
+                                            <button className='btn btn-danger w-100' onClick={handleMoveToNextOrderStage}>Перевести в следующую стадию</button>
+                                        </Col>
+                                    </Row>
+                                }
+                            </Row>
+                            
+                        </Card.Body>
+                    </Col>
+                </Row>
+            </Card>
+            {showCancelModel && <CancelOrderModal show={showCancelModel} closeModel={handleCloseCancelModal} commitCancelOrder={handleCancelClick}/>}
+            {showReviewModel && <ReviewOrderModal show={showReviewModel} closeModel={handleCloseReviewModal} commitAction={handleSendReviewClick}/>}
+        </>
+    );
+}
+
+export default OrderCard;
+
+
+UserCard.tsx
+import React, { FC, ReactElement, useEffect, useState } from 'react';
+import { Card, Col, Row, Button, Form } from 'react-bootstrap';
+
+const UserCard: FC<{ userInfo: profileInfo, markUser: (userId: string) => void, unmarkUser: (userId: string) => void, }> = ({ userInfo, markUser, unmarkUser }) => {
+    const [showMoreInfo, setShowMoreInfo] = useState(false);
+    const [unmarked, setUnmarked] = useState(true);
+
+    const handleShowStoryClick = (): void => {
+        setShowMoreInfo(!showMoreInfo);
+    }
+
+    const handleClickToCheckBox = (): void => {
+        if (unmarked) {
+            markUser(userInfo.id as string);
+        }
+        else {
+            unmarkUser(userInfo.id as string);
+        }
+        setUnmarked(!unmarked);
+    }
+
+    return (
+        <>
+            <Card className="mt-2 bg-light">
+                <Row className="g-0 align-items-center">
+                    <Card.Body>
+                        <Row className='d-flex justify-content-start'>
+                            <Col xs={12} lg='auto' className='mt-1'>
+                                <Card.Title>Id: {userInfo.id}</Card.Title>
+                            </Col>
+                            <Col xs={12} lg='auto' className='mt-1 me-auto'>
+                                <Card.Text className='m-0'>Роли пользователя: {userInfo.roles}</Card.Text>
+                            </Col>
+                            <Col xs={12} lg='auto' className='mt-1 d-flex justify-content-end me-auto '>
+                                <Form className='d-flex justify-content-end'>
+                                    <Form.Check reverse type="switch" onClick={handleClickToCheckBox} label="Выбрать пользователя" />
+                                </Form>
+                            </Col>
+                        </Row>
+                        <Row className='d-flex justify-content-start'>
+                            <Col xs={12} lg='auto' className='me-lg-auto mt-1'>
+                                <Card.Text>Логин пользователя: {userInfo.login}</Card.Text>
+                            </Col>
+                            {userInfo.isBlocked &&
+                                <Col xs={12} lg='auto' className='mt-1'>
+                                    <Card.Text className='text-danger'>Заблокирован</Card.Text>
+                                </Col>}
+                            <Col xs={12} lg='auto' className='mt-1'>
+                                <Button className='btn btn-secondary w-100' onClick={handleShowStoryClick}>{showMoreInfo ? 'Скрыть' : 'Показать'} подробную информацию</Button>
+                            </Col>
+                        </Row>
+                        {showMoreInfo &&
+                            <>
+                                <Row className='d-flex justify-content-start'>
+                                    <Col md='auto' className='mt-1'>
+                                        <Card.Text>Имя: {userInfo.name}</Card.Text>
+                                    </Col>
+                                    <Col md='auto' className='mt-1'>
+                                        <Card.Text>Дата рождения: {new Date(userInfo.born as string).toLocaleDateString()}</Card.Text>
+                                    </Col>
+                                    <Col md='auto' className='mt-1'>
+                                        <Card.Text>Номер телефона: {userInfo.phoneNumber}</Card.Text>
+                                    </Col>
+                                </Row>
+                                <Row className='d-flex justify-content-start'>
+                                    <Col md='auto' className='mt-1'>
+                                        <Card.Text>Адрес: {userInfo.address}</Card.Text>
+                                    </Col>
+                                </Row>
+                            </>
+                        }
+                    </Card.Body>
+                </Row>
+            </Card>
+        </>
+    );
+}
+
+export default UserCard;
+
+
+WorkerCard.tsx
+import React, { FC, useState } from 'react';
+import { Card, Col, Row, Button } from 'react-bootstrap';
+
+const WorkerCard: FC<{ userInfo: profileInfo }> = ({ userInfo }) => {
+    const [showMoreInfo, setShowMoreInfo] = useState(false);
+
+    const handleShowStoryClick = (): void => {
+        setShowMoreInfo(!showMoreInfo);
+    }
+
+    return (
+        <>
+            <Card className="mt-2 bg-light">
+                <Row className="g-0 align-items-center">
+                    <Card.Body>
+                        <Row className='d-flex justify-content-start'>
+                            <Col xs={12} lg='auto' className='mt-1'>
+                                <Card.Title>Id: {userInfo.id}</Card.Title>
+                            </Col>
+                            <Col xs={12} lg='auto' className='mt-1'>
+                                <Card.Title>Должность: {userInfo.jobTitle}</Card.Title>
+                            </Col>
+                        </Row>
+                        <Row className='d-flex justify-content-start'>
+                            <Col xs={12} lg='auto' className='me-lg-auto mt-1'>
+                                <Card.Text>Имя: {userInfo.name}</Card.Text>
+                            </Col>
+                            <Col xs={12} lg='auto' className='me-lg-auto mt-1'>
+                                <Card.Text>Логин пользователя: {userInfo.login}</Card.Text>
+                            </Col>
+                            {userInfo.isBlocked &&
+                                <Col xs={12} lg='auto' className='mt-1'>
+                                    <Card.Text className='text-danger'>Заблокирован</Card.Text>
+                                </Col>}
+                            <Col xs={12} lg='auto' className='mt-1'>
+                                <Button className='btn btn-secondary w-100' onClick={handleShowStoryClick}>{showMoreInfo ? 'Скрыть' : 'Показать'} подробную информацию</Button>
+                            </Col>
+                        </Row>
+                        {showMoreInfo &&
+                            <Row className='d-flex justify-content-start'>
+                                <Col md='auto' className='mt-1'>
+                                    <Card.Text>Получил работу: {new Date (userInfo.gotJob as Date).toLocaleDateString()}</Card.Text>
+                                </Col>
+                                <Col md='auto' className='mt-1'>
+                                    <Card.Text>Дата рождения: {new Date(userInfo.born as string).toLocaleDateString()}</Card.Text>
+                                </Col>
+                                <Col md='auto' className='mt-1'>
+                                    <Card.Text>Номер телефона: {userInfo.phoneNumber}</Card.Text>
+                                </Col>
+                            </Row>
+                        }
+                    </Card.Body>
+                </Row>
+            </Card>
+        </>
+    );
+}
+
+export default WorkerCard;
+
+
+CounterCartDish.tsx
+import React, { FC, useState } from 'react';
+import styles from '@/styles/Home.module.css'
+import { useCookies } from 'react-cookie';
+import { Button, Col, Row } from 'react-bootstrap';
+
+
+const CounterCartDish: FC<{ dishId: string, cancelDish: (dishId: string) => void }> = ({ dishId, cancelDish }) => {
+    const [cookies, setCookie] = useCookies(['cartDishes']);
+    const [count, setCount] = useState(Number.parseInt(cookies?.cartDishes[dishId]) ?? 1);
+
+    //Изменяет количество блюд, находящихся в корзине
+    const changeCountDishToCookies = (): void => {
+        cookies.cartDishes[dishId] = count;
+
+        setCookie('cartDishes', JSON.stringify(cookies.cartDishes), { path: '/', sameSite: "none", secure: true })
+    };
+
+    const handleChangeCountClick = (countToAdd: number): void => {
+        setCount((count) => {
+            let sum = count + countToAdd;
+            return sum > 20 || sum < 1 ? count : sum;
+        });
+    }
+
+    //Удаляет свойство с id текущего блюда из куки, обновляет куки, удаляет блюдо из списка
+    const handleCancelClick = (): void => {
+        delete cookies.cartDishes[dishId];
+        setCookie('cartDishes', JSON.stringify(cookies.cartDishes), { path: '/', sameSite: "none", secure: true })
+        cancelDish(dishId);
+    }
+
+    return (
+        <>
+            <Row className='d-flex justify-content-end pe-md-3'>
+                <Col xs={12} md={4} className='d-flex justify-content-md-start justify-content-center mt-2'>
+                    <Button onClick={handleCancelClick} className={`btn btn-danger me-2`}>
+                        Отменить
+                    </Button>
+                </Col>
+                <Col xs={12} md={4} className='mt-2'>
+                    <Row className='d-flex justify-content-md-end justify-content-center'>
+                        <Button onClick={() => handleChangeCountClick(1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>
+                            +
+                        </Button>
+                        <div className={`d-flex align-items-center justify-content-center ${styles.cardCountBtnAndP}`}>
+                            <p className='m-0'>
+                                {count}
+                            </p>
+                        </div>
+                        <Button onClick={() => handleChangeCountClick(-1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>
+                            -
+                        </Button>
+                    </Row>
+                </Col>
+                <Col xs={12} md={4} className='d-flex justify-content-md-start justify-content-center mt-2'>
+                    <Button onClick={changeCountDishToCookies}>
+                        Изменить количество
+                    </Button>
+                </Col>
+            </Row>
+        </>
+    );
+}
+
+export default CounterCartDish;
+
+
+CounterMainDish.tsx
+import React, { FC, useState } from 'react';
+import styles from '@/styles/Home.module.css'
+import { useCookies } from 'react-cookie';
+import { Button } from 'react-bootstrap';
+
+
+const CounterMainDish: FC<{dishId: string}> = ({dishId}) => {
+    const [count, setCount] = useState(1);
+    const [cookies, setCookie] = useCookies(['cartDishes']);    
+
+    //Добавляет количество блюд, к находящимся в корзине
+    const addCountDishToCookies = ():void => {
+        let futureCookie:any = {};
+        if(cookies.cartDishes != undefined)
+            futureCookie = cookies.cartDishes;
+
+        var countCurDish = futureCookie[dishId] ?? 0;
+
+        futureCookie[dishId] = countCurDish + count;
+
+        setCookie('cartDishes', JSON.stringify(futureCookie), { path: '/', sameSite: "none", secure: true });
+    };
+
+    const handleClick = (countToAdd: number): void => {
+        setCount((count) => {
+            let sum = count + countToAdd;
+            return sum > 20 || sum < 1 ? count : sum;
+        });
+    }
+
+    return (
+        <>
+            <div className='d-flex justify-content-end pe-md-3'>
+                <button onClick={() => handleClick(1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>
+                    +
+                </button>
+                <div className={`d-flex align-items-center justify-content-center ${styles.cardCountBtnAndP}`}>
+                    <p className='m-0'>
+                        {count}
+                    </p>
+                </div>
+                <button onClick={() => handleClick(-1)} className={`btn btn-secondary me-2 ${styles.cardCountBtnAndP}`}>
+                    -
+                </button>
+                <Button onClick={addCountDishToCookies}>
+                    Добавить в корзину
+                </Button>
+            </div>
+        </>
+    );
+}
+
+export default CounterMainDish;
+
+
+CounterOrderDish.tsx
+import React, { FC, useState } from 'react';
+import styles from '@/styles/Home.module.css'
+import { Button, Col, Row } from 'react-bootstrap';
+
+interface CounterOrderDishProps { 
+    dishId: string, 
+    cancelDish: (dishId: string) => void, 
+    changeCountDish: (dishId: string, newCount:number) => void, 
+    countOrdered: number,
+}
+
+const CounterOrderDish: FC<CounterOrderDishProps> = ({ dishId, cancelDish, changeCountDish, countOrdered }) => {
+    const [count, setCount] = useState(countOrdered);
+
+    const handleChangeCountClick = (countToAdd: number) => {
+        setCount((count) => {
+            let sum = count + countToAdd;
+            return sum > 20 || sum < 1 ? count : sum;
+        });
+    }
+
+    const handleCommitChangeCountClick = async () =>{
+        changeCountDish(dishId, count);
+    }
+
+    const handleCancelClick = (): void => {
+        cancelDish(dishId);
+    }
+
+    return (
+        <>
+            <Row className='d-flex justify-content-end pe-md-3'>
+                <Col xs={12} md={4} className='d-flex justify-content-md-start justify-content-center mt-2'>
+                    <Button onClick={handleCancelClick} className={`btn btn-danger me-2`}>
+                        Отменить
+                    </Button>
+                </Col>
+                <Col xs={12} md={4} className='mt-2'>
+                    <Row className='d-flex justify-content-md-end justify-content-center'>
+                        <Button onClick={() => handleChangeCountClick(1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>
+                            +
+                        </Button>
+                        <div className={`d-flex align-items-center justify-content-center ${styles.cardCountBtnAndP}`}>
+                            <p className='m-0'>
+                                {count}
+                            </p>
+                        </div>
+                        <Button onClick={() => handleChangeCountClick(-1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>
+                            -
+                        </Button>
+                    </Row>
+                </Col>
+                <Col xs={12} md={4} className='d-flex justify-content-md-start justify-content-center mt-2'>
+                    <Button onClick={handleCommitChangeCountClick}>
+                        Изменить количество
+                    </Button>
+                </Col>
+            </Row>
+        </>
+    );
+}
+
+export default CounterOrderDish;
+
+
+HandlerAdminDish.tsx
+import React, { FC, useState } from 'react';
+import styles from '@/styles/Home.module.css'
+import { useCookies } from 'react-cookie';
+import { Button, Col, Row } from 'react-bootstrap';
+import Link from 'next/link';
+
+interface HandlerAdminDishProps {
+    dishId: string, 
+    dishDeleted: boolean, 
+    isVisibleForUsers: boolean, 
+    changeDeleteStateDish: (dishId:string)=>void,
+    changeVisibleStateDish: (dishId:string)=>void,
+}
+
+const HandlerAdminDish: FC<HandlerAdminDishProps> = ({ dishId, dishDeleted, isVisibleForUsers, changeDeleteStateDish, changeVisibleStateDish }) => {
+
+    const handleDeleteStateDish = () =>{
+        changeDeleteStateDish(dishId);
+    }
+
+    const handleVisibleStateDish = () =>{
+        changeVisibleStateDish(dishId);
+    }
+
+    return (
+        <>
+            <Row className='ms-1 d-flex justify-content-center'>
+                <Col xs='auto' className='mt-1 mt-xxl-0'>
+                    <Link href={"/admin/changeDish?dishId=" + dishId} className={`btn btn-secondary`}>
+                        Изменить блюдо
+                    </Link>
+                </Col>
+                <Col xs='auto' className='mt-1 mt-xxl-0'>
+                    <Button onClick={handleDeleteStateDish} className={`btn btn-secondary`}>
+                        {dishDeleted ? "Восстановить блюдо" : "Удалить блюдо"}
+                    </Button>
+                </Col>
+                <Col xs='auto' className='mt-1 mt-xxl-0'>
+                    <Button onClick={handleVisibleStateDish} className={`btn btn-secondary`}>
+                        {isVisibleForUsers ? "Скрыть от пользователей" : "Сделать доступным для пользователей"}
+                    </Button>
+                </Col>
+            </Row>
+        </>
+    );
+}
+
+export default HandlerAdminDish;
+
+
+OrderStateItem.tsx
+import React, { FC, useState } from 'react';
+import { Card, Col, Row } from 'react-bootstrap';
+
+const OrderStateItem: FC<orderState> = (orderState) => {
+
+    return (
+        <Card className='mt-2'>
+            <Row className='p-md-1'>
+                <Col xs={12} md={5} >
+                    <div>Статус: {orderState.nameOfState}</div>
+                </Col>
+                <Col xs={12} md={7} >
+                    <div>Время начала стадии: {orderState.timeStartState.toLocaleString()}</div>
+                </Col>
+            </Row>
+            <Row className='p-md-1'>
+                <Col xs={12} >
+                    <div>Описание стадии: {orderState.descriptionForClient}</div>
+                </Col>
+            </Row>
+            <Row className='p-md-1'>
+                <Col xs={12} >
+                    <div>Комментарий: {orderState.comment}</div>
+                </Col>
+            </Row>
+        </Card>
+    );
+}
+
+export default OrderStateItem;
+
+
+customMap.tsx
+import { MapContext } from "../contexts/MapContext";
+import { FC, ReactNode, useEffect, useRef, useState } from "react";
+import * as ol from "ol";
+import { MapOptions } from "ol/Map";
+
+const CustomMap: FC<{ children: ReactNode, zoom: number, center: Array<number> }> = ({ children, zoom, center }) => {
+    const mapRef = useRef<HTMLDivElement | null>(null);
+    const [map, setMap] = useState<ol.Map | null>(null);
+    
+    // on component mount
+    useEffect(() => {
+        const options:MapOptions = {
+            view: new ol.View({ zoom, center }),
+            layers: [],
+            controls: [],
+            overlays: []
+        };
+        const mapObject = new ol.Map(options);
+        mapObject.setTarget(mapRef.current as string | HTMLElement | undefined);
+        setMap(mapObject);
+        return () => mapObject.setTarget(undefined);
+    }, []);
+    // zoom change handler
+    useEffect(() => {
+        if (!map) return;
+        map.getView().setZoom(zoom);
+    }, [zoom]);
+    // center change handler
+    useEffect(() => {
+        if (!map) return;
+        map.getView().setCenter(center)
+    }, [center])
+    return (
+        <MapContext.Provider value={{ map }}>
+            <div ref={mapRef} style={{height:'500px'}} >
+                {children}
+            </div>
+        </MapContext.Provider>
+    )
+}
+export default CustomMap;
+Layers.tsx
+import React, { FC, ReactNode } from "react";
+
+const Layers: FC<{ children: ReactNode }> = ({ children }) => {
+  return (<div>
+        {children}
+    </div>);
+};
+
+export default Layers;
+
+TitleLayer.tsx
+import { FC, useContext, useEffect } from "react";
+import OLTileLayer from "ol/layer/Tile";
+import { MapContext } from "@/components/contexts/MapContext";
+import * as ol from "ol";
+import { Options } from "ol/layer/Layer";
+
+interface mapContextProps {
+    map: ol.Map | null,
+}
+
+const TileLayer:FC<Options<any>> = ({ source, zIndex = 0 }) => {
+  const { map } = useContext<mapContextProps>(MapContext); 
+  useEffect(() => {
+    if (!map) return;
+    
+    let tileLayer = new OLTileLayer({
+      source,
+      zIndex,
+    });
+    map.addLayer(tileLayer);
+    tileLayer.setZIndex(zIndex);
+    return () => {
+      if (map) {
+        map.removeLayer(tileLayer);
+      }
+    };
+  }, [map]);
+  return null;
+};
+export default TileLayer;
+CancelOrderModal.tsx
+import React, { ChangeEvent, FC, useState } from 'react';
+import { Form } from 'react-bootstrap';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+
+interface CancelOrderModelProps {
+    show: boolean | undefined,
+    commitCancelOrder: (reasonOfCancel: string) => void,
+    closeModel: () => void,
+}
+
+const CancelOrderModal: FC<CancelOrderModelProps> = ({ show, commitCancelOrder, closeModel }) => {
+    const [reasonOfCancel, setReasonOfCancel] = useState("")
+
+    const changeTextOfReason = (e:ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        setReasonOfCancel(newValue);
+    }
+
+    const handleCommit = async () => {
+        commitCancelOrder(reasonOfCancel)
+    }
+
+    return (
+        <>
+            <Modal show={show} onHide={closeModel} keyboard={false} aria-labelledby="contained-modal-title-vcenter">
+                <Modal.Header closeButton>
+                    <Modal.Title>Отмена заказа</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Пожалуйста, введите причину, из-за которой Вы отменяете заказ: </Form.Label>
+                            <Form.Control as="textarea" rows={3} value={reasonOfCancel} onChange={changeTextOfReason}/>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={closeModel}>
+                        Закрыть
+                    </Button>
+                    <Button variant="primary" onClick={handleCommit}>Отменить заказ</Button>
+                </Modal.Footer>
+            </Modal>
+        </>
+    );
+}
+
+export default CancelOrderModal;
+PlaceAnOrderModal.tsx
+import React, { ChangeEvent, FC, useEffect, useState } from 'react';
+import { Form } from 'react-bootstrap';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+
+interface PlaceAnOrderModelProps {
+    show: boolean | undefined,
+    commitAction: (userAddress: string, userPhoneNumber: string, comment: string) => void,
+    closeModel: () => void,
+}
+
+const PlaceAnOrderModal: FC<PlaceAnOrderModelProps> = ({ show, commitAction, closeModel }) => {
+    const [address, setAddress] = useState("")
+    const [phoneNumber, setPhoneNumber] = useState("")
+    const [comment, setComment] = useState("")
+
+    const changeAddress = (e:ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        setAddress(newValue);
+    }
+
+    const changePhoneNumber = (e:ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        setPhoneNumber(newValue);
+    }
+
+    const changeComment = (e:ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        setComment(newValue);
+    }
+
+    const handleCommit = async () => {
+        if(address == "" || phoneNumber == "")
+        {
+            alert("Для оформления заказа необходимо ввести ваш номер телефона и адрес")
+            return;
+        }
+        commitAction(address, phoneNumber, comment)
+    }
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/main/getProfileInfo`, {
+                credentials: 'include',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
+                }, 
+            });
+
+            if(resp.ok){
+                const profileInfo = await resp.json() as {address: string, phoneNumber: string};
+                setAddress(profileInfo.address);
+                setPhoneNumber(profileInfo.phoneNumber);
+            }        
+            else{
+                const errorText = await resp.text()
+                if(errorText != "")
+                    alert(errorText);
+            }
+        }
+        fetchData();
+    }, []);
+
+    return (
+        <>
+            <Modal show={show} onHide={closeModel} keyboard={false} aria-labelledby="contained-modal-title-vcenter">
+                <Modal.Header closeButton>
+                    <Modal.Title>Оформление заказа</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" >
+                            <Form.Label>Пожалуйста, введите адрес, по которому необходимо доставить заказ: </Form.Label>
+                            <Form.Control type="text" value={address} onChange={changeAddress}/>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Пожалуйста, введите свой номер телефона: </Form.Label>
+                            <Form.Control type="tel" placeholder="+7" maxLength={12} value={phoneNumber} onChange={changePhoneNumber}/>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Комментарий к заказу: </Form.Label>
+                            <Form.Control as="textarea" rows={2} value={comment} onChange={changeComment}/>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={closeModel}>
+                        Закрыть
+                    </Button>
+                    <Button variant="primary" onClick={handleCommit}>Оформить заказ</Button>
+                </Modal.Footer>
+            </Modal>
+        </>
+    );
+}
+
+export default PlaceAnOrderModal;
+ReviewOrderModal.tsx
+import React, { ChangeEvent, FC, useState } from 'react';
+import { Form, Row } from 'react-bootstrap';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+import styles from '@/styles/Home.module.css'
+
+interface ReviewOrderModelProps {
+    show: boolean | undefined,
+    commitAction: (review: string, rating:number) => void,
+    closeModel: () => void,
+}
+
+const ReviewOrderModal: FC<ReviewOrderModelProps> = ({ show, commitAction, closeModel }) => {
+    const [clientReview, setClientReview] = useState("")
+    const [rating, setRating] = useState(10);
+
+    const changeTextOfReason = (e: ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        setClientReview(newValue);
+    }
+
+    const handleCommit = async () => {
+        commitAction(clientReview, rating)
+    }
+
+    const handleChangeCountClick = (countToAdd: number): void => {
+        setRating((count) => {
+            let sum = count + countToAdd;
+            return sum > 10 || sum < 1 ? count : sum;
+        });
+    }
+
+    return (
+        <>
+            <Modal show={show} onHide={closeModel} keyboard={false} aria-labelledby="contained-modal-title-vcenter">
+                <Modal.Header closeButton>
+                    <Modal.Title>Отзыв</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Ваша оценка: </Form.Label>
+                            <Row className='d-flex justify-content-center'>
+                                <Button onClick={() => handleChangeCountClick(1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>
+                                    +
+                                </Button>
+                                <div className={`d-flex align-items-center justify-content-center ${styles.cardCountBtnAndP}`}>
+                                    <p className='m-0'>
+                                        {rating}
+                                    </p>
+                                </div>
+                                <Button onClick={() => handleChangeCountClick(-1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>
+                                    -
+                                </Button>
+                            </Row>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Пожалуйста, введите отзыв: </Form.Label>
+                            <Form.Control as="textarea" value={clientReview} onChange={changeTextOfReason} />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={closeModel}>
+                        Закрыть
+                    </Button>
+                    <Button variant="primary" onClick={handleCommit}>Оставить отзыв</Button>
+                </Modal.Footer>
+            </Modal>
+        </>
+    );
+}
+
+export default ReviewOrderModal;
+BarChart.tsx
+import { ChartData } from "chart.js";
+import { FC, useEffect, useState } from "react";
+import { Bar } from 'react-chartjs-2';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+  } from 'chart.js';
+  
+  ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+  );
+
+  function getRandomInt(max:number) {
+    return Math.floor(Math.random() * max);
+}
+
+const BarChart: FC<{ query:statisticQueryInfo }> = ({ query }) => {
+    const [chartData, setChartData] = useState<ChartData<"bar">>();
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/statistic/${query.linkToQuery}`, {
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
+                },
+            });
+
+            if(resp.ok){
+                const resInfo = await resp.json() as statisticQueryDataItem[];
+    
+                const data:{labels:string[], datasets:any} = {
+                    labels: resInfo.map((value) => value.x),
+                    datasets: [],
+                }
+                
+                for( let i = 0; i < (query.nameDatasets?.length ?? 1); i++)
+                {
+                    data.datasets.push({
+                        label: query.nameDatasets == null ? query.nameQuery : query.nameDatasets[i],
+                        data: resInfo.map((value) => value.y[i]),
+                        borderColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)})`,
+                        backgroundColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)})`,
+                        borderWidth: 1,
+                    });
+                };
+    
+                setChartData(data);
+            }
+            else{
+                alert(await resp.text());
+            }
+
+        }
+        fetchData();
+    }, [query]);
+
+    const options = {
+        plugins: {
+            datalabels: {
+                color: '#000',
+                font: {
+                    weight: 'bold' as 'bold'
+                },
+                align: 'center' as 'center'
+              }
+        },
+    };
+
+    return (
+        <>
+            {chartData != undefined && <Bar plugins={[ChartDataLabels]} options={options} data={chartData}/>}
+        </>    
+    );
+}
+
+export default BarChart;
+LineChart.tsx
+import { ChartData } from "chart.js";
+import { FC, useEffect, useState } from "react";
+import { Line } from "react-chartjs-2";
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+  } from 'chart.js';
+
+  ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+  );
+
+const LineChart: FC<{ query:statisticQueryInfo }> = ({ query }) => {
+    const [chartsData, setChartsData] = useState<ChartData<"line">[]>([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/statistic/${query.linkToQuery}`, {
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
+                },
+            });
+
+            if(resp.ok){
+                const resInfo = await resp.json() as statisticQueryDataItem[];
+    
+                const datasets:ChartData<"line">[] = [];
+                
+                for( let i = 0; i < (query.nameDatasets?.length ?? 1); i++)
+                {
+                    datasets.push({
+                        labels: resInfo.map((value) => value.x),
+                        datasets: [
+                            {
+                                label: query.nameDatasets == null ? query.nameQuery : query.nameDatasets[i] ,
+                                data: resInfo.map((value) => value.y[i]),
+                                borderColor: 'rgb(255, 99, 132)',
+                                backgroundColor: '#7E07A9',
+                            },
+                        ],
+                    });
+                };
+    
+                setChartsData(datasets);
+            }
+            else{
+                alert(await resp.text());
+            }
+           
+        }
+        fetchData();
+    }, [query]);
+
+    const options = {
+        plugins: {
+            datalabels: {
+                color: '#000',
+                font: {
+                    weight: 'bold' as 'bold'
+                },
+                align: 'left' as 'left'
+              }
+        },
+    };
+
+    return (
+        <>
+            {chartsData.map((chartData, i) => <Line key={i} plugins={[ChartDataLabels]} options={options} data={chartData}/>) }
+        </>    
+    );
+}
+
+export default LineChart;
+RadarChart.tsx
+import { ChartData } from "chart.js";
+import { FC, useEffect, useState } from "react";
+import { Radar } from 'react-chartjs-2';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+import {
+    Chart as ChartJS,
+    RadialLinearScale,
+    PointElement,
+    LineElement,
+    Filler,
+    Tooltip,
+    Legend,
+  } from 'chart.js';
+  
+  ChartJS.register(
+    RadialLinearScale,
+    PointElement,
+    LineElement,
+    Filler,
+    Tooltip,
+    Legend
+  );
+
+function getRandomInt(max:number) {
+    return Math.floor(Math.random() * max);
+}
+
+const RadarChart: FC<{ query:statisticQueryInfo }> = ({ query }) => {
+    const [chartData, setChartData] = useState<ChartData<"radar">>();
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/statistic/${query.linkToQuery}`, {
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
+                },
+            });
+
+            if(resp.ok){
+                const resInfo = await resp.json() as {queryData: statisticQueryDataItem[], nameDatasets:string[]};
+    
+                const data:{labels:string[], datasets:any} = {
+                    labels: resInfo.queryData.map((value) => value.x),
+                    datasets: [],
+                }
+                
+                for( let i = 0; i < resInfo.nameDatasets.length; i++)
+                {
+                    data.datasets.push({
+                        label: resInfo.nameDatasets[i] ,
+                        data: resInfo.queryData.map(value => value.y[i]),
+                        borderColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)}, 0.5)`,
+                        backgroundColor: `rgb(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)}, 0.3)`,
+                        borderWidth: 1,
+                        fill: true,
+                    });
+                };
+    
+                setChartData(data);
+            }
+            else{
+                alert(await resp.text());
+            }
+        }
+        fetchData();
+    }, [query]);
+
+    const options = {
+        plugins: {
+            datalabels: {
+                color: '#000',
+                font: {
+                    weight: 'bold' as 'bold'
+                },
+                align: 'top' as 'top'
+              }
+        },
+    };
+
+    return (
+        <>
+            {chartData != undefined && <Radar plugins={[ChartDataLabels]} options={options} data={chartData}/> }
+        </>    
+    );
+}
+
+export default RadarChart;
+ClientLayout.tsx
+import {FC, ReactNode} from "react"
+import Sidebar from "./Sidebar";
+import { Col, Container, Row } from "react-bootstrap";
+import React from "react";
+
+type clientLayoutProps = {
+    children: ReactNode,
+    categories:Array<categoryItem>,
+}
+
+const ClientLayout:FC<clientLayoutProps> = ({children, categories}) => (
+        <>
+            <Container fluid="xl" className="row pt-2 mx-auto mb-1">
+                <Col xs={2} md={3} lg={2} className="g-0 px-1">
+                    <Sidebar categories={categories}/> 
+                </Col>
+                <Col xs={10} md={9} lg={10} className="g-0">
+                    {children}
+                </Col>
+            </Container>
+        </>);
+
+export default ClientLayout;
+DishStandartLayout.tsx
+import React, { FC, ReactNode, useState } from 'react';
+import { Card, Col, Row, Carousel, Image } from 'react-bootstrap';
+import styles from '@/styles/Home.module.css'
+import Link from 'next/link';
+
+const DishStandartLayout: FC<{ dishInfo: dishClientInfo, children: ReactNode }> = ({ dishInfo, children }) => {
+    const [index, setIndex] = useState(0);
+
+    const handleSelect = (selectedIndex: number): void => {
+        setIndex(selectedIndex);
+    };
+
+    return (
+        <Card className='mt-1'>
+            <Row className='g-0'>
+                <Col xs={12} sm={5} md={4} lg={3}>
+                    <Carousel activeIndex={index} onSelect={handleSelect}>
+                        {dishInfo.images?.slice(0, 3).map((value, i) =>
+                            <Carousel.Item key={i}>
+                                <Image className="d-block w-100" src={value} alt="First slide" />
+                            </Carousel.Item>
+                        )}
+                    </Carousel>
+                </Col>
+                <Col xs={12} sm={7} md={8} lg={9}>
+                    <Card.Body>
+                        <Row className='align-items-center'>
+                            <Col xs={9}>
+                                <Link href={'/dishes/' + dishInfo.id} className={`${styles.linkWithoutDefaultStyles}`}>
+                                    <h3>{dishInfo.name}</h3>
+                                </Link>
+                            </Col>
+                            <Col ><p className='text-start text-lg-center m-0'>Цена: {dishInfo.price}р</p></Col>
+                        </Row>
+                        <Card.Text>
+                            {dishInfo.description}
+                        </Card.Text>
+                        {children}
+                    </Card.Body>
+                </Col>
+            </Row>
+        </Card>
+    );
+}
+
+export default DishStandartLayout;
+
+
+Footer.tsx
+import Link from "next/link";
+import { FC } from "react"
+import { Col, Container, NavbarBrand } from "react-bootstrap";
+import FooterPanelItem from "../FooterPanelItem";
+import Image from "next/image";
+
+const questionsPanel:footerPanelInfo = 
+{
+    panelName: "Часто задаваемые вопросы",
+    panelItems: [
+        {
+            itemName: "Как получить бонусы?",
+            itemHref: "/",
+        },
+        {
+            itemName: "Как связаться с менеджером?",
+            itemHref: "/",
+        },
+        {
+            itemName: "Как стать частью вашей команды?",
+            itemHref: "/",
+        },
+        {
+            itemName: "Какие доступны способы оплаты?",
+            itemHref: "/",
+        },
+    ]
+}
+const informationPanel:footerPanelInfo = 
+{
+    panelName: "Общая информация",
+    panelItems: [
+        {
+            itemName: "История сервиса",
+            itemHref: "/",
+        },
+        {
+            itemName: "Действия при возникновении проблем с сайтом",
+            itemHref: "/",
+        },
+        {
+            itemName: "Вакансии",
+            itemHref: "/",
+        },
+    ]
+}
+
+const Footer: FC = () => {
+    return (
+        <Container className="row mx-auto">
+            <Col md={4} xs={12} className="p-1 h-100">
+                {FooterPanelItem(informationPanel)}
+            </Col>
+            <Col md={4} xs={12} className="p-1">
+                {FooterPanelItem(questionsPanel)}
+            </Col>
+            <Col md={4} xs={12} className="order-md-first d-flex justify-content-center align-items-center p-1">
+                <Link href="/">
+                    <NavbarBrand>
+                        <Image src="/2_logo.svg" alt="logo" width={220} height={80}/>
+                    </NavbarBrand>
+                </Link>
+            </Col>
+        </Container>
+    );
+}
+
+export default Footer;
+Header.tsx
+import Link from "next/link";
+import { FC, MouseEvent } from "react"
+import { Button, Col, Container, NavbarBrand } from "react-bootstrap";
+import styles from '@/styles/Home.module.css'
+import { useRouter } from "next/router";
+import Image from "next/image";
+
+interface HeaderProps { 
+    isAdmin: boolean, 
+    isKitchenWorker: boolean,
+    isDeliveryMan: boolean,
+    isAuthed: boolean, 
+    dropJwtToken: () => void
+}
+
+const Header: FC<HeaderProps> = ({isAuthed, dropJwtToken, isAdmin, isKitchenWorker, isDeliveryMan}) => {
+    const router = useRouter();
+
+    const logoutClickHandler = async (e:MouseEvent):Promise<void> => {
+        e.preventDefault();
+
+        const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/auth/logout`, {
+            method: "POST",
+            credentials: 'include',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem("jwtToken"),
+            }, 
+        });
+
+        if(resp.ok)
+        {
+            dropJwtToken();
+            router.push("/");
+        }
+        else{
+            alert(await resp.text());
+        }
+        
+    }
+
+    const cartButtonVisibility:boolean = !(isAdmin || isKitchenWorker || isDeliveryMan);
+
+    return (
+        <Container fluid="xl" className="row pt-2 mx-auto">
+            <Col sm={5} md={6} className="d-flex justify-content-center align-items-center">
+                <Link href="/">
+                    <NavbarBrand>
+                        <Image src="/2_logo.svg" alt="logo" width={220} height={80}/>
+                    </NavbarBrand>
+                </Link>
+            </Col>
+            <Col sm={7} md={6} className="d-flex justify-content-end align-items-center">
+                {cartButtonVisibility &&  <Col xs={isAuthed ? 4 : 6} sm={4} className={`p-1 ${styles.headerButton}`}>
+                    <Link href='/cart' className="btn btn-primary w-100">
+                        Корзина
+                    </Link>
+                </Col>}
+                { isAuthed ? 
+                    <>
+                        <Col xs={4} sm={4} className={`p-1 ${styles.headerButton}`}>
+                            <Link href='/profile' className="btn btn-primary w-100">
+                                Профиль
+                            </Link>
+                        </Col>
+                        <Col xs={4} sm={4} className={`p-1 ${styles.headerButton}`}>
+                            <Button className="w-100" onClick={logoutClickHandler}>Выйти</Button>
+                        </Col>
+                    </>
+                    :
+                    <Col xs={6} sm={8} className={`p-1 ${styles.headerButton}`}>
+                        <Link href='/login' className="btn btn-primary w-100 text-nowrap">
+                            Войти/Регистрация
+                        </Link>
+                    </Col>
+                }
+            </Col>
+        </Container>
+    );
+}
+
+export default Header;
+Layout.tsx
+import {FC, ReactNode, useEffect, useState} from "react"
+import MainNavbar from "./Navbar";
+import Header from "./Header";
+import Footer from "./Footer";
+import React from "react";
+import { AuthContext as AuthContext } from "../contexts/AuthContext";
+
+type layoutProps = {
+    children: ReactNode
+}
+
+const Layout:FC<layoutProps> = ({children}) =>  {
+    const [isAuthed, setIsAuthed] = useState(false);
+    const [roles, setRoles] = useState(["User"]);
+
+    const DropJwtToken = () => {
+        setRoles(["User"]);
+        setIsAuthed(false);
+
+        localStorage.removeItem("jwtToken");
+        localStorage.removeItem("jwtTokenValidTo");
+    };
+
+    const JwtTokenIsValid = ():boolean => {
+        const jwtTokenValidTo: string | null = localStorage.getItem("jwtTokenValidTo");
+
+        if(jwtTokenValidTo == null || new Date(jwtTokenValidTo) < new Date()){
+            return false;
+        }
+
+        return true;
+    };
+
+    const UpdateJwtToken = async () => {
+        //Если пользователь авторизован и при этом
+        //Если с jwt токеном все ок, то нет смысла его обновлять
+        if(JwtTokenIsValid() && isAuthed == true)
+            return;
+
+        const resp = await fetch(`${process.env.NEXT_PUBLIC_HOME_API}/auth/refreshAccessToken`, {
+            method: "POST",
+            credentials: "include"
+        });
+    
+        if(resp.ok){
+            const token = await resp.json() as jsonTokenInfo;
+
+            setRoles(token.roleNames);
+            setIsAuthed(true);
+
+            localStorage.setItem("jwtToken", token.jwtToken);
+            localStorage.setItem("jwtTokenValidTo", token.validTo.toString());
+        }
+        else{
+            DropJwtToken();
+        }
+    }
+
+    useEffect(() => {
+        UpdateJwtToken();
+    },[isAuthed]);
+
+    const authContextData = { 
+        isAdmin: roles.includes("Admin"), 
+        isClient: roles.includes("Client"), 
+        isDeliveryMan: roles.includes("DeliveryMan"), 
+        isKitchenWorker: roles.includes("KitchenWorker"), 
+        isAuth: isAuthed, 
+        toggleIsAuthed: () => setIsAuthed(true)
+    };
+
+    return (
+        <>
+            <Header {...authContextData} isAuthed={isAuthed} dropJwtToken={DropJwtToken}/>
+            <MainNavbar {...authContextData} />
+            <AuthContext.Provider value = {authContextData}>
+                {children}
+            </AuthContext.Provider>
+            <Footer />
+        </>
+    );
+};
+
+export default Layout;
+Navbar.tsx
+import { Nav, Navbar, NavDropdown, Container, Button, Form } from 'react-bootstrap';
+import { ChangeEvent, FC, useState } from "react";
+import Link from 'next/link';
+import Image from 'next/image';
+
+const HorizontalMenuItems: Array<linkPanelItem> = [
+    {
+        itemName: "Главная",
+        itemHref: "/",
+    },
+    {
+        itemName: "Акции",
+        itemHref: "/",
+    },
+    {
+        itemName: "Доставка",
+        itemHref: "/",
+    },
+];
+
+const AdminPanelMenuItems: Array<linkPanelItem> = [
+    {
+        itemName: "Статистика",
+        itemHref: "/admin/statistics",
+    },
+    {
+        itemName: "Блюда",
+        itemHref: "/admin/dishes",
+    },
+    {
+        itemName: "Заказы",
+        itemHref: "/admin/orders",
+    },
+    {
+        itemName: "Пользователи",
+        itemHref: "/admin/users",
+    },
+];
+
+const KitchenPanelMenuItems: Array<linkPanelItem> = [
+    {
+        itemName: "Заказы кухни",
+        itemHref: "/kitchen/orders",
+    },
+    {
+        itemName: "Сотрудники кухни",
+        itemHref: "/kitchen/workers",
+    },
+];
+
+interface MainNavbarProps { 
+    isAdmin: boolean, 
+    isKitchenWorker: boolean 
+}
+
+const MainNavbar: FC<MainNavbarProps> = ({ isAdmin, isKitchenWorker }) => {
+    const [searchValue, setSearchValue] = useState("");
+
+    const changeSearchValue = (e: ChangeEvent<HTMLInputElement>): void => {
+        e.preventDefault();
+        setSearchValue(e.target.value);
+    }
+
+    return (
+        <Navbar expand="md" className="upperNavbar">
+            <Container>
+                <Navbar.Toggle id="navbarToggle" aria-controls="offcanvasNavbar-expand" className="order-1 col-3" style={{color:"#FFF"}}></Navbar.Toggle>
+                <Navbar.Collapse id="basic-navbar-nav" className='order-3'>
+                    <Nav className="me-auto">
+                        {HorizontalMenuItems.map((value, i) =>
+                        (<Nav.Item className='mx-auto' key={i}>
+                            <Link href={value.itemHref} className='nav-link' style={{color: "#FFF"}}>
+                                {value.itemName}
+                            </Link>
+                        </Nav.Item>)
+                        )}
+                        {isAdmin &&
+                            <NavDropdown className='mx-auto' title="Админ панель" id="nav-dropdown">
+                                {AdminPanelMenuItems.map((value, i) => (
+                                    <Nav.Item key={i} className='mx-auto'>
+                                        <Link href={value.itemHref} className='dropdown-item pt-2 pb-2 nav-link'>
+                                            {value.itemName}
+                                        </Link>
+                                    </Nav.Item>))
+                                }
+                            </NavDropdown>
+                        }
+                        {isKitchenWorker &&
+                            <NavDropdown className='mx-auto' title="Панель кухни" id="nav-dropdown">
+                                {KitchenPanelMenuItems.map((value, i) => (
+                                    <Nav.Item key={i} className='mx-auto'>
+                                        <Link href={value.itemHref} className='dropdown-item pt-2 pb-2'>
+                                            {value.itemName}
+                                        </Link>
+                                    </Nav.Item>))
+                                }
+                            </NavDropdown>
+                        }
+                    </Nav>
+                </Navbar.Collapse>
+                <Form className="d-flex col-lg-4 col-md-5 col-8 order-md-4 order-2 ">
+                    <Form.Control className='w-100' placeholder="Поиск" aria-describedby="basic-addon2" value={searchValue} onChange={changeSearchValue} />
+                    <Button variant="outline-secondary" className='ms-1' id="button-addon2">
+                        <Link href={searchValue.trim() != "" ? `/search?searchText=${searchValue.toLowerCase().trim()}` : '/'}>
+                            <Image src="\loupe.svg" width="20" height="20" alt="Поиск"/>
+                        </Link>
+                    </Button>
+                </Form>
+            </Container>
+        </Navbar>
+    )
+};
+
+export default MainNavbar;
+Sidebar.tsx
+import { Nav, Navbar, Container, Offcanvas } from 'react-bootstrap';
+import { FC, useEffect, useState } from "react"
+import Link from 'next/link';
+import styles from '@/styles/Home.module.css'
+
+const Sidebar: FC<{ categories: Array<categoryItem> }> = ({ categories }) => {
+
+    const [isFixed, setIsFixed] = useState(false);
+
+    useEffect(() => {
+      const handleScroll = () => {
+        let heightOfHeaderAndNavBar = 32 + 56 + window.innerWidth >= 576 ? 88 : 133
+
+        if (window.scrollY > heightOfHeaderAndNavBar && !isFixed) {
+          setIsFixed(true);
+        } else if (window.scrollY < heightOfHeaderAndNavBar && isFixed) {
+          setIsFixed(false);
+        }
+      };
+      window.addEventListener("scroll", handleScroll);
+      window.addEventListener("resize", handleScroll);
+      return () => {
+        window.removeEventListener("scroll", handleScroll);
+        window.removeEventListener("resize", handleScroll);
+      };
+    }, [isFixed]);
+
+    return (
+        <Navbar expand="md" style={{ maxHeight: "100vw", minHeight: "23vw", position: (isFixed?"fixed":"static"), top: "0px"}} className="h-100">
+            <Container fluid className='h-100 align-items-start justify-content-end g-0 mx-auto'>
+                <Navbar.Toggle aria-controls='offcanvasNavbar' className={`${styles.sidebarToggle} p-0 h-100`}>
+                    <div className={`${styles.rotate90deg} align-items-center`}>Категории</div>
+                </Navbar.Toggle>
+                <Navbar.Offcanvas id='offcanvasNavbar' aria-labelledby='offcanvasNavbarLabel' placement="start">
+                    <Offcanvas.Header closeButton>
+                        <Offcanvas.Title id='offcanvasNavbarLabel'>
+                            Категории
+                        </Offcanvas.Title>
+                    </Offcanvas.Header>
+                    <Offcanvas.Body className='g-0'>
+                        <Nav className="flex-column">
+                            <Nav.Item className='w-100 d-none d-md-block p-2'>
+                                <b>Категории</b>
+                            </Nav.Item>
+                            {categories?.map((value, i) =>
+                            (<Nav.Item key={i} className='w-100 ms-2'>
+                                <Link className="nav-link " href={`/categories/${value.linkName}`} >
+                                    {value.name}
+                                </Link>
+                            </Nav.Item>)
+                            )}
+                        </Nav>
+                    </Offcanvas.Body>
+                </Navbar.Offcanvas>
+            </Container>
+        </Navbar>
+    )
+};
+
+export default Sidebar;
+AuthContext.ts
+import React from "react"
+
+export const AuthContext = React.createContext<authContextProps>({
+    isAdmin: false,
+    isClient: false,
+    isDeliveryMan: false,
+    isKitchenWorker: false,
+    isAuth: false,
+    toggleIsAuthed: ()=>{},
+  });
+MapContext.ts
+import React from "react";
+import * as ol from "ol";
+
+interface mapContextProps {
+    map: ol.Map | null,
+}
+
+export const MapContext = React.createContext<mapContextProps>({
+    map: null
+});

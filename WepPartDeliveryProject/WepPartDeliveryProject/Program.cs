@@ -38,6 +38,7 @@ builder.Services.AddCors(options =>
         {
             policy
                 .WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value)
+                .WithOrigins("https://e9eb-176-124-28-223.ngrok-free.app")
                 //.WithHeaders(HeaderNames.ContentType, HeaderNames.Cookie)
                 .AllowAnyHeader()
                 .AllowAnyMethod()
@@ -97,7 +98,12 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-//await app.Services.GetService<GeneratorService>().GenerateAll();
+var appSetting = new ApplicationSettings();
+configuration.GetSection("ApplicationSettings").Bind(appSetting);
+
+if (appSetting.GenerateData)
+    await app.Services.GetService<GeneratorService>().GenerateAll();
+
 //Отчасти костыль
 var graphClient = app.Services.GetService<IGraphClient>();
 graphClient.OperationCompleted += (sender, e) => app.Logger.LogInformation(e.QueryText.Replace("\r\n", " "));

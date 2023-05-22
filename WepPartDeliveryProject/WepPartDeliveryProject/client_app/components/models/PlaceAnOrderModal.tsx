@@ -53,7 +53,9 @@ const PlaceAnOrderModal: FC<PlaceAnOrderModelProps> = ({ show, commitAction, clo
                 setPhoneNumber(profileInfo.phoneNumber);
             }        
             else{
-                alert(await resp.text());
+                const errorText = await resp.text()
+                if(errorText != "")
+                    alert(errorText);
             }
         }
         fetchData();
@@ -63,7 +65,7 @@ const PlaceAnOrderModal: FC<PlaceAnOrderModelProps> = ({ show, commitAction, clo
         <>
             <Modal show={show} onHide={closeModel} keyboard={false} aria-labelledby="contained-modal-title-vcenter">
                 <Modal.Header closeButton>
-                    <Modal.Title>Отмена заказа</Modal.Title>
+                    <Modal.Title>Оформление заказа</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>

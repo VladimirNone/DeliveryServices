@@ -42,7 +42,7 @@ namespace WepPartDeliveryProject.Controllers
             var users = await _repositoryFactory.GetRepository<User>().GetNodesByPropertyAsync("Login", new[] { data.Login });
             if(users.Count != 1)
             {
-                return BadRequest();
+                return BadRequest("Вы ввели не верный логин");
             }
 
             var user = users[0];

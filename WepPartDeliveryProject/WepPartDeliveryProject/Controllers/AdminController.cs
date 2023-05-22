@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DbManager;
 using DbManager.Data;
 using DbManager.Data.DTOs;
 using DbManager.Data.Nodes;
@@ -241,11 +242,9 @@ namespace WepPartDeliveryProject.Controllers
             var pathToPublicClientAppDirectory = _configuration.GetSection("ClientAppSettings:PathToPublicSourceDirecroty").Value;
             var dirWithDishImages = _configuration.GetSection("ClientAppSettings:DirectoryWithDishImages").Value;
 
-            var pathToDishesDir = Path.Combine(pathToPublicClientAppDirectory, dirWithDishImages);
-            var pathToCategoryDir = Path.Combine(pathToDishesDir, categoryLinkName);
-            var pathToDishDir = Path.Combine(pathToCategoryDir, dishId);
+            var pathToDishDir = ServiceRegistration.PathToDirWithDish(pathToPublicClientAppDirectory, dirWithDishImages, categoryLinkName, dishId);
 
-            if(!Directory.Exists(pathToDishDir))
+            if (!Directory.Exists(pathToDishDir))
                 Directory.CreateDirectory(pathToDishDir);
 
             if (files != null)
@@ -256,7 +255,7 @@ namespace WepPartDeliveryProject.Controllers
                     using var fileStream = new FileStream(pathToImage, FileMode.Create);
                     await imageFile.CopyToAsync(fileStream);
 
-                    images.Add(Path.Combine("/", pathToImage.Replace(pathToPublicClientAppDirectory, "").Replace('\\', '/')));
+                    images.Add(ServiceRegistration.ConvertFromIOPathToInternetPath_DirWithDish(pathToPublicClientAppDirectory, pathToImage));
                 }
             }
 

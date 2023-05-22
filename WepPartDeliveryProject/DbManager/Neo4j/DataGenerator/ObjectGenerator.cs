@@ -35,10 +35,10 @@ namespace DbManager.Neo4j.DataGenerator
 
         //----------------------------------------------GenerateNodes------------------------------------------------------------
 
-        public static Faker<Dish> GenerateDish()
+        public static Faker<Dish> GenerateDish(List<string>? dishNames = null)
             => new Faker<Dish>("ru")
                 .RuleFor(h => h.Id, g => Guid.NewGuid())
-                .RuleFor(h => h.Name, g => g.Commerce.ProductName())
+                .RuleFor(h => h.Name, g => dishNames == null ? g.Commerce.ProductName() : g.Random.ListItemWithRemove(dishNames))
                 .RuleFor(h => h.Description, g => g.Lorem.Paragraph())
                 .RuleFor(h => h.Price, g => g.Random.Number(100, 800))
                 .RuleFor(h => h.Weight, g => g.Random.Number(150, 1000))
@@ -46,6 +46,7 @@ namespace DbManager.Neo4j.DataGenerator
 
         public static Faker<Category> GenerateCategory()
             => new Faker<Category>("ru")
+                .RuleFor(h => h.Id, g => Guid.NewGuid())
                 .RuleFor(h => h.Name, g => g.Random.ListItemWithRemove(CategoryNames))
                 .RuleFor(h => h.LinkName, (g, o) => CategoryLinks[o.Name])
                 .RuleFor(h => h.Description, g => g.Lorem.Paragraph());

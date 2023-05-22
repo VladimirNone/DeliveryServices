@@ -3,17 +3,20 @@ using DbManager.Data;
 using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Services;
-using System.Linq;
+using Microsoft.Extensions.Configuration;
 
 namespace DbManager.Neo4j.DataGenerator
 {
     public class DataGenerator
     {
-        IPasswordService pswService { get; set; }
+        private IPasswordService pswService { get; set; }
+        private IConfiguration _configuration { get; set; }
 
-        public DataGenerator(IPasswordService passwordService)
+
+        public DataGenerator(IPasswordService passwordService, IConfiguration configuration)
         {
             pswService = passwordService;
+            _configuration = configuration;
         }
 
         public List<Admin> GenerateAdmins(int count)
@@ -30,6 +33,9 @@ namespace DbManager.Neo4j.DataGenerator
     
         public List<Dish> GenerateDishes(int count)
             => ObjectGenerator.GenerateDish().Generate(count);
+
+        public List<Dish> GenerateDishes(int count, List<string> dishNames)
+            => ObjectGenerator.GenerateDish(dishNames).Generate(count);
 
         public List<Order> GenerateOrders(int count)
             => ObjectGenerator.GenerateOrder().Generate(count);
@@ -54,8 +60,54 @@ namespace DbManager.Neo4j.DataGenerator
         public List<CookedBy> GenerateRelationsCookedBy(int count, List<Order> orders, List<Kitchen> kitchens)
             => ObjectGenerator.GenerateCookedBy(orders, kitchens).Generate(count);
 
-        public List<ContainsDish> GenerateRelationsContainsDish(int count, List<Category> categories, List<Dish> dishes)
-            => ObjectGenerator.GenerateContainsDish(categories, dishes).Generate(count);
+        public List<ContainsDish> GenerateRelationsContainsDishWithNodes(int countDish, int countCategory, List<Category> categories, List<Dish> dishes)
+        {
+            var relations = new List<ContainsDish>();
+            var mediumCountDishesInCategory = countDish / countCategory;
+            var random = new Random();
+
+            categories.AddRange(GenerateCategories(countCategory));
+
+            for (int i = 0, j = 1; i < categories.Count; i++, j = (int)Math.Pow(2, i))
+            {
+                categories[i].CategoryNumber = j;
+                var categoryDishNames = CategoryLinkWithDishNames[categories[i].LinkName];
+                var categoryDishes = GenerateDishes(random.Next(2, mediumCountDishesInCategory + 2), categoryDishNames);
+                dishes.AddRange(categoryDishes);
+
+                var pathToPublicClientAppDirectory = _configuration.GetSection("ClientAppSettings:PathToPublicSourceDirecroty").Value;
+                var dirWithDishImages = _configuration.GetSection("ClientAppSettings:DirectoryWithDishImages").Value;
+                var dirWithImagesForGeneration = Path.Combine("ImagesForGeneration", categories[i].LinkName);
+                var filesForGeneration = Directory.GetFiles(dirWithImagesForGeneration);
+
+                for (int l = 0; l < filesForGeneration.Length; l++)
+                {
+                    var pathToDishDir = ServiceRegistration.PathToDirWithDish(  pathToPublicClientAppDirectory, 
+                                                                                dirWithDishImages, 
+                                                                                categories[i].LinkName, 
+                                                                                categoryDishes[l % categoryDishes.Count].Id.ToString());
+                    var imageName = filesForGeneration[l].Replace(dirWithImagesForGeneration+"\\", "");
+                    var pathToDishFile = Path.Combine(pathToDishDir, imageName);
+
+                    if (!Directory.Exists(pathToDishDir))
+                        Directory.CreateDirectory(pathToDishDir);
+
+                    File.Copy(filesForGeneration[l], pathToDishFile, false);
+
+                    if (categoryDishes[l % categoryDishes.Count].Images == null)
+                        categoryDishes[l % categoryDishes.Count].Images = new List<string>();
+
+                    categoryDishes[l % categoryDishes.Count].Images.Add(ServiceRegistration.ConvertFromIOPathToInternetPath_DirWithDish(pathToPublicClientAppDirectory, pathToDishFile));
+                }
+
+                var categoryContainsDishRelation = ObjectGenerator.GenerateContainsDish(new List<Category>() { categories[i] }, categoryDishes)
+                    .Generate(categoryDishes.Count);
+
+                relations.AddRange(categoryContainsDishRelation);
+            }
+
+            return relations;
+        }
 
         public List<DeliveredBy> GenerateRelationsDeliveredBy(int count, List<Order> orders, List<DeliveryMan> deliveryMen)
             => ObjectGenerator.GenerateDeliveredBy(orders, deliveryMen).Generate(count);
@@ -171,5 +223,16 @@ namespace DbManager.Neo4j.DataGenerator
 
             return relations;
         }
+
+        private Dictionary<string, List<string>> CategoryLinkWithDishNames { get; set; } =
+            new Dictionary<string, List<string>>()
+            {
+                {"Rolls", new List<string>{ "Суши с лососем", "Унаги ролл", "Калифорния ролл", "Филадельфия ролл", "Авокадо ролл", "Креветка ролл", "Темпура ролл", "Дракон ролл", "Спайси тунец ролл", "Ролл с огурцом" } },
+                {"Drinks", new List<string>{ "Мохито", "Пина Колада", "Дайкири", "Маргарита", "Май Тай", "Космополитен", "Мартини", "Белый Русский", "Текила Санрайз" } },
+                {"SecondMeal", new List<string>{ "Стейк", "Котлеты", "Рыба запеченная в духовке", "Жаркое", "Гуляш", "Курица табака", "Мясо по-французски", "Свинина в соусе", "Телятина с овощами", "Гриль" } },
+                {"FirstMeal", new List<string>{ "Борщ", "Солянка", "Уха", "Грибной суп", "Щи", "Окрошка", "Рассольник", "Лапша по-флотски", "Французский луковый суп", "Куриный суп с лапшой" } },
+                {"Salads", new List<string>{ "Цезарь", "Греческий", "Оливье", "Винегрет", "Салат нисуаз", "Мимоза", "Тушёнка", "Капустный", "Селёдочный", "Крабовый" } },
+                {"Pizza", new List<string>{ "Маргарита", "Пепперони", "Гавайская пицца", "Пицца четыре сыра", "Вегетарианская пицца", "Барбекю", "Мексиканская пицца", "Мясная пицца", "Морская пицца", "Дьябло" } },
+            };
     }
 }

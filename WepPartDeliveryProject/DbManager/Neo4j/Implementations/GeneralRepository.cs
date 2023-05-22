@@ -17,7 +17,8 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task AddNodeAsync(TNode newNode)
         {
-            newNode.Id = Guid.NewGuid();
+            if(newNode.Id == Guid.Empty)
+                newNode.Id = Guid.NewGuid();
             await dbContext.Cypher
                 .Merge($"(newNode:{typeof(TNode).Name} {{Id: $id}})")
                 .OnCreate()
@@ -127,7 +128,8 @@ namespace DbManager.Neo4j.Implementations
             var typeNodeFrom = typeof(TRelation).BaseType.GenericTypeArguments[0];
             var direction = GetDirection(relation.GetType().Name, "relation", typeNodeFrom == typeof(TNode));
 
-            relation.Id = Guid.NewGuid();
+            if (relation.Id == Guid.Empty)
+                relation.Id = Guid.NewGuid();
 
             await dbContext.Cypher
                 .Match($"(node {{Id: $entityId}}), (otherNode {{Id: $otherNodeId}})")

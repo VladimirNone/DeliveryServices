@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.text.Editable
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -31,6 +32,7 @@ class OrderListActivity : AppCompatActivity() {
     private var page = 0
     private var lastPage = true
     private var selectedState: OrderStateItemDTO? = null
+    private var statesAdapter:ArrayAdapter<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,12 +53,12 @@ class OrderListActivity : AppCompatActivity() {
                 try {
                     states = gson.fromJson(response, Array<OrderStateItemDTO>::class.java)
 
-                    val arrayAdapter = ArrayAdapter(this, R.layout.dropdown_item, states.map { it.nameOfState })
+                    statesAdapter = ArrayAdapter(this, R.layout.dropdown_item, states.map { it.nameOfState })
                     val headerView = findViewById<View>(R.id.header)
 
                     val autocompleteTV = headerView.findViewById<AutoCompleteTextView>(R.id.autoCompleteTextView)
 
-                    autocompleteTV.setAdapter(arrayAdapter)
+                    autocompleteTV.setAdapter(statesAdapter)
 
                 } catch (e: JSONException) {
                     e.printStackTrace()
@@ -85,6 +87,9 @@ class OrderListActivity : AppCompatActivity() {
 
         val autocompleteTV = headerView.findViewById<AutoCompleteTextView>(R.id.autoCompleteTextView)
         autocompleteTV.clearFocus()
+
+//        autocompleteTV.text = Editable.Factory.getInstance().newEditable(selectedState?.nameOfState)
+//        autocompleteTV.setAdapter(statesAdapter)
     }
 
     private fun loadAndAddOrdersToList(){

@@ -39,6 +39,7 @@ const ReviewOrderModal: FC<ReviewOrderModelProps> = ({ show, commitAction, close
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3">
+                            <Form.Label>Ваша оценка: </Form.Label>
                             <Row className='d-flex justify-content-center'>
                                 <Button onClick={() => handleChangeCountClick(1)} className={`btn btn-secondary ${styles.cardCountBtnAndP}`}>
                                     +
@@ -55,7 +56,7 @@ const ReviewOrderModal: FC<ReviewOrderModelProps> = ({ show, commitAction, close
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Пожалуйста, введите отзыв: </Form.Label>
-                            <Form.Control type="" value={clientReview} onChange={changeTextOfReason} />
+                            <Form.Control as="textarea" value={clientReview} onChange={changeTextOfReason} />
                         </Form.Group>
                     </Form>
                 </Modal.Body>

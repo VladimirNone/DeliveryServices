@@ -151,7 +151,8 @@ namespace WepPartDeliveryProject.Controllers
                 var orderedDishes = await _repositoryFactory.GetRepository<Order>().GetRelationsOfNodesAsync<OrderedDish, Dish>(searchedOrder);
 
                 var preparedOrder = _mapper.Map<OrderOutDTO>(searchedOrder);
-                _mapper.Map(reviewedOrder[0], preparedOrder);
+                if(reviewedOrder.Count != 0)
+                    _mapper.Map(reviewedOrder[0], preparedOrder);
                 preparedOrder.Story = _mapper.Map<List<OrderStateItemOutDTO>>(searchedOrder.Story);
 
                 return Ok(new { order = preparedOrder, orderedDishes = orderedDishes.Select(h=> new {count = h.Count, dishInfo = h.NodeTo}) });

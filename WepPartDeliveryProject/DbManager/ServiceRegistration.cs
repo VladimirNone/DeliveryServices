@@ -23,7 +23,8 @@ namespace DbManager
             services.AddSingleton<IGraphClient, BoltGraphClient>(op => {
                         var graphClient = new BoltGraphClient(settings.Neo4jConnection, settings.Neo4jUser, settings.Neo4jPassword);
                         graphClient.ConnectAsync().Wait();
-                        PrepareData(graphClient, configuration.GetSection("ClientAppSettings:PathToPublicSourceDirecroty").Value, configuration.GetSection("ClientAppSettings:DirectoryWithDishImages").Value);
+                        if(Convert.ToBoolean(configuration.GetSection("ApplicationSettings:GenerateData").Value) == false)
+                            PrepareData(graphClient, configuration.GetSection("ClientAppSettings:PathToPublicSourceDirecroty").Value, configuration.GetSection("ClientAppSettings:DirectoryWithDishImages").Value);
                         return graphClient;
                     });
 
@@ -47,8 +48,6 @@ namespace DbManager
             var categoryRepo = new GeneralRepository<Category>(graphClient);
             var dishRepo = new GeneralRepository<Dish>(graphClient);
 
-            var pathToDishesDir = Path.Combine(pathToPublicClientAppDirectory, dirWithDishImages);
-
             OrderState.OrderStatesFromDb = new GeneralRepository<OrderState>(graphClient).GetNodesAsync().Result;
 
             Category.CategoriesFromDb = categoryRepo.GetNodesAsync().Result;
@@ -56,18 +55,17 @@ namespace DbManager
             foreach (var category in Category.CategoriesFromDb)
             {
                 var categoryDishes = categoryRepo.GetRelationsOfNodesAsync<ContainsDish, Dish>(category).Result.Select(h=>(Dish)h.NodeTo);
-                var pathToCategoryDir = Path.Combine(pathToDishesDir, category.LinkName);
 
                 foreach (var dish in categoryDishes)
                 {
-                    var pathToDishDir = Path.Combine(pathToCategoryDir, dish.Id.ToString());
+                    var pathToDishDir = PathToDirWithDish(pathToPublicClientAppDirectory, dirWithDishImages, category.LinkName, dish.Id.ToString());
                     if (Directory.Exists(pathToDishDir))
                     {
                         dish.Images = Directory
                             .GetFiles(pathToDishDir)
                             //получаемый путь
                             // /dishes/{Название категории на англ}/{Guid}/{Название файла}
-                            .Select(h => Path.Combine("\\", dirWithDishImages, category.LinkName, dish.Id.ToString(), Path.GetFileName(h)).Replace('\\','/'))
+                            .Select(h => ConvertFromIOPathToInternetPath_DirWithDish(pathToPublicClientAppDirectory, h))
                             .ToList();
 
                         dishRepo.UpdateNodeAsync(dish).Wait();
@@ -79,6 +77,24 @@ namespace DbManager
                 }
             }
             
+        }
+
+        public static string PathToDirWithDish(string pathToPublicClientAppDirectory, string dirWithDishImages, string categoryLink, string dishId)
+        {
+            var pathToDishesDir = Path.Combine(pathToPublicClientAppDirectory, dirWithDishImages);
+            var pathToCategoryDir = Path.Combine(pathToDishesDir, categoryLink);
+            var pathToDishDir = Path.Combine(pathToCategoryDir, dishId);
+
+            return pathToDishDir;
+        }
+
+        public static string ConvertFromIOPathToInternetPath_DirWithDish(string pathToPublicClientAppDirectory, string pathToImage)
+        {
+            pathToImage = pathToImage
+                .Replace(pathToPublicClientAppDirectory, "")
+                .Replace('\\', '/');
+
+            return Path.Combine("/", pathToImage);
         }
     }
 }

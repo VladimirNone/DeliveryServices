@@ -1,0 +1,599 @@
+AdapterOrders.kt
+package com.example.deliverymanapp
+
+import android.content.Context
+import android.content.Intent
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
+import com.example.deliverymanapp.dto.OrderItemDTO
+
+class AdapterOrders (context: Context, private val resource: Int, private var orders:List<OrderItemDTO>) : ArrayAdapter<OrderItemDTO>(context, resource, orders) {
+    private var inflater: LayoutInflater = LayoutInflater.from(context)
+
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val view: View = inflater.inflate(this.resource, parent, false)
+
+        val tvOrderId = view.findViewById<TextView>(R.id.OrderId)
+        val tvPrice = view.findViewById<TextView>(R.id.Price)
+        val tvWeight = view.findViewById<TextView>(R.id.Weight)
+        val tvAddress = view.findViewById<TextView>(R.id.Address)
+
+        tvOrderId.text = "Id: ${orders[position].id}"
+        tvPrice.text = "Стоимость: ${orders[position].price} Р"
+        tvWeight.text = "Вес: ${orders[position].sumWeight}"
+        tvAddress.text = "Адрес: ${orders[position].deliveryAddress}"
+
+        view.setOnClickListener{ v -> run{
+            val intent = Intent(context, OrderActivity::class.java)
+            intent.putExtra("orderId", orders[position].id);
+            intent.putExtra("canChangeState", orders[position].canDelManChangestate);
+            context.startActivity(intent);
+        }}
+
+
+        return view
+    }
+}
+MainActivity.kt
+package com.example.deliverymanapp
+
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import android.os.Bundle
+import android.view.View
+import android.widget.EditText
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.android.volley.Request
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.Volley
+import com.example.deliverymanapp.dto.JwtTokenInfoDTO
+import com.google.gson.Gson
+import org.json.JSONException
+import org.json.JSONObject
+import java.net.*
+
+class MainActivity : AppCompatActivity() {
+    private var mRequestQueue: RequestQueue? = null
+    private var sharedPreferences :SharedPreferences? = null
+    private var cookieManager: CookieManager? = null
+    private var gson: Gson = Gson()
+    private val nameUserId:String = "X-UserId"
+    private val nameRefreshToken:String = "X-Refresh-Token"
+    private var url:String = ""
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        cookieManager = CookieManager()
+
+        CookieHandler.setDefault(cookieManager)
+
+        url = resources.getString(R.string.url)
+
+        mRequestQueue = Volley.newRequestQueue(this)
+        sharedPreferences = getSharedPreferences("my_preference", Context.MODE_PRIVATE)
+
+        fetchRefreshToken()
+
+    }
+
+    private fun saveCookieDataToSharedPreferences(responseData : JSONObject?){
+
+        var userId = responseData?.getString("Set-Cookie")
+        if (userId != null) {
+            if(userId.contains("X-UserId"))
+            {
+                val start = userId.indexOf('=')
+                val end = userId.indexOf(';')
+                userId = userId.substring(start+1,end).trim('\"')
+            }
+        }
+
+        var refreshToken = responseData?.getString("Set-Cookie1")
+        if (refreshToken != null) {
+            if(refreshToken.contains("X-Refresh-Token"))
+            {
+                val start = refreshToken.indexOf('=')
+                val end = refreshToken.indexOf(';')
+                refreshToken = refreshToken.substring(start+1,end)
+            }
+        }
+
+        val editor = sharedPreferences?.edit()
+        editor?.putString(nameUserId, userId)
+        editor?.putString(nameRefreshToken, refreshToken)
+        editor?.apply()
+    }
+
+    private fun fetchRefreshToken() {
+        val userId = sharedPreferences?.getString(nameUserId, "")
+        val refreshToken = sharedPreferences?.getString(nameRefreshToken, "")
+        if(userId == null || refreshToken == null || userId == "" || refreshToken == ""){
+            return
+        }
+
+        val userIdCookie:HttpCookie = HttpCookie(nameUserId, userId)
+        userIdCookie.version = 0
+        val refreshTokenCookie:HttpCookie = HttpCookie(nameRefreshToken, refreshToken)
+        refreshTokenCookie.version = 0
+
+        cookieManager?.cookieStore?.add(URI.create(url), userIdCookie)
+        cookieManager?.cookieStore?.add(URI.create(url), refreshTokenCookie)
+
+        val req = MetaRequest(
+            Request.Method.POST, "${url}/auth/refreshAccessToken", null,
+            { response : JSONObject? ->
+                try {
+                    val body = response?.getString("body")
+
+                    val jwtToken = gson.fromJson(body, JwtTokenInfoDTO::class.java)
+
+                    val editor = sharedPreferences?.edit()
+                    editor?.putString("jwtToken", jwtToken.jwtToken)
+                    editor?.apply()
+
+                    runOnUiThread {
+                        val listIntent = Intent(this@MainActivity, OrderListActivity::class.java)
+                        startActivity(listIntent)
+                    }
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
+            },
+            {
+                error -> run {
+                    Toast.makeText(this@MainActivity, "Bad request", Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
+
+        /* Add your Requests to the RequestQueue to execute */
+        mRequestQueue!!.add(req)
+    }
+
+    private fun fetchLogin(login:String, password: String) {
+
+        cookieManager?.cookieStore?.removeAll()
+        val jsonBody = JSONObject("{\"login\":\"${login}\", \"password\":\"${password}\"}")
+
+        // Pass second argument as "null" for GET requests
+        val req = MetaRequest(
+            Request.Method.POST, "${url}/auth/login", jsonBody,
+            { response : JSONObject? ->
+                try {
+                    saveCookieDataToSharedPreferences(response)
+                    fetchRefreshToken()
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
+            },
+            {
+                error -> run {
+                    Toast.makeText(this@MainActivity, "Bad request", Toast.LENGTH_SHORT).show()
+                }
+        })
+
+        /* Add your Requests to the RequestQueue to execute */
+        mRequestQueue!!.add(req)
+    }
+
+    fun loginClick(view: View) {
+        val loginValue : String = findViewById<EditText>(R.id.LoginEditText).text.toString()
+        val passwordValue : String = findViewById<EditText>(R.id.PasswordEditText).text.toString()
+        fetchLogin(loginValue, passwordValue)
+    }
+
+//    fun logoutClick(view: View) {
+//        cookieManager?.cookieStore?.removeAll()
+//
+//        val editor = sharedPreferences?.edit()
+//        editor?.remove(nameUserId)
+//        editor?.remove(nameRefreshToken)
+//        editor?.apply()
+//    }
+}
+MetaRequest.kt
+package com.example.deliverymanapp
+
+import com.android.volley.NetworkResponse
+import com.android.volley.ParseError
+import com.android.volley.Response
+import com.android.volley.toolbox.HttpHeaderParser
+import com.android.volley.toolbox.JsonObjectRequest
+import org.json.JSONException
+import org.json.JSONObject
+import java.io.UnsupportedEncodingException
+
+
+class MetaRequest : JsonObjectRequest {
+    constructor(
+        method: Int,
+        url: String?,
+        jsonRequest: JSONObject?,
+        listener: Response.Listener<JSONObject?>?,
+        errorListener: Response.ErrorListener?
+    ) : super(method, url, jsonRequest, listener, errorListener) {
+    }
+
+    constructor(
+        url: String?,
+        jsonRequest: JSONObject?,
+        listener: Response.Listener<JSONObject?>?,
+        errorListener: Response.ErrorListener?
+    ) : super(url, jsonRequest, listener, errorListener) {
+    }
+
+    override fun parseNetworkResponse(response: NetworkResponse): Response<JSONObject> {
+        return try {
+            val jsonString = String(response.data)
+            val jsonResponse = JSONObject()
+
+            response.allHeaders?.forEach {
+                var nameEl:String = it.name
+                if(jsonResponse.has(it.name))
+                    nameEl += "1"
+                jsonResponse.put(nameEl, it.value)
+            }
+            if(jsonString != "")
+                jsonResponse.put("body", jsonString)
+
+            Response.success(
+                jsonResponse,
+                HttpHeaderParser.parseCacheHeaders(response)
+            )
+        } catch (e: UnsupportedEncodingException) {
+            Response.error(ParseError(e))
+        } catch (je: JSONException) {
+            Response.error(ParseError(je))
+        }
+    }
+}
+OrderActivity.kt
+package com.example.deliverymanapp
+
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import android.os.Bundle
+import android.view.View
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import com.android.volley.Request
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import com.example.deliverymanapp.dto.OrderInfoDTO
+import com.example.deliverymanapp.dto.OrderStateItemDTO
+import com.example.deliverymanapp.dto.OrdersDTO
+import com.google.gson.Gson
+import org.json.JSONException
+import org.json.JSONObject
+
+class OrderActivity : AppCompatActivity() {
+    private var orderId : String = ""
+    private var mRequestQueue: RequestQueue? = null
+    private var sharedPreferences : SharedPreferences? = null
+    private val gson: Gson = Gson()
+    private var url:String = ""
+    private var order : OrderInfoDTO?  = null
+    private var delManCanChangeStateOfOrder : Boolean?  = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_order)
+
+        mRequestQueue = Volley.newRequestQueue(this)
+        sharedPreferences = getSharedPreferences("my_preference", Context.MODE_PRIVATE)
+        url = resources.getString(R.string.url)
+
+        val arguments = intent.extras
+
+        if (arguments != null) {
+            orderId = arguments["orderId"] as String
+            delManCanChangeStateOfOrder = arguments["canChangeState"] as Boolean
+
+            val buttonChangeState = findViewById<Button>(R.id.moveOrderToNextStageButton)
+            if(delManCanChangeStateOfOrder == false)
+                buttonChangeState.visibility = View.GONE
+
+            LoadOrderDataToList()
+        }
+    }
+
+    private fun LoadOrderDataToList(){
+        val req = object : StringRequest(
+            Request.Method.GET, "${url}/Order/getOrder/${orderId}",
+            { response ->
+                try {
+                    order = gson.fromJson(response, OrderInfoDTO::class.java)
+
+                    val orderView = findViewById<View>(R.id.orderInfo)
+                    val tvOrderId = orderView.findViewById<TextView>(R.id.OrderId)
+                    val tvPrice = orderView.findViewById<TextView>(R.id.Price)
+                    val tvWeight = orderView.findViewById<TextView>(R.id.Weight)
+                    val tvAddress = orderView.findViewById<TextView>(R.id.Address)
+
+                    tvOrderId.text = "Id: ${order?.order?.id}"
+                    tvPrice.text = "Стоимость: ${order?.order?.price} Р"
+                    tvWeight.text = "Вес: ${order?.order?.sumWeight}"
+                    tvAddress.text = "Адрес: ${order?.order?.deliveryAddress}"
+
+                    val dishes = order?.orderedDishes?.map{it.dishInfo.name + " " + it.count + " шт"}?.toTypedArray() as Array<String>
+
+                    val arrayAdapter = ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, dishes)
+                    val listView = findViewById<ListView>(R.id.orderDishesList)
+
+                    listView.adapter = arrayAdapter
+
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
+            },
+            { error ->
+                run {
+                    Toast.makeText(this, "Bad request", Toast.LENGTH_SHORT).show()
+                }
+            })
+        {
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Authorization"] = "Bearer " + sharedPreferences?.getString("jwtToken", "")
+                return headers
+            }
+        }
+
+        /* Add your Requests to the RequestQueue to execute */
+        mRequestQueue!!.add(req)
+    }
+
+    fun moveOrderToNextStageClick(view: View) {
+        val jsonBody = JSONObject("{\"orderId\":\"${orderId}\"}")
+
+        val req = object : JsonObjectRequest(
+            Request.Method.POST, "${url}/Order/moveToNextStage", jsonBody,
+            { response ->
+                try {
+                    val intent = Intent(this, OrderListActivity::class.java)
+                    this.startActivity(intent);
+
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
+            },
+            { error ->
+                run {
+                    Toast.makeText(this, "Bad request", Toast.LENGTH_SHORT).show()
+                }
+            })
+        {
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Authorization"] = "Bearer " + sharedPreferences?.getString("jwtToken", "")
+                return headers
+            }
+        }
+
+        /* Add your Requests to the RequestQueue to execute */
+        mRequestQueue!!.add(req)
+    }
+}
+OrderListActivity.kt
+package com.example.deliverymanapp
+
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import android.os.Bundle
+import android.text.Editable
+import android.view.View
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import com.android.volley.Request
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import com.example.deliverymanapp.dto.OrderItemDTO
+import com.example.deliverymanapp.dto.OrderStateItemDTO
+import com.example.deliverymanapp.dto.OrdersDTO
+import com.google.android.gms.location.*
+import com.google.gson.Gson
+import org.json.JSONException
+import java.net.CookieHandler
+import java.net.CookieManager
+
+
+class OrderListActivity : AppCompatActivity() {
+    private var mRequestQueue: RequestQueue? = null
+    private var sharedPreferences :SharedPreferences? = null
+    private var states = arrayOf<OrderStateItemDTO>()
+    private val gson: Gson = Gson()
+    private var url:String = ""
+    private var orders = mutableListOf<OrderItemDTO>()
+    private var page = 0
+    private var lastPage = true
+    private var selectedState: OrderStateItemDTO? = null
+    private var statesAdapter:ArrayAdapter<String>? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_order_list)
+
+        mRequestQueue = Volley.newRequestQueue(this)
+        sharedPreferences = getSharedPreferences("my_preference", Context.MODE_PRIVATE)
+        url = resources.getString(R.string.url)
+
+        fetchListOfStates()
+    }
+
+    private fun fetchListOfStates() {
+
+        val req = StringRequest(
+            Request.Method.GET, "${url}/main/getOrderStates",
+            { response ->
+                try {
+                    states = gson.fromJson(response, Array<OrderStateItemDTO>::class.java)
+
+                    statesAdapter = ArrayAdapter(this, R.layout.dropdown_item, states.map { it.nameOfState })
+                    val headerView = findViewById<View>(R.id.header)
+
+                    val autocompleteTV = headerView.findViewById<AutoCompleteTextView>(R.id.autoCompleteTextView)
+
+                    autocompleteTV.setAdapter(statesAdapter)
+
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
+            },
+            { error ->
+                run {
+                    Toast.makeText(this@OrderListActivity, "Bad request", Toast.LENGTH_SHORT).show()
+                }
+            })
+
+        /* Add your Requests to the RequestQueue to execute */
+        mRequestQueue!!.add(req)
+    }
+
+    fun selectOrderState(view: View) {
+        val textView:TextView = view as TextView
+        selectedState = states.find { it.nameOfState == textView.text }
+
+        if(selectedState != null){
+            orders.clear()
+            loadAndAddOrdersToList()
+        }
+
+        val headerView = findViewById<View>(R.id.header)
+
+        val autocompleteTV = headerView.findViewById<AutoCompleteTextView>(R.id.autoCompleteTextView)
+        autocompleteTV.clearFocus()
+
+//        autocompleteTV.text = Editable.Factory.getInstance().newEditable(selectedState?.nameOfState)
+//        autocompleteTV.setAdapter(statesAdapter)
+    }
+
+    private fun loadAndAddOrdersToList(){
+        val req = object : StringRequest(
+            Request.Method.GET, "${url}/DeliveryMan/getOrders?page=${page}&numberOfState=${selectedState?.numberOfStage}",
+            { response ->
+                try {
+                    val ordersInput = gson.fromJson(response, OrdersDTO::class.java)
+                    orders.addAll(ordersInput.orders)
+                    lastPage = ordersInput.pageEnded
+
+                    if(selectedState != null) {
+                        val res:Boolean = (selectedState!!.numberOfStage == 4 || selectedState!!.numberOfStage == 8)
+                        orders.forEach{it.canDelManChangestate = res}
+                    }
+
+                    val showMoreButton = findViewById<Button>(R.id.showMoreButton)
+                    if(lastPage){
+                        showMoreButton.visibility = View.INVISIBLE
+                    }
+                    else{
+                        showMoreButton.visibility = View.VISIBLE
+                    }
+
+                    val arrayAdapter = AdapterOrders(this, R.layout.order_item, orders.toList())
+                    val listView = findViewById<ListView>(R.id.orderList)
+
+                    listView.adapter = arrayAdapter
+
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
+            },
+            { error ->
+                run {
+                    Toast.makeText(this@OrderListActivity, "Bad request", Toast.LENGTH_SHORT).show()
+                }
+            })
+        {
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Authorization"] = "Bearer " + sharedPreferences?.getString("jwtToken", "")
+                return headers
+            }
+        }
+
+        /* Add your Requests to the RequestQueue to execute */
+        mRequestQueue!!.add(req)
+    }
+
+    fun showMoreOrdersClick(view: View) {
+        loadAndAddOrdersToList()
+    }
+
+    fun logoutClick(view: View) {
+        val cookieManager = CookieManager()
+        CookieHandler.setDefault(cookieManager)
+
+        cookieManager.cookieStore?.removeAll()
+
+        val sharedPreferences = getSharedPreferences("my_preference", Context.MODE_PRIVATE)
+        val editor = sharedPreferences?.edit()
+        editor?.remove("X-UserId")
+        editor?.remove("X-Refresh-Token")
+        editor?.apply()
+
+        val intent = Intent(this, MainActivity::class.java)
+        this.startActivity(intent);
+    }
+}
+
+
+DishInfoDTO.kt
+package com.example.deliverymanapp.dto
+
+class DishInfoDTO(val name: String,
+                  val description: String,
+                  val price : Int,
+                  val id: String,) {
+}
+JwtTokenInfoDTO.kt
+package com.example.deliverymanapp.dto
+
+class JwtTokenInfoDTO(val jwtToken:String) {
+}
+OrderedDishItemDTO.kt
+package com.example.deliverymanapp.dto
+
+class OrderedDishItemDTO(val count:Int,
+                         val orderId:String,
+                         val dishInfo:DishInfoDTO,) {
+}
+OrderInfoDTO.kt
+package com.example.deliverymanapp.dto
+
+class OrderInfoDTO(val order: OrderItemDTO, val orderedDishes: Array<OrderedDishItemDTO>) {
+}
+OrderItemDTO.kt
+package com.example.deliverymanapp.dto
+
+class OrderItemDTO(val id: String,
+                   val price: Int,
+                   val sumWeight: Int,
+                   val deliveryAddress: String,
+                   var canDelManChangestate: Boolean?) {
+}
+OrdersDTO.kt
+package com.example.deliverymanapp.dto
+
+class OrdersDTO(val orders: Array<OrderItemDTO>,
+                val pageEnded: Boolean) {
+}
+OrderStateItemDTO.kt
+package com.example.deliverymanapp.dto
+
+class OrderStateItemDTO(val orderStateId: String,
+                        val numberOfStage: Int,
+                        val nameOfState: String,) {
+}

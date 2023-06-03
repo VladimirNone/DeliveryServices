@@ -38,16 +38,11 @@ builder.Services.AddCors(options =>
         {
             policy
                 .WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value)
-                .WithOrigins("https://e9eb-176-124-28-223.ngrok-free.app")
+                .WithOrigins("https://fe1e-176-124-28-223.ngrok-free.app")
                 //.WithHeaders(HeaderNames.ContentType, HeaderNames.Cookie)
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
-
-            /*            policy
-                            .AllowAnyOrigin()
-                            .AllowAnyHeader()
-                            .AllowAnyMethod();*/
         });
 });
 

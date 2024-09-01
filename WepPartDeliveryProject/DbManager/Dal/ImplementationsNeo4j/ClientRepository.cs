@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DbManager.Neo4j.Implementations
 {
-    public class ClientRepository : GeneralRepository<Client>, IClientRepository
+    public class ClientRepository : GeneralNeo4jRepository<Client>, IClientRepository
     {
         public ClientRepository(IGraphClient DbContext) : base(DbContext)
         {

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DbManager.Neo4j.Implementations
 {
-    public class DishRepository : GeneralRepository<Dish>, IDishRepository
+    public class DishRepository : GeneralNeo4jRepository<Dish>, IDishRepository
     {
         public DishRepository(IGraphClient DbContext) : base(DbContext)
         {

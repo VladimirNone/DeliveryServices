@@ -8,6 +8,7 @@ using DbManager.Neo4j.DataGenerator;
 using Microsoft.Extensions.Configuration;
 using DbManager.Data.Relations;
 using DbManager.Data;
+using DbManager.Dal;
 
 namespace DbManager
 {
@@ -45,10 +46,10 @@ namespace DbManager
 
         private static void PrepareData(IGraphClient graphClient, string pathToPublicClientAppDirectory, string dirWithDishImages)
         {
-            var categoryRepo = new GeneralRepository<Category>(graphClient);
-            var dishRepo = new GeneralRepository<Dish>(graphClient);
+            var categoryRepo = new GeneralNeo4jRepository<Category>(graphClient);
+            var dishRepo = new GeneralNeo4jRepository<Dish>(graphClient);
 
-            OrderState.OrderStatesFromDb = new GeneralRepository<OrderState>(graphClient).GetNodesAsync().Result;
+            OrderState.OrderStatesFromDb = new GeneralNeo4jRepository<OrderState>(graphClient).GetNodesAsync().Result;
 
             Category.CategoriesFromDb = categoryRepo.GetNodesAsync().Result;
 

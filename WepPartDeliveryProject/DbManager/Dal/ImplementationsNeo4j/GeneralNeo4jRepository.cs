@@ -1,16 +1,16 @@
-﻿using DbManager.Data;
-using DbManager.Neo4j.Interfaces;
+﻿using DbManager.Dal;
+using DbManager.Data;
 using Neo4jClient;
 using Neo4jClient.Cypher;
 
 namespace DbManager.Neo4j.Implementations
 {
-    public class GeneralRepository<TNode> : IGeneralRepository<TNode> 
+    public class GeneralNeo4jRepository<TNode> : IGeneralRepository<TNode> 
         where TNode : INode
     {
         protected readonly IGraphClient dbContext;
 
-        public GeneralRepository(IGraphClient DbContext)
+        public GeneralNeo4jRepository(IGraphClient DbContext)
         {
             dbContext = DbContext;
         }

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DbManager.Neo4j.Implementations
 {
-    public class DeliveryManRepository : GeneralRepository<DeliveryMan>, IDeliveryManRepository
+    public class DeliveryManRepository : GeneralNeo4jRepository<DeliveryMan>, IDeliveryManRepository
     {
         public DeliveryManRepository(IGraphClient DbContext) : base(DbContext)
         {

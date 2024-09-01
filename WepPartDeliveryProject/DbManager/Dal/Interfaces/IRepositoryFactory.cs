@@ -1,4 +1,5 @@
-﻿using DbManager.Data;
+﻿using DbManager.Dal;
+using DbManager.Data;
 
 namespace DbManager.Neo4j.Interfaces
 {

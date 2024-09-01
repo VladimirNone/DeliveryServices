@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace DbManager.Neo4j.Implementations
 {
-    public class UserRepository : GeneralRepository<User>, IUserRepository
+    public class UserRepository : GeneralNeo4jRepository<User>, IUserRepository
     {
         public UserRepository(IGraphClient DbContext) : base(DbContext)
         {

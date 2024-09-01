@@ -1,4 +1,5 @@
-﻿using DbManager.Data;
+﻿using DbManager.Dal;
+using DbManager.Data;
 using DbManager.Neo4j.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Neo4jClient;
@@ -36,7 +37,7 @@ namespace DbManager.Neo4j.Implementations
             var typeEntity = typeof(TEntity);
             if (!repositories.ContainsKey(typeEntity)) 
             { 
-                var generalRepo = new GeneralRepository<TEntity>(DbContext);
+                var generalRepo = new GeneralNeo4jRepository<TEntity>(DbContext);
                 repositories.Add(typeEntity, generalRepo);
             }
 

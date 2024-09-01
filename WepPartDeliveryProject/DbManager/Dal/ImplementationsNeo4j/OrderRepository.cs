@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace DbManager.Neo4j.Implementations
 {
-    public class OrderRepository : GeneralRepository<Order>, IOrderRepository
+    public class OrderRepository : GeneralNeo4jRepository<Order>, IOrderRepository
     {
         public OrderRepository(IGraphClient DbContext) : base(DbContext)
         {

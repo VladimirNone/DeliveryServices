@@ -132,7 +132,7 @@ namespace WepPartDeliveryProject.Controllers
             Response.Cookies.Delete("X-Refresh-Token",
                         new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
 
-            return Ok();
+            return await Task.FromResult(Ok());
         }
     }
 }

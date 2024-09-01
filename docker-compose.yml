@@ -1,0 +1,42 @@
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+      
+  kafka:
+    image: wurstmeister/kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+    depends_on:
+      - zookeeper
+
+  deliverysrv:
+    build: 
+      context: ./WepPartDeliveryProject
+      dockerfile: ./WepPartDeliveryProject/Dockerfile
+      args:
+        BUILD_CONFIGURATION: Debug
+    ports:
+      - '8080:8080' # Port used for the http protocol.
+      - '8081:8081' # Port used for the https protocol.
+    volumes: 
+      - "./WepPartDeliveryProject/WepPartDeliveryProject/appsettings.json:/app/appsettings.json"
+      - "./WepPartDeliveryProject/WepPartDeliveryProject/client_app/public/:/app/client_app/public/"
+
+  neo4j:
+    image: bitnami/neo4j:latest
+    environment:
+      - NEO4J_PASSWORD=123456sa
+    ports:
+      - '7474:7474' # Port used for the http protocol.
+      - '7473:7473' # Port used for the https protocol.
+      - '7687:7687' # Port used for the bolt protocol.
+    volumes:
+      - neo4j_data:/bitnami/neo4j/data
+
+volumes:
+  neo4j_data:

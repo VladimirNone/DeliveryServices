@@ -23,11 +23,11 @@ var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 var configuration = builder.Configuration;
 
-services.AddLogging(loggingBuilder => {
+/*services.AddLogging(loggingBuilder => {
     var loggingSection = configuration.GetSection("Logging");
     loggingBuilder.AddFile(loggingSection);
 });
-
+*/
 services.AddAutoMapper(typeof(MapperProfile));
 services.AddSingleton<JwtService>();
 
@@ -38,7 +38,7 @@ builder.Services.AddCors(options =>
         {
             policy
                 .WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value)
-                .WithOrigins("https://fe1e-176-124-28-223.ngrok-free.app")
+                //.WithOrigins("https://fe1e-176-124-28-223.ngrok-free.app")
                 //.WithHeaders(HeaderNames.ContentType, HeaderNames.Cookie)
                 .AllowAnyHeader()
                 .AllowAnyMethod()

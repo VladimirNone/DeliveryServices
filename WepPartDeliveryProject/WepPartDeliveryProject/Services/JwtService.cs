@@ -31,7 +31,7 @@ public class JwtService
                 new Claim(ClaimTypes.Sid, userId),
             }),
             Expires = DateTime.Now.AddMinutes(30), // Время истечения токена
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKey), SecurityAlgorithms.HmacSha256Signature)
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKey), SecurityAlgorithms.HmacSha512Signature)
         };
         foreach (var role in roles)
         {

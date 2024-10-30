@@ -15,7 +15,7 @@ namespace DbManager.Neo4j.Implementations
             dbContext = DbContext;
         }
 
-        public async Task AddNodeAsync(TNode newNode)
+        public virtual async Task AddNodeAsync(TNode newNode)
         {
             if(newNode.Id == Guid.Empty)
                 newNode.Id = Guid.NewGuid();
@@ -31,7 +31,7 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
-        public async Task AddNodesAsync(List<TNode> newNodes)
+        public virtual async Task AddNodesAsync(List<TNode> newNodes)
         {
             foreach (var item in newNodes)
             {
@@ -39,7 +39,7 @@ namespace DbManager.Neo4j.Implementations
             }
         }
 
-        public async Task UpdateNodeAsync(TNode node)
+        public virtual async Task UpdateNodeAsync(TNode node)
         {
             await dbContext.Cypher
                 .Match($"(updateNode:{typeof(TNode).Name} {{Id: $id}})")
@@ -52,7 +52,7 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
-        public async Task UpdateNodesPropertiesAsync(TNode node)
+        public virtual async Task UpdateNodesPropertiesAsync(TNode node)
         {
             var properties = typeof(TNode).GetProperties();
             var query = dbContext.Cypher
@@ -106,7 +106,7 @@ namespace DbManager.Neo4j.Implementations
             return res.ToList();
         }
 
-        public async Task DeleteNodeWithAllRelations(TNode node)
+        public virtual async Task DeleteNodeWithAllRelations(TNode node)
         {
             await dbContext.Cypher
                 .Match($"(entity:{typeof(TNode).Name} {{Id: $id}})-[r]-()")
@@ -118,7 +118,7 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
-        public async Task RelateNodesAsync<TRelation>(TRelation relation)
+        public virtual async Task RelateNodesAsync<TRelation>(TRelation relation)
             where TRelation : IRelation
         {
             if(relation.NodeFromId == null || relation.NodeToId == null)
@@ -144,7 +144,7 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
-        public async Task UpdateRelationNodesAsync<TRelation>(TRelation updatedRelation)
+        public virtual async Task UpdateRelationNodesAsync<TRelation>(TRelation updatedRelation)
             where TRelation : IRelation
         {
             var typeNodeFrom = typeof(TRelation).BaseType.GenericTypeArguments[0];
@@ -232,7 +232,7 @@ namespace DbManager.Neo4j.Implementations
             return await GetRelationsOfNodesAsync<TRelation, TRelatedNode>(node, skipCount, limitCount, orderByProperty);
         }
 
-        public async Task DeleteRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode)
+        public virtual async Task DeleteRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode)
             where TRelation : IRelation
             where TRelatedNode : INode
         {
@@ -297,13 +297,13 @@ namespace DbManager.Neo4j.Implementations
             return result.ToList();
         }
 
-        public async Task SetNewNodeType<TNewNodeType>(string nodeId)
+        public virtual async Task SetNewNodeType<TNewNodeType>(string nodeId)
             where TNewNodeType : INode
         {
             await SetNewNodeType(nodeId, typeof(TNewNodeType).Name);
         }
 
-        public async Task SetNewNodeType(string nodeId, string nodeTypeName)
+        public virtual async Task SetNewNodeType(string nodeId, string nodeTypeName)
         {
             await dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}})")
@@ -315,13 +315,13 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
-        public async Task RemoveNodeType<TNodeType>(string nodeId)
+        public virtual async Task RemoveNodeType<TNodeType>(string nodeId)
             where TNodeType : INode
         {
             await RemoveNodeType(nodeId, typeof(TNodeType).Name);
         }
 
-        public async Task RemoveNodeType(string nodeId, string nodeTypeName)
+        public virtual async Task RemoveNodeType(string nodeId, string nodeTypeName)
         {
             await dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}})")

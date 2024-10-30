@@ -1,4 +1,4 @@
-﻿namespace DbManager
+﻿namespace DbManager.AppSettings
 {
     public class Neo4jSettings
     {

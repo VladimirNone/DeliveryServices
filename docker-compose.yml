@@ -13,6 +13,19 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
     depends_on:
       - zookeeper
+  frontsrv:
+    build: 
+      context: ./WepPartDeliveryProject/WepPartDeliveryProject/client_app
+      dockerfile: ./Dockerfile
+    ports:
+      - '3000:3000' # Port used for the http protocol.
+    environment:
+      - SSL_CERT_FILE=/bundle/localhost.cer
+      - NEXT_PUBLIC_HOME_API=https://host.docker.internal:8081
+      - NODE_TLS_REJECT_UNAUTHORIZED="0"
+    volumes: 
+      - "./WepPartDeliveryProject/WepPartDeliveryProject/client_app/.env:/app/.env"
+      - "./WepPartDeliveryProject/certs/localhost.cer:/bundle/localhost.cer"
 
   deliverysrv:
     build: 

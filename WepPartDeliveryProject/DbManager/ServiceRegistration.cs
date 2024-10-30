@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using DbManager.Data.Relations;
 using DbManager.Data;
 using DbManager.Dal;
+using DbManager.AppSettings;
 
 namespace DbManager
 {
@@ -25,9 +26,12 @@ namespace DbManager
                         var graphClient = new BoltGraphClient(settings.Neo4jConnection, settings.Neo4jUser, settings.Neo4jPassword);
                         graphClient.ConnectAsync().Wait();
                         if(Convert.ToBoolean(configuration.GetSection("ApplicationSettings:GenerateData").Value) == false)
-                            PrepareData(graphClient, configuration.GetSection("ClientAppSettings:PathToPublicSourceDirecroty").Value, configuration.GetSection("ClientAppSettings:DirectoryWithDishImages").Value);
+                            PrepareData(graphClient, configuration.GetSection("ClientAppSettings:PathToPublicSourceDirecroty")?.Value, configuration.GetSection("ClientAppSettings:DirectoryWithDishImages")?.Value);
                         return graphClient;
                     });
+
+            services.AddSingleton<KafkaClientHandle>();
+            services.AddSingleton<KafkaDependentProducer<string, string>>();
 
             services.AddSingleton<IRepositoryFactory, RepositoryFactory>();
 

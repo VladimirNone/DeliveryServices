@@ -1,6 +1,8 @@
 using DbManager;
+using DbManager.AppSettings;
 using DbManager.Mapper;
 using DbManager.Neo4j.DataGenerator;
+using DbManager.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -16,6 +18,7 @@ using Neo4jClient.Execution;
 using Newtonsoft.Json;
 using System.Text;
 using WepPartDeliveryProject;
+using WepPartDeliveryProject.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,8 +41,8 @@ builder.Services.AddCors(options =>
         {
             policy
                 .WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value)
-                //.WithOrigins("https://fe1e-176-124-28-223.ngrok-free.app")
-                //.WithHeaders(HeaderNames.ContentType, HeaderNames.Cookie)
+                //.WithOrigins("http://localhost:3000")
+                .WithHeaders(HeaderNames.ContentType, HeaderNames.Cookie)
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
@@ -82,6 +85,7 @@ services.AddAuthentication(options =>
         };
     });
 
+services.AddHostedService<KafkaConsumerBackgroundService>();
 
 var app = builder.Build();
 

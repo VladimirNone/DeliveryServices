@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DbManager;
 using DbManager.Data;
+using DbManager.Data.Cache;
 using DbManager.Data.DTOs;
 using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
@@ -51,7 +52,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getOrderStates")]
         public async Task<IActionResult> GetOrderStates()
         {
-            var states = _mapper.Map<List<OrderStateItemOutDTO>>(OrderState.OrderStatesFromDb);
+            var states = _mapper.Map<List<OrderStateItemOutDTO>>(ObjectCache<OrderState>.Instanse.ToList());
 
             return Ok(states);
         }
@@ -59,7 +60,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getCategoriesList")]
         public IActionResult GetCategoriesList()
         {
-            var categories = Category.CategoriesFromDb;
+            var categories = ObjectCache<Category>.Instanse.ToList();
             return Ok(categories);
         }
 
@@ -100,7 +101,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getDishesList/{category}")]
         public async Task<IActionResult> GetDishesList(string category)
         {
-            var choicedCategory = Category.CategoriesFromDb.Single(h=>h.LinkName == category);
+            var choicedCategory = ObjectCache<Category>.Instanse.ToList().Single(h=>h.LinkName == category);
             var categoryDishes = await _repositoryFactory.GetRepository<Category>().GetRelationsOfNodesAsync<ContainsDish, Dish>(choicedCategory, orderByProperty: "Name");
 
             var dishes = categoryDishes.Select(h => (Dish)h.NodeTo).ToList();

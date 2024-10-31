@@ -1,5 +1,6 @@
 ﻿
 using DbManager;
+using DbManager.Data.Cache;
 using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Helpers;
@@ -40,14 +41,24 @@ namespace WepPartDeliveryProject.BackgroundServices
                 {
                     await this._generatorService.GenerateAll();
                 }
-                await this.PrepareData( this._configuration.GetSection("ClientAppSettings:PathToPublicSourceDirecroty")?.Value, 
+
+                ObjectCache<Category>.Instanse.AddList(await this._repoFactory.GetRepository<Category>().GetNodesAsync());
+                ObjectCache<OrderState>.Instanse.AddList(await this._repoFactory.GetRepository<OrderState>().GetNodesAsync());
+
+                await this.PrepareDishes( this._configuration.GetSection("ClientAppSettings:PathToPublicSourceDirecroty")?.Value, 
                                         this._configuration.GetSection("ClientAppSettings:DirectoryWithDishImages")?.Value);
-                
+
+                ObjectCache<Dish>.Instanse.AddList(await this._repoFactory.GetRepository<Dish>().GetNodesAsync());
+                ObjectCache<DeliveryMan>.Instanse.AddList(await this._repoFactory.GetRepository<DeliveryMan>().GetNodesAsync());
+                ObjectCache<Kitchen>.Instanse.AddList(await this._repoFactory.GetRepository<Kitchen>().GetNodesAsync());
+                ObjectCache<KitchenWorker>.Instanse.AddList(await this._repoFactory.GetRepository<KitchenWorker>().GetNodesAsync());
+                ObjectCache<Client>.Instanse.AddList(await this._repoFactory.GetRepository<Client>().GetNodesAsync());
+                ObjectCache<Admin>.Instanse.AddList(await this._repoFactory.GetRepository<Admin>().GetNodesAsync());
             });
             this._deliveryHealthCheck.StartupCompleted = true;
         }
 
-        private async Task PrepareData(string pathToPublicClientAppDirectory, string dirWithDishImages)
+        private async Task PrepareDishes(string pathToPublicClientAppDirectory, string dirWithDishImages)
         {
             if (pathToPublicClientAppDirectory == null || dirWithDishImages == null)
                 throw new ArgumentException("PathToPublicSourceDirecroty or DirectoryWithDishImages in appsettings.json (or envs) is null. We can't generate data.");
@@ -55,11 +66,7 @@ namespace WepPartDeliveryProject.BackgroundServices
             var categoryRepo = this._repoFactory.GetRepository<Category>();
             var dishRepo = this._repoFactory.GetRepository<Dish>();
 
-            OrderState.OrderStatesFromDb = await this._repoFactory.GetRepository<OrderState>().GetNodesAsync();
-
-            Category.CategoriesFromDb = await categoryRepo.GetNodesAsync();
-
-            foreach (var category in Category.CategoriesFromDb)
+            foreach (var category in ObjectCache<Category>.Instanse.ToList())
             {
                 var categoryDishes = (await categoryRepo.GetRelationsOfNodesAsync<ContainsDish, Dish>(category)).Select(h => (Dish)h.NodeTo);
 

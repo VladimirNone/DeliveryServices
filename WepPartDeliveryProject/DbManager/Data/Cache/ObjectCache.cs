@@ -1,8 +1,9 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Collections;
+using System.Collections.Concurrent;
 
 namespace DbManager.Data.Cache
 {
-    public class ObjectCache<T> : IObjectCache<T> where T : IModel
+    public class ObjectCache<T> : IEnumerable<T>, IObjectCache<T> where T : IModel
     {
         private readonly ConcurrentDictionary<Guid, T> _cache = new ConcurrentDictionary<Guid, T> ();
 
@@ -22,6 +23,10 @@ namespace DbManager.Data.Cache
                             _instance = new ObjectCache<T>();
                 return _instance;
             }
+        }
+
+        private ObjectCache()
+        {
         }
 
         public T Get(Guid key)
@@ -49,6 +54,14 @@ namespace DbManager.Data.Cache
                 throw new ArgumentException($"Object with type = {typeof(T)} and key = {key} already exist in cache.");
         }
 
+        public void AddList(List<T> data)
+        {
+            foreach (var item in data)
+            {
+                this.Add(item.Id, item);
+            }
+        }
+
         public void Update(Guid key, T value)
         {
             if (!this._cache.TryGetValue(key, out var oldValue))
@@ -63,6 +76,16 @@ namespace DbManager.Data.Cache
             if(this._cache.TryRemove(key, out value))
                 return true;
             return false;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return this._cache.Values.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
     }
 }

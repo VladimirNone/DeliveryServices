@@ -2,6 +2,7 @@
 using DbManager.Data;
 using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
+using DbManager.Helpers;
 using DbManager.Services;
 using Microsoft.Extensions.Configuration;
 
@@ -82,7 +83,7 @@ namespace DbManager.Neo4j.DataGenerator
 
                 for (int l = 0; l < filesForGeneration.Length; l++)
                 {
-                    var pathToDishDir = ServiceRegistration.PathToDirWithDish(  pathToPublicClientAppDirectory, 
+                    var pathToDishDir = FilePathHelper.PathToDirWithDish(  pathToPublicClientAppDirectory, 
                                                                                 dirWithDishImages, 
                                                                                 categories[i].LinkName, 
                                                                                 categoryDishes[l % categoryDishes.Count].Id.ToString());
@@ -97,7 +98,7 @@ namespace DbManager.Neo4j.DataGenerator
                     if (categoryDishes[l % categoryDishes.Count].Images == null)
                         categoryDishes[l % categoryDishes.Count].Images = new List<string>();
 
-                    categoryDishes[l % categoryDishes.Count].Images.Add(ServiceRegistration.ConvertFromIOPathToInternetPath_DirWithDish(pathToPublicClientAppDirectory, pathToDishFile));
+                    categoryDishes[l % categoryDishes.Count].Images.Add(FilePathHelper.ConvertFromIOPathToInternetPath_DirWithDish(pathToPublicClientAppDirectory, pathToDishFile));
                 }
 
                 var categoryContainsDishRelation = ObjectGenerator.GenerateContainsDish(new List<Category>() { categories[i] }, categoryDishes)

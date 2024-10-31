@@ -5,6 +5,7 @@ using DbManager.Neo4j.Interfaces;
 using DbManager.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace WepPartDeliveryProject.Controllers
 {
@@ -28,11 +29,17 @@ namespace WepPartDeliveryProject.Controllers
             if(userId != null) 
             {
                 Response.Cookies.Append("X-UserId", userId,
-                            new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
+                            new CookieOptions() { HttpOnly = true, Secure = false, Expires = DateTime.Now.AddDays(30), SameSite = SameSiteMode.None });
+
+                Response.Cookies.Append("X-UserId1", userId,
+                    new CookieOptions() { HttpOnly = true, Secure = false, Expires = DateTime.Now.AddDays(30), SameSite = SameSiteMode.None });
             }
 
             Response.Cookies.Append("X-Refresh-Token", RefreshToken,
-                        new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
+                        new CookieOptions() { HttpOnly = true, Secure = false, Expires = DateTime.Now.AddDays(30), SameSite = SameSiteMode.None });
+
+            Response.Cookies.Append("X-Refresh-Token1", RefreshToken,
+            new CookieOptions() { HttpOnly = true, Secure = false, Expires = DateTime.Now.AddDays(30), SameSite = SameSiteMode.None, IsEssential = true });
 
         }
 
@@ -128,9 +135,9 @@ namespace WepPartDeliveryProject.Controllers
         public async Task<IActionResult> Logout()
         {
             Response.Cookies.Delete("X-UserId",
-                        new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
+                        new CookieOptions() { HttpOnly = true, Secure = false, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
             Response.Cookies.Delete("X-Refresh-Token",
-                        new CookieOptions() { HttpOnly = true, Secure = true, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
+                        new CookieOptions() { HttpOnly = true, Secure = false, Expires = DateTime.Now.AddDays(60), SameSite = SameSiteMode.None });
 
             return await Task.FromResult(Ok());
         }

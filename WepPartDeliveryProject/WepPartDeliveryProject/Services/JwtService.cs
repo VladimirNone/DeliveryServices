@@ -1,6 +1,7 @@
 ﻿using AutoMapper.Configuration.Annotations;
 using DbManager.Data.DTOs;
 using DbManager.Neo4j.Interfaces;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,11 +13,10 @@ public class JwtService
 {
     private readonly ApplicationSettings _appSettings;
 
-    public JwtService(IConfiguration configuration)
+    public JwtService(IOptions<ApplicationSettings> appSettingsOptions)
     {
         // Fetch settings object from configuration
-        _appSettings = new ApplicationSettings();
-        configuration.GetSection("ApplicationSettings").Bind(_appSettings);
+        _appSettings = appSettingsOptions.Value;
     }
 
     public JwtTokenInfoOutDTO GenerateAccessJwtToken(string userId, List<string> roles)

@@ -2,32 +2,26 @@
 using DbManager.Data;
 using DbManager.Neo4j.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
-using Neo4jClient;
 
 namespace DbManager.Neo4j.Implementations
 {
     public class RepositoryFactory: IRepositoryFactory
     {
-        private readonly IGraphClient dbContext;
-        private readonly IServiceProvider services;
+        private readonly IServiceProvider _services;
         private readonly Dictionary<Type, object> repositories = new Dictionary<Type, object>();
+        private readonly BoltGraphClientFactory _boltGraphClientFactory;
 
-        public IGraphClient DbContext => dbContext;
-
-        public RepositoryFactory(IGraphClient neo4jData, IServiceProvider serviceProvider)
+        public RepositoryFactory(BoltGraphClientFactory boltGraphClientFactory, IServiceProvider serviceProvider)
         {
-            dbContext = neo4jData;
-            services = serviceProvider;
-
-            var res = neo4jData.JsonConverters;
-            var count = res.Count;
+            this._boltGraphClientFactory = boltGraphClientFactory;
+            this._services = serviceProvider;
         }
 
         public IGeneralRepository<TEntity> GetRepository<TEntity>(bool hasCustomRepository = false) where TEntity : INode
         {
             if (hasCustomRepository)
             {
-                var repo = services.GetService<IGeneralRepository<TEntity>>();
+                var repo = _services.GetService<IGeneralRepository<TEntity>>();
                 if(repo != null)
                 {
                     return repo;
@@ -37,7 +31,7 @@ namespace DbManager.Neo4j.Implementations
             var typeEntity = typeof(TEntity);
             if (!repositories.ContainsKey(typeEntity)) 
             { 
-                var generalRepo = new GeneralNeo4jRepository<TEntity>(DbContext);
+                var generalRepo = new GeneralNeo4jRepository<TEntity>(this._boltGraphClientFactory);
                 repositories.Add(typeEntity, generalRepo);
             }
 

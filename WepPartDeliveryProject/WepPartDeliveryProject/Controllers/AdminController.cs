@@ -4,10 +4,12 @@ using DbManager.Data;
 using DbManager.Data.DTOs;
 using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
+using DbManager.Helpers;
 using DbManager.Neo4j.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 
 namespace WepPartDeliveryProject.Controllers
@@ -22,11 +24,10 @@ namespace WepPartDeliveryProject.Controllers
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
 
-        public AdminController(IRepositoryFactory repositoryFactory, IConfiguration configuration, IMapper mapper)
+        public AdminController(IRepositoryFactory repositoryFactory, IConfiguration configuration, IMapper mapper, IOptions<ApplicationSettings> appSettingsOptions)
         {
             // Fetch settings object from configuration
-            _appSettings = new ApplicationSettings();
-            configuration.GetSection("ApplicationSettings").Bind(_appSettings);
+            _appSettings = appSettingsOptions.Value;
 
             _configuration = configuration;
             _repositoryFactory = repositoryFactory;
@@ -242,7 +243,7 @@ namespace WepPartDeliveryProject.Controllers
             var pathToPublicClientAppDirectory = _configuration.GetSection("ClientAppSettings:PathToPublicSourceDirecroty").Value;
             var dirWithDishImages = _configuration.GetSection("ClientAppSettings:DirectoryWithDishImages").Value;
 
-            var pathToDishDir = ServiceRegistration.PathToDirWithDish(pathToPublicClientAppDirectory, dirWithDishImages, categoryLinkName, dishId);
+            var pathToDishDir = FilePathHelper.PathToDirWithDish(pathToPublicClientAppDirectory, dirWithDishImages, categoryLinkName, dishId);
 
             if (!Directory.Exists(pathToDishDir))
                 Directory.CreateDirectory(pathToDishDir);
@@ -255,7 +256,7 @@ namespace WepPartDeliveryProject.Controllers
                     using var fileStream = new FileStream(pathToImage, FileMode.Create);
                     await imageFile.CopyToAsync(fileStream);
 
-                    images.Add(ServiceRegistration.ConvertFromIOPathToInternetPath_DirWithDish(pathToPublicClientAppDirectory, pathToImage));
+                    images.Add(FilePathHelper.ConvertFromIOPathToInternetPath_DirWithDish(pathToPublicClientAppDirectory, pathToImage));
                 }
             }
 

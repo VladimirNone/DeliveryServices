@@ -12,7 +12,7 @@ namespace DbManager.Neo4j.Implementations
 {
     public class DeliveryManRepository : GeneralNeo4jRepository<DeliveryMan>, IDeliveryManRepository
     {
-        public DeliveryManRepository(IGraphClient DbContext) : base(DbContext)
+        public DeliveryManRepository(BoltGraphClientFactory boltGraphClientFactory) : base(boltGraphClientFactory)
         {
         }
 
@@ -22,7 +22,7 @@ namespace DbManager.Neo4j.Implementations
             with c, count(o) as count
             return c,count order by COUNT desc limit 10*/
 
-            var res = await dbContext.Cypher
+            var res = await _dbContext.Cypher
                 .Match($"(node:{typeof(DeliveryMan).Name})-[relation:{typeof(DeliveredBy).Name.ToUpper()}]-(relatedNode:{typeof(Order).Name})")
                 .With("node, count(relatedNode) as count")
                 //.Where($"")

@@ -6,6 +6,7 @@ using DbManager.Data.Relations;
 using DbManager.Neo4j.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace WepPartDeliveryProject.Controllers
 {
@@ -18,11 +19,10 @@ namespace WepPartDeliveryProject.Controllers
         private readonly ApplicationSettings _appSettings;
         private readonly IMapper _mapper;
 
-        public KitchenController(IRepositoryFactory repositoryFactory, IConfiguration configuration, IMapper mapper)
+        public KitchenController(IRepositoryFactory repositoryFactory, IMapper mapper, IOptions<ApplicationSettings> appSettingsOptions)
         {
             // Fetch settings object from configuration
-            _appSettings = new ApplicationSettings();
-            configuration.GetSection("ApplicationSettings").Bind(_appSettings);
+            _appSettings = appSettingsOptions.Value;
 
             _repositoryFactory = repositoryFactory;
             _mapper = mapper;

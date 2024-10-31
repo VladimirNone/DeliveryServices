@@ -13,7 +13,7 @@ namespace DbManager.Neo4j.Implementations
 {
     public class ClientRepository : GeneralNeo4jRepository<Client>, IClientRepository
     {
-        public ClientRepository(IGraphClient DbContext) : base(DbContext)
+        public ClientRepository(BoltGraphClientFactory boltGraphClientFactory) : base(boltGraphClientFactory)
         {
         }
 
@@ -23,7 +23,7 @@ namespace DbManager.Neo4j.Implementations
             with c, sum(o.Price) as sum, count(o) as count
             return c,sum,count order by sum limit 10*/
 
-            var res = await dbContext.Cypher
+            var res = await _dbContext.Cypher
                 .Match($"(node:{typeof(Client).Name})-[relation:{typeof(Ordered).Name.ToUpper()}]-(relatedNode:{typeof(Order).Name})")
                 .With("node, sum(relatedNode.Price) as sum, count(relatedNode) as count")
                 //.Where($"")

@@ -8,6 +8,7 @@ using NLog;
 using NLog.Web;
 using System.Text;
 using WepPartDeliveryProject;
+using WepPartDeliveryProject.BackgroundServices;
 
 var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 try
@@ -50,11 +51,14 @@ try
     services.AddSwaggerGen();
 
     // Register application setting
-    services.Configure<Neo4jSettings>(configuration.GetSection("Neo4jSettings"));
-    services.Configure<ApplicationSettings>(configuration.GetSection("ApplicationSettings"));
+    services.AddOptions<Neo4jSettings>().Bind(configuration.GetSection("Neo4jSettings"));
+    services.AddOptions<ApplicationSettings>().Bind(configuration.GetSection("ApplicationSettings"));
 
     services.AddDbInfrastructure(configuration);
-    services.AddHealthChecks().AddCheck<GraphHealthCheck>("GraphHealthCheck");
+    services.AddSingleton<DeliveryHealthCheck>();
+    services.AddHealthChecks()
+        .AddCheck<GraphHealthCheck>(nameof(GraphHealthCheck), tags: ["live"])
+        .AddCheck<DeliveryHealthCheck>(nameof(DeliveryHealthCheck), tags: ["ready"]);
 
     services.AddAuthentication(options =>
     {
@@ -76,6 +80,7 @@ try
             };
         });
 
+    services.AddHostedService<StartupBackgroundService>();
 
     var app = builder.Build();
 
@@ -86,16 +91,6 @@ try
         // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         app.UseHsts();
     }
-
-    var appSetting = new ApplicationSettings();
-    configuration.GetSection("ApplicationSettings").Bind(appSetting);
-
-    if (appSetting.GenerateData)
-        await app.Services.GetService<GeneratorService>().GenerateAll();
-
-    //Отчасти костыль
-    var graphClient = app.Services.GetService<IGraphClient>();
-    graphClient.OperationCompleted += (sender, e) => app.Logger.LogTrace(e.QueryText.Replace("\r\n", " "));
 
     app.UseSwagger();
     app.UseSwaggerUI(options =>
@@ -109,7 +104,7 @@ try
     app.UseHttpsRedirection();
     app.UseStaticFiles();
 
-    app.UseHealthChecks("/healthcheck");
+    app.UseHealthChecks("/health");
 
     app.UseAuthentication();
     app.UseRouting();

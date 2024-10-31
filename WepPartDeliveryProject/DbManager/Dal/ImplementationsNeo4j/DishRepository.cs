@@ -13,7 +13,7 @@ namespace DbManager.Neo4j.Implementations
 {
     public class DishRepository : GeneralNeo4jRepository<Dish>, IDishRepository
     {
-        public DishRepository(IGraphClient DbContext) : base(DbContext)
+        public DishRepository(BoltGraphClientFactory boltGraphClientFactory) : base(boltGraphClientFactory)
         {
         }
 
@@ -22,7 +22,7 @@ namespace DbManager.Neo4j.Implementations
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "node." + orderByProperty[i];
 
-            var res = await dbContext.Cypher
+            var res = await _dbContext.Cypher
                 .Match($"(node:{typeof(Dish).Name})")
                 .Where($"toLower(node.Name) contains($searchText) or toLower(node.Description) contains($searchText)")
                 .WithParams(new
@@ -42,7 +42,7 @@ namespace DbManager.Neo4j.Implementations
             with count(r) as countR, d
             return d, countR order by countR desc limit 10*/
 
-            var res = await dbContext.Cypher
+            var res = await _dbContext.Cypher
                 .Match($"(node:{typeof(Order).Name})-[relation:{typeof(OrderedDish).Name.ToUpper()}]-(relatedNode:{typeof(Dish).Name})")
                 .With("relatedNode, count(relation) as countR")
                 //where time > date("2022-11-01") and time < date("2023-03-01")

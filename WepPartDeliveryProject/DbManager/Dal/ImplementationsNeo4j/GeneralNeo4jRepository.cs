@@ -8,18 +8,18 @@ namespace DbManager.Neo4j.Implementations
     public class GeneralNeo4jRepository<TNode> : IGeneralRepository<TNode> 
         where TNode : INode
     {
-        protected readonly IGraphClient dbContext;
+        protected readonly IGraphClient _dbContext;
 
-        public GeneralNeo4jRepository(IGraphClient DbContext)
+        public GeneralNeo4jRepository(BoltGraphClientFactory boltGraphClientFactory)
         {
-            dbContext = DbContext;
+            this._dbContext = boltGraphClientFactory.GetGraphClient();
         }
 
         public virtual async Task AddNodeAsync(TNode newNode)
         {
             if(newNode.Id == Guid.Empty)
                 newNode.Id = Guid.NewGuid();
-            await dbContext.Cypher
+            await _dbContext.Cypher
                 .Merge($"(newNode:{typeof(TNode).Name} {{Id: $id}})")
                 .OnCreate()
                 .Set("newNode = $newEntity")
@@ -41,7 +41,7 @@ namespace DbManager.Neo4j.Implementations
 
         public virtual async Task UpdateNodeAsync(TNode node)
         {
-            await dbContext.Cypher
+            await _dbContext.Cypher
                 .Match($"(updateNode:{typeof(TNode).Name} {{Id: $id}})")
                 .Set("updateNode = $updatedEntity")
                 .WithParams(new
@@ -55,7 +55,7 @@ namespace DbManager.Neo4j.Implementations
         public virtual async Task UpdateNodesPropertiesAsync(TNode node)
         {
             var properties = typeof(TNode).GetProperties();
-            var query = dbContext.Cypher
+            var query = _dbContext.Cypher
                 .Match($"(updateNode:{typeof(TNode).Name} {{Id: $id}})");
 
             foreach (var property in properties)
@@ -76,7 +76,7 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<TNode> GetNodeAsync(Guid id)
         {
-            var res = await dbContext.Cypher
+            var res = await _dbContext.Cypher
                 .Match($"(entity:{typeof(TNode).Name} {{Id: $id}})")
                 .WithParams(new
                 {
@@ -96,7 +96,7 @@ namespace DbManager.Neo4j.Implementations
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "entity." + orderByProperty[i];
 
-            var query = dbContext.Cypher
+            var query = _dbContext.Cypher
                 .Match($"(entity:{typeof(TNode).Name})")
                 .Return(entity => entity.As<TNode>())
                 .ChangeQueryForPagination(orderByProperty, skipCount, limitCount);
@@ -108,7 +108,7 @@ namespace DbManager.Neo4j.Implementations
 
         public virtual async Task DeleteNodeWithAllRelations(TNode node)
         {
-            await dbContext.Cypher
+            await _dbContext.Cypher
                 .Match($"(entity:{typeof(TNode).Name} {{Id: $id}})-[r]-()")
                 .WithParams(new
                 {
@@ -131,7 +131,7 @@ namespace DbManager.Neo4j.Implementations
             if (relation.Id == Guid.Empty)
                 relation.Id = Guid.NewGuid();
 
-            await dbContext.Cypher
+            await _dbContext.Cypher
                 .Match($"(node {{Id: $entityId}}), (otherNode {{Id: $otherNodeId}})")
                 .Create($"(node){direction}(otherNode)")
                 .Set("relation=$newRelation")
@@ -150,7 +150,7 @@ namespace DbManager.Neo4j.Implementations
             var typeNodeFrom = typeof(TRelation).BaseType.GenericTypeArguments[0];
             var direction = GetDirection(updatedRelation.GetType().Name, "relation", typeNodeFrom == typeof(TNode));
 
-            await dbContext.Cypher
+            await _dbContext.Cypher
                 .Match($"(node {{Id: $id}}){direction}(relatedNode {{Id: $relatedNodeId}})")
                 .Set("relation=$updatedRelation")
                 .WithParams(new
@@ -171,7 +171,7 @@ namespace DbManager.Neo4j.Implementations
 
             var direction = GetDirection(typeof(TRelation).Name, "relation");
 
-            var res = await dbContext.Cypher
+            var res = await _dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name} {{Id: $relatedNodeId}})")
                 .WithParams(new
                 {
@@ -198,7 +198,7 @@ namespace DbManager.Neo4j.Implementations
             var direction = GetDirection(typeof(TRelation).Name, "relation");
             var typeNodeFrom = typeof(TRelation).BaseType.GenericTypeArguments[0];
 
-            var res = await dbContext.Cypher
+            var res = await _dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name})")
                 .WithParams(new
                 {
@@ -238,7 +238,7 @@ namespace DbManager.Neo4j.Implementations
         {
             var direction = GetDirection(typeof(TRelation).Name, "relation");
 
-            await dbContext.Cypher
+            await _dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name} {{Id: $relatedNodeId}})")
                 .Delete("relation")
                 .WithParams(new
@@ -257,7 +257,7 @@ namespace DbManager.Neo4j.Implementations
             var directionIn = GetDirection(typeof(TRelation).Name); 
             var directionOut = GetDirection(typeof(TRelation).Name);
 
-            var result = await dbContext.Cypher
+            var result = await _dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name})")
                 .Where($"not (node){directionIn}() and not (node){directionOut}()")
                 .Return(node => node.As<TNode>())
@@ -272,7 +272,7 @@ namespace DbManager.Neo4j.Implementations
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "node." + orderByProperty[i];
 
-            var result = await dbContext.Cypher
+            var result = await _dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name})")
                 .Where($"node.Id in [\"{string.Join("\",\"", ids)}\"]")
                 .Return(node => node.As<TNode>())
@@ -287,7 +287,7 @@ namespace DbManager.Neo4j.Implementations
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "node." + orderByProperty[i];
 
-            var result = await dbContext.Cypher
+            var result = await _dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name})")
                 .Where($"node.{nameOfProperty} in [\"{string.Join("\",\"", propertyValues)}\"]")
                 .Return(node => node.As<TNode>())
@@ -305,7 +305,7 @@ namespace DbManager.Neo4j.Implementations
 
         public virtual async Task SetNewNodeType(string nodeId, string nodeTypeName)
         {
-            await dbContext.Cypher
+            await _dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}})")
                 .Set($"node:{nodeTypeName}")
                 .WithParams(new
@@ -323,7 +323,7 @@ namespace DbManager.Neo4j.Implementations
 
         public virtual async Task RemoveNodeType(string nodeId, string nodeTypeName)
         {
-            await dbContext.Cypher
+            await _dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}})")
                 .Remove($"node:{nodeTypeName}")
                 .WithParams(new
@@ -341,7 +341,7 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<bool> HasNodeType(string nodeId, string nodeType)
         {
-            var result = await dbContext.Cypher
+            var result = await _dbContext.Cypher
                 .Match($"(node:{typeof(User).Name} {{Id: $id}})")
                 .WithParams(new
                 {

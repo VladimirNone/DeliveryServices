@@ -26,11 +26,10 @@ namespace WepPartDeliveryProject.Controllers
         private readonly IMapper _mapper;
         private readonly int countCharInDishDescription = 160;
 
-        public MainController(IRepositoryFactory repositoryFactory, IConfiguration configuration, IMapper mapper)
+        public MainController(IRepositoryFactory repositoryFactory, IMapper mapper, IOptions<ApplicationSettings> appSettingsOptions)
         {
             // Fetch settings object from configuration
-            _appSettings = new ApplicationSettings();
-            configuration.GetSection("ApplicationSettings").Bind(_appSettings);
+            _appSettings = appSettingsOptions.Value;
 
             _repositoryFactory = repositoryFactory;
             _mapper = mapper;

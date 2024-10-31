@@ -14,7 +14,7 @@ namespace DbManager.Neo4j.Implementations
 {
     public class UserRepository : GeneralNeo4jRepository<User>, IUserRepository
     {
-        public UserRepository(IGraphClient DbContext) : base(DbContext)
+        public UserRepository(BoltGraphClientFactory boltGraphClientFactory) : base(boltGraphClientFactory)
         {
         }
 
@@ -50,7 +50,7 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<List<string>> GetUserRoles(string userId)
         {
-            var result = await dbContext.Cypher
+            var result = await _dbContext.Cypher
                 .Match($"(node:{typeof(User).Name} {{Id: $id}})")
                 .WithParams(new
                 {
@@ -69,7 +69,7 @@ namespace DbManager.Neo4j.Implementations
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "node." + orderByProperty[i];
 
-            var res = await dbContext.Cypher
+            var res = await _dbContext.Cypher
                 .Match($"(node:{typeof(User).Name})")
                 .With("node, labels(node) as roles")
                 .Return((node, roles) => new
@@ -88,7 +88,7 @@ namespace DbManager.Neo4j.Implementations
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "node." + orderByProperty[i];
 
-            var res = await dbContext.Cypher
+            var res = await _dbContext.Cypher
                 .Match($"(node:{typeof(User).Name})")
                 .Where($"toLower(node.Id) contains($searchText) or toLower(node.Login) contains($searchText)")
                 .WithParams(new
@@ -112,7 +112,7 @@ namespace DbManager.Neo4j.Implementations
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "node." + orderByProperty[i];
 
-            var res = await dbContext.Cypher
+            var res = await _dbContext.Cypher
                 .Match($"(node:{typeof(User).Name})")
                 .Where($"toLower(node.Id) contains($searchText) or toLower(node.Login) contains($searchText)")
                 .WithParams(new

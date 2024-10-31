@@ -11,17 +11,15 @@ namespace DbManager
     public class GraphHealthCheck : IHealthCheck
     {
 
-        private readonly IGraphClient _client;
-        public GraphHealthCheck(IGraphClient client)
+        private readonly BoltGraphClientFactory _boltGraphClientFactory;
+        public GraphHealthCheck(BoltGraphClientFactory boltGraphClientFactory)
         {
-            _client = client;
+            this._boltGraphClientFactory = boltGraphClientFactory;
         }
 
         public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
         {
-
-            var healthCheckResultHealthy = await CheckNeo4jGraphConnectionAsync();
-
+            var healthCheckResultHealthy = await CheckNeo4jGraphConnectionAsync(await this._boltGraphClientFactory.GetGraphClientAsync());
 
             if (healthCheckResultHealthy)
             {
@@ -31,13 +29,12 @@ namespace DbManager
             return HealthCheckResult.Unhealthy("neo4j graph db health check success"); ;
         }
 
-        private async Task<bool> CheckNeo4jGraphConnectionAsync()
+        private async Task<bool> CheckNeo4jGraphConnectionAsync(IGraphClient client)
         {
             try
             {
-                await _client.ConnectAsync();
+                await client.ConnectAsync();
             }
-
             catch (Exception)
             {
                 return false;

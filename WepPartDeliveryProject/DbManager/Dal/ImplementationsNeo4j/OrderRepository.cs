@@ -14,7 +14,7 @@ namespace DbManager.Neo4j.Implementations
 {
     public class OrderRepository : GeneralNeo4jRepository<Order>, IOrderRepository
     {
-        public OrderRepository(IGraphClient DbContext) : base(DbContext)
+        public OrderRepository(BoltGraphClientFactory boltGraphClientFactory) : base(boltGraphClientFactory)
         {
         }
 
@@ -39,7 +39,7 @@ namespace DbManager.Neo4j.Implementations
             var directionInOrderCB = GetDirection("");
             var directionInOrderHOS = GetDirection(typeof(HasOrderState).Name, "rel");
 
-            var res = await dbContext.Cypher
+            var res = await _dbContext.Cypher
                 .Match(
                     $"(node:{typeof(TNode).Name} {{Id: $nodeId}})" +
                     $"{directionInOrderCB}" +
@@ -134,7 +134,7 @@ namespace DbManager.Neo4j.Implementations
             where time > date("2022-11-01") and time < date("2023-03-01")
             RETURN time, sum, count order by time*/
 
-            var res = await dbContext.Cypher
+            var res = await _dbContext.Cypher
                 .Match($"(node:{typeof(Order).Name})-[relation:{typeof(HasOrderState).Name.ToUpper()}]-(relatedNode:{typeof(OrderState).Name} {{NumberOfStage: $NumberOfFinishStage}})")
                 .WithParams(new
                 {
@@ -160,7 +160,7 @@ namespace DbManager.Neo4j.Implementations
             with count(relatedNode) as countOfOrders, count(distinct node) as countOfClients, date.truncate('month', datetime(relation2.TimeStartState)) as time
             RETURN countOfOrders, countOfClients, time order by time */
 
-            var res = await dbContext.Cypher
+            var res = await _dbContext.Cypher
                 .Match($"(node:{typeof(Client).Name})-[relation:{typeof(Ordered).Name.ToUpper()}]-(relatedNode:{typeof(Order).Name})-[relation2:{typeof(HasOrderState).Name.ToUpper()}]-(relatedNode2:{typeof(OrderState).Name} {{NumberOfStage: $NumberOfFinishStage}})")
                 .WithParams(new
                 {
@@ -186,7 +186,7 @@ namespace DbManager.Neo4j.Implementations
             with node, date.truncate('month', datetime(relation.TimeStartState)) as time
             RETURN node, time order by time */
 
-            var res = await dbContext.Cypher
+            var res = await _dbContext.Cypher
                 .Match($"(node:{typeof(Order).Name})-[relation:{typeof(HasOrderState).Name.ToUpper()}]-(relatedNode:{typeof(OrderState).Name} {{NumberOfStage: $NumberOfFinishStage}})")
                 .WithParams(new
                 {
@@ -211,7 +211,7 @@ namespace DbManager.Neo4j.Implementations
             with k, count(distinct o) as countO, sum(r.Count) as sumD
             return k,countO, sumD */
 
-            var res = await dbContext.Cypher
+            var res = await _dbContext.Cypher
                 .Match($"(node:{typeof(Kitchen).Name})-[relation:{typeof(CookedBy).Name.ToUpper()}]-(relatedNode:{typeof(Order).Name})-[relation2:{typeof(OrderedDish).Name.ToUpper()}]-(relatedNode2:{typeof(Dish).Name})")
                 .With("node, count(distinct relatedNode) as countO, sum(relation2.Count) as sumD")
                 //where time > date("2022-11-01") and time < date("2023-03-01")

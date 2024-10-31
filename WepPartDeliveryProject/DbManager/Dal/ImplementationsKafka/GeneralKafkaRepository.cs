@@ -12,7 +12,7 @@ namespace DbManager.Dal.ImplementationsKafka
         private readonly KafkaDependentProducer<string, string> _kafkaProducer;
         private readonly string _topic;
 
-        public GeneralKafkaRepository(IGraphClient DbContext, KafkaDependentProducer<string, string> kafkaProducer, IConfiguration configuration) : base(DbContext)
+        public GeneralKafkaRepository(BoltGraphClientFactory boltGraphClientFactory, KafkaDependentProducer<string, string> kafkaProducer, IConfiguration configuration) : base(boltGraphClientFactory)
         {
             this._topic = configuration["ContainerEventsTopic"] ?? "ContainerEvents";
             this._kafkaProducer = kafkaProducer;

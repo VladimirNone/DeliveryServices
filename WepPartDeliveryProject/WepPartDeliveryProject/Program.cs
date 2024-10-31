@@ -18,7 +18,7 @@ using Neo4jClient.Execution;
 using Newtonsoft.Json;
 using System.Text;
 using WepPartDeliveryProject;
-using WepPartDeliveryProject.Services;
+using WepPartDeliveryProject.BackgroundServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,11 +26,6 @@ var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 var configuration = builder.Configuration;
 
-/*services.AddLogging(loggingBuilder => {
-    var loggingSection = configuration.GetSection("Logging");
-    loggingBuilder.AddFile(loggingSection);
-});
-*/
 services.AddAutoMapper(typeof(MapperProfile));
 services.AddSingleton<JwtService>();
 
@@ -59,11 +54,14 @@ services.AddControllers().AddNewtonsoftJson(options =>
 services.AddSwaggerGen();
 
 // Register application setting
-services.Configure<Neo4jSettings>(configuration.GetSection("Neo4jSettings"));
-services.Configure<ApplicationSettings>(configuration.GetSection("ApplicationSettings"));
+services.AddOptions<Neo4jSettings>().Bind(configuration.GetSection("Neo4jSettings"));
+services.AddOptions<ApplicationSettings>().Bind(configuration.GetSection("ApplicationSettings"));
 
 services.AddDbInfrastructure(configuration);
-services.AddHealthChecks().AddCheck<GraphHealthCheck>("GraphHealthCheck");
+services.AddSingleton<DeliveryHealthCheck>();
+services.AddHealthChecks()
+    .AddCheck<GraphHealthCheck>(nameof(GraphHealthCheck), tags: ["live"])
+    .AddCheck<DeliveryHealthCheck>(nameof(DeliveryHealthCheck), tags: ["ready"]);
 
 services.AddAuthentication(options =>
 {
@@ -85,6 +83,7 @@ services.AddAuthentication(options =>
         };
     });
 
+services.AddHostedService<StartupBackgroundService>();
 services.AddHostedService<KafkaConsumerBackgroundService>();
 
 var app = builder.Build();
@@ -96,16 +95,6 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
-var appSetting = new ApplicationSettings();
-configuration.GetSection("ApplicationSettings").Bind(appSetting);
-
-if (appSetting.GenerateData)
-    await app.Services.GetService<GeneratorService>().GenerateAll();
-
-//Отчасти костыль
-var graphClient = app.Services.GetService<IGraphClient>();
-graphClient.OperationCompleted += (sender, e) => app.Logger.LogInformation(e.QueryText.Replace("\r\n", " "));
 
 app.UseSwagger();
 app.UseSwaggerUI(options =>
@@ -119,7 +108,7 @@ app.UseCors();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseHealthChecks("/healthcheck");
+app.UseHealthChecks("/health");
 
 app.UseAuthentication();
 app.UseRouting();

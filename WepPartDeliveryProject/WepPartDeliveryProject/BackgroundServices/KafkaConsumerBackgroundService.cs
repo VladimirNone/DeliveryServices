@@ -1,6 +1,6 @@
 ﻿using Confluent.Kafka;
 
-namespace WepPartDeliveryProject.Services
+namespace WepPartDeliveryProject.BackgroundServices
 {
     public class KafkaConsumerBackgroundService : BackgroundService
     {
@@ -16,8 +16,8 @@ namespace WepPartDeliveryProject.Services
                 AutoOffsetReset = AutoOffsetReset.Latest,
                 Acks = Acks.All,
             };
-            this._consumerBuilder = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
-            this._topic = configuration["ContainerEventsTopic"] ?? "ContainerEvents";
+            _consumerBuilder = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
+            _topic = configuration["ContainerEventsTopic"] ?? "ContainerEvents";
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -29,12 +29,12 @@ namespace WepPartDeliveryProject.Services
         {
             try
             {
-                this._consumerBuilder.Subscribe(this._topic);
+                _consumerBuilder.Subscribe(_topic);
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     try
                     {
-                        var consumer = this._consumerBuilder.Consume(cancellationToken);
+                        var consumer = _consumerBuilder.Consume(cancellationToken);
                         Console.WriteLine($"Processing Employee Name: {consumer.Message.Value}");
 
                     }
@@ -63,8 +63,8 @@ namespace WepPartDeliveryProject.Services
 
         public override void Dispose()
         {
-            this._consumerBuilder.Close();
-            this._consumerBuilder.Dispose();
+            _consumerBuilder.Close();
+            _consumerBuilder.Dispose();
 
             base.Dispose();
         }

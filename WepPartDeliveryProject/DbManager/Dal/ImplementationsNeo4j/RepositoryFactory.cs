@@ -11,30 +11,25 @@ namespace DbManager.Neo4j.Implementations
 {
     public class RepositoryFactory: IRepositoryFactory
     {
-        private readonly IGraphClient dbContext;
-        private readonly IServiceProvider services;
+        private readonly IServiceProvider _services;
         private readonly Dictionary<Type, object> repositories = new Dictionary<Type, object>();
-        private readonly KafkaDependentProducer<string, string> kafkaDependentProducer;
-        private readonly IConfiguration configuration;
+        private readonly KafkaDependentProducer<string, string> _kafkaDependentProducer;
+        private readonly IConfiguration _configuration;
+        private readonly BoltGraphClientFactory _boltGraphClientFactory;
 
-        public IGraphClient DbContext => dbContext;
-
-        public RepositoryFactory(IGraphClient neo4jData, KafkaDependentProducer<string, string> kafkaDependentProducer, IConfiguration configuration, IServiceProvider serviceProvider)
+        public RepositoryFactory(BoltGraphClientFactory boltGraphClientFactory, KafkaDependentProducer<string, string> kafkaDependentProducer, IConfiguration configuration, IServiceProvider serviceProvider)
         {
-            dbContext = neo4jData;
-            services = serviceProvider;
-            this.kafkaDependentProducer = kafkaDependentProducer;
-            this.configuration = configuration;
-
-            var res = neo4jData.JsonConverters;
-            var count = res.Count;
+            this._boltGraphClientFactory = boltGraphClientFactory;
+            this._services = serviceProvider;
+            this._kafkaDependentProducer = kafkaDependentProducer;
+            this._configuration = configuration;
         }
 
         public IGeneralRepository<TEntity> GetRepository<TEntity>(bool hasCustomRepository = false) where TEntity : INode
         {
             if (hasCustomRepository)
             {
-                var repo = services.GetService<IGeneralRepository<TEntity>>();
+                var repo = _services.GetService<IGeneralRepository<TEntity>>();
                 if(repo != null)
                 {
                     return repo;
@@ -44,7 +39,7 @@ namespace DbManager.Neo4j.Implementations
             var typeEntity = typeof(TEntity);
             if (!repositories.ContainsKey(typeEntity)) 
             { 
-                var generalRepo = new GeneralKafkaRepository<TEntity>(this.DbContext, this.kafkaDependentProducer, this.configuration);
+                var generalRepo = new GeneralKafkaRepository<TEntity>(this._boltGraphClientFactory, this._kafkaDependentProducer, this._configuration);
                 repositories.Add(typeEntity, generalRepo);
             }
 

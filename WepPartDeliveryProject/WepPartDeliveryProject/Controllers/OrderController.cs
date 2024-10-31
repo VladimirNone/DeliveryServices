@@ -8,6 +8,7 @@ using DbManager.Data.Relations;
 using AutoMapper;
 using DbManager.Data;
 using System.Xml.Linq;
+using Microsoft.Extensions.Options;
 
 namespace WepPartDeliveryProject.Controllers
 {
@@ -21,11 +22,10 @@ namespace WepPartDeliveryProject.Controllers
         private readonly IMapper _mapper;
         private readonly JwtService _jwtService;
 
-        public OrderController(IRepositoryFactory repositoryFactory, IConfiguration configuration, IMapper mapper, JwtService jwtService)
+        public OrderController(IRepositoryFactory repositoryFactory, IMapper mapper, JwtService jwtService, IOptions<ApplicationSettings> appSettingsOptions)
         {
             // Fetch settings object from configuration
-            _appSettings = new ApplicationSettings();
-            configuration.GetSection("ApplicationSettings").Bind(_appSettings);
+            _appSettings = appSettingsOptions.Value;
 
             _repositoryFactory = repositoryFactory;
             _mapper = mapper;

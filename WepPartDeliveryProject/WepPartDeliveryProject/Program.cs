@@ -95,7 +95,7 @@ try
 
     //Отчасти костыль
     var graphClient = app.Services.GetService<IGraphClient>();
-    graphClient.OperationCompleted += (sender, e) => app.Logger.LogInformation(e.QueryText.Replace("\r\n", " "));
+    graphClient.OperationCompleted += (sender, e) => app.Logger.LogTrace(e.QueryText.Replace("\r\n", " "));
 
     app.UseSwagger();
     app.UseSwaggerUI(options =>

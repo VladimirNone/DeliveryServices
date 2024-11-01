@@ -6,7 +6,7 @@ namespace DbManager.Dal
     /// General interface for repository
     /// </summary>
     /// <typeparam name="TNode"></typeparam>
-    public interface IGeneralRepository<TNode> where TNode : INode
+    public interface IGeneralRepository<TNode> : IDisposable where TNode : INode
     {
         /// <summary>
         /// Add node with properties to DB. Generate new Id. If node with such id already exist in DB, then node won't added to DB

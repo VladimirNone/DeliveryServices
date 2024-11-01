@@ -24,11 +24,6 @@ namespace DbManager.Dal.ImplementationsKafka
             await this._kafkaProducer.ProduceAsync(this._topic, new Confluent.Kafka.Message<string, string>() { Key = node.Id.ToString(),  Value = node?.GetType()?.Name ?? "node is  null" });
         }
 
-        public override async Task AddNodesAsync(List<TNode> newNodes)
-        {
-            await base.AddNodesAsync(newNodes);
-        }
-
         public override async Task DeleteNodeWithAllRelations(TNode node)
         {
             await base.DeleteNodeWithAllRelations(node);

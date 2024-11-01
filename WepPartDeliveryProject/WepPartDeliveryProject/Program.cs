@@ -1,13 +1,8 @@
 using DbManager;
 using DbManager.AppSettings;
 using DbManager.Mapper;
-using DbManager.Neo4j.DataGenerator;
-using DbManager.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Net.Http.Headers;
-using Neo4jClient;
 using NLog;
 using NLog.Web;
 using System.Text;
@@ -27,23 +22,23 @@ try
     var services = builder.Services;
     var configuration = builder.Configuration;
 
-services.AddAutoMapper(typeof(MapperProfile));
-services.AddSingleton<JwtService>();
+    services.AddAutoMapper(typeof(MapperProfile));
+    services.AddSingleton<JwtService>();
 
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(
-        policy =>
-        {
-            policy
-                .WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value)
-                //.WithOrigins("http://localhost:3000")
-                .WithHeaders(HeaderNames.ContentType, HeaderNames.Cookie)
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
-        });
-});
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(
+            policy =>
+            {
+                policy
+                    .WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value)
+                    //.WithOrigins("http://localhost:3000")
+                    //.WithHeaders(HeaderNames.ContentType, HeaderNames.Cookie)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
+    });
 
     services.AddControllers().AddNewtonsoftJson(options =>
             {
@@ -54,15 +49,15 @@ builder.Services.AddCors(options =>
     //services.AddEndpointsApiExplorer();
     services.AddSwaggerGen();
 
-// Register application setting
-services.AddOptions<Neo4jSettings>().Bind(configuration.GetSection("Neo4jSettings"));
-services.AddOptions<ApplicationSettings>().Bind(configuration.GetSection("ApplicationSettings"));
+    // Register application setting
+    services.AddOptions<Neo4jSettings>().Bind(configuration.GetSection("Neo4jSettings"));
+    services.AddOptions<ApplicationSettings>().Bind(configuration.GetSection("ApplicationSettings"));
 
-services.AddDbInfrastructure(configuration);
-services.AddSingleton<DeliveryHealthCheck>();
-services.AddHealthChecks()
-    .AddCheck<GraphHealthCheck>(nameof(GraphHealthCheck), tags: ["live"])
-    .AddCheck<DeliveryHealthCheck>(nameof(DeliveryHealthCheck), tags: ["ready"]);
+    services.AddDbInfrastructure(configuration);
+    services.AddSingleton<DeliveryHealthCheck>();
+    services.AddHealthChecks()
+        .AddCheck<GraphHealthCheck>(nameof(GraphHealthCheck), tags: ["live"])
+        .AddCheck<DeliveryHealthCheck>(nameof(DeliveryHealthCheck), tags: ["ready"]);
 
     services.AddAuthentication(options =>
     {
@@ -84,8 +79,8 @@ services.AddHealthChecks()
             };
         });
 
-services.AddHostedService<StartupBackgroundService>();
-services.AddHostedService<KafkaConsumerBackgroundService>();
+    services.AddHostedService<StartupBackgroundService>();
+    services.AddHostedService<KafkaConsumerBackgroundService>();
 
     var app = builder.Build();
 
@@ -97,12 +92,12 @@ services.AddHostedService<KafkaConsumerBackgroundService>();
         app.UseHsts();
     }
 
-app.UseSwagger();
-app.UseSwaggerUI(options =>
-{
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-    options.RoutePrefix = string.Empty;
-});
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+        options.RoutePrefix = string.Empty;
+    });
 
     app.UseCors();
 

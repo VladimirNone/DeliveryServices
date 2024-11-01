@@ -26,7 +26,7 @@ namespace DbManager
                 return HealthCheckResult.Healthy("neo4j graph db health check success");
             }
 
-            return HealthCheckResult.Unhealthy("neo4j graph db health check success"); ;
+            return HealthCheckResult.Unhealthy("neo4j graph db health check unsuccess"); ;
         }
 
         private async Task<bool> CheckNeo4jGraphConnectionAsync(IGraphClient client)
@@ -38,6 +38,10 @@ namespace DbManager
             catch (Exception)
             {
                 return false;
+            }
+            finally
+            {
+                client.Dispose();
             }
 
             return true;

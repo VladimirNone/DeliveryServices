@@ -5,7 +5,7 @@ using Neo4jClient.Cypher;
 
 namespace DbManager.Neo4j.Implementations
 {
-    public class GeneralNeo4jRepository<TNode> : IGeneralRepository<TNode> 
+    public class GeneralNeo4jRepository<TNode> : IGeneralRepository<TNode>
         where TNode : INode
     {
         protected readonly IGraphClient _dbContext;
@@ -31,7 +31,7 @@ namespace DbManager.Neo4j.Implementations
                 .ExecuteWithoutResultsAsync();
         }
 
-        public virtual async Task AddNodesAsync(List<TNode> newNodes)
+        public async Task AddNodesAsync(List<TNode> newNodes)
         {
             foreach (var item in newNodes)
             {
@@ -375,6 +375,11 @@ namespace DbManager.Neo4j.Implementations
                 return direction;
 
             return relationInEntity.Value ? "<" + direction: direction + ">";
+        }
+
+        public void Dispose()
+        {
+            this._dbContext.Dispose();
         }
     }
 }

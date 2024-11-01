@@ -1,13 +1,15 @@
 ﻿using Confluent.Kafka;
+using Microsoft.Extensions.Logging;
 
 namespace WepPartDeliveryProject.BackgroundServices
 {
     public class KafkaConsumerBackgroundService : BackgroundService
     {
-        private IConsumer<Ignore, string> _consumerBuilder { get; set; }
+        private IConsumer<Ignore, string> _consumerBuilder;
         private readonly string _topic;
+        private readonly ILogger<KafkaConsumerBackgroundService> _logger;
 
-        public KafkaConsumerBackgroundService(IConfiguration configuration)
+        public KafkaConsumerBackgroundService(IConfiguration configuration, ILogger<KafkaConsumerBackgroundService> logger)
         {
             var consumerConfig = new ConsumerConfig
             {
@@ -16,8 +18,9 @@ namespace WepPartDeliveryProject.BackgroundServices
                 AutoOffsetReset = AutoOffsetReset.Latest,
                 Acks = Acks.All,
             };
-            _consumerBuilder = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
-            _topic = configuration["ContainerEventsTopic"] ?? "ContainerEvents";
+            this._consumerBuilder = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
+            this._topic = configuration["ContainerEventsTopic"] ?? "ContainerEvents";
+            this._logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -29,7 +32,8 @@ namespace WepPartDeliveryProject.BackgroundServices
         {
             try
             {
-                _consumerBuilder.Subscribe(_topic);
+                this._logger.LogInformation($"KafkaConsumerBackgroundService subscribe to {this._topic}");
+                this._consumerBuilder.Subscribe(this._topic);
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     try
@@ -38,26 +42,28 @@ namespace WepPartDeliveryProject.BackgroundServices
                         Console.WriteLine($"Processing Employee Name: {consumer.Message.Value}");
 
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException ex)
                     {
-                        break;
+                        this._logger.LogCritical(ex.ToString());
+                        throw;
                     }
                     catch (ConsumeException e)
                     {
                         // Consumer errors should generally be ignored (or logged) unless fatal.
-                        Console.WriteLine($"Consume error: {e.Error.Reason}");
+                        this._logger.LogCritical($"Consume error: {e.Error.Reason}. Stacktrace: {e}");
 
                         if (e.Error.IsFatal)
                         {
                             // https://github.com/edenhill/librdkafka/blob/master/INTRODUCTION.md#fatal-consumer-errors
-                            break;
+                            throw;
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                this._logger.LogCritical(ex.ToString());
+                throw;
             }
         }
 

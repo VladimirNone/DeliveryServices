@@ -109,7 +109,7 @@ app.UseSwaggerUI(options =>
     app.UseHttpsRedirection();
     app.UseStaticFiles();
 
-    app.UseHealthChecks("/healthcheck");
+    app.UseHealthChecks("/health");
 
     app.UseAuthentication();
     app.UseRouting();

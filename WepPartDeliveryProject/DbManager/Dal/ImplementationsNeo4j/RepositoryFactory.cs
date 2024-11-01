@@ -5,7 +5,6 @@ using DbManager.Neo4j.Interfaces;
 using DbManager.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Neo4jClient;
 
 namespace DbManager.Neo4j.Implementations
 {

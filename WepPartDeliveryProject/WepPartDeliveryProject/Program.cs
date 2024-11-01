@@ -1,126 +1,132 @@
 using DbManager;
 using DbManager.Mapper;
 using DbManager.Neo4j.DataGenerator;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Net.Http.Headers;
 using Neo4jClient;
-using Neo4jClient.Execution;
-using Newtonsoft.Json;
+using NLog;
+using NLog.Web;
 using System.Text;
 using WepPartDeliveryProject;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-var services = builder.Services;
-var configuration = builder.Configuration;
-
-/*services.AddLogging(loggingBuilder => {
-    var loggingSection = configuration.GetSection("Logging");
-    loggingBuilder.AddFile(loggingSection);
-});
-*/
-services.AddAutoMapper(typeof(MapperProfile));
-services.AddSingleton<JwtService>();
-
-builder.Services.AddCors(options =>
+var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
+try
 {
-    options.AddDefaultPolicy(
-        policy =>
-        {
-            policy
-                .WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value)
-                //.WithOrigins("https://fe1e-176-124-28-223.ngrok-free.app")
-                //.WithHeaders(HeaderNames.ContentType, HeaderNames.Cookie)
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
-        });
-});
+    var builder = WebApplication.CreateBuilder(args);
 
-services.AddControllers().AddNewtonsoftJson(options =>
-        {
-            options.SerializerSettings.MaxDepth = 3;
-            options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
-        }
-    ); 
-//services.AddEndpointsApiExplorer();
-services.AddSwaggerGen();
+    // NLog: Setup NLog for Dependency injection
+    builder.Logging.ClearProviders();
+    builder.Host.UseNLog();
 
-// Register application setting
-services.Configure<Neo4jSettings>(configuration.GetSection("Neo4jSettings"));
-services.Configure<ApplicationSettings>(configuration.GetSection("ApplicationSettings"));
+    // Add services to the container.
+    var services = builder.Services;
+    var configuration = builder.Configuration;
 
-services.AddDbInfrastructure(configuration);
-services.AddHealthChecks().AddCheck<GraphHealthCheck>("GraphHealthCheck");
+    services.AddAutoMapper(typeof(MapperProfile));
+    services.AddSingleton<JwtService>();
 
-services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
-})
-    .AddJwtBearer(options =>
+    builder.Services.AddCors(options =>
     {
-        options.RequireHttpsMetadata = false;
-        options.SaveToken = true;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection("ApplicationSettings:JwtSecretKey").Value)),
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-        };
+        options.AddDefaultPolicy(
+            policy =>
+            {
+                policy
+                    .WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value)
+                    //.WithOrigins("https://fe1e-176-124-28-223.ngrok-free.app")
+                    //.WithHeaders(HeaderNames.ContentType, HeaderNames.Cookie)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
     });
 
+    services.AddControllers().AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.MaxDepth = 3;
+                options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+            }
+        );
+    //services.AddEndpointsApiExplorer();
+    services.AddSwaggerGen();
 
-var app = builder.Build();
+    // Register application setting
+    services.Configure<Neo4jSettings>(configuration.GetSection("Neo4jSettings"));
+    services.Configure<ApplicationSettings>(configuration.GetSection("ApplicationSettings"));
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    services.AddDbInfrastructure(configuration);
+    services.AddHealthChecks().AddCheck<GraphHealthCheck>("GraphHealthCheck");
+
+    services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+    })
+        .AddJwtBearer(options =>
+        {
+            options.RequireHttpsMetadata = false;
+            options.SaveToken = true;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection("ApplicationSettings:JwtSecretKey").Value)),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = true,
+            };
+        });
+
+
+    var app = builder.Build();
+
+    // Configure the HTTP request pipeline.
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseExceptionHandler("/Error");
+        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+        app.UseHsts();
+    }
+
+    var appSetting = new ApplicationSettings();
+    configuration.GetSection("ApplicationSettings").Bind(appSetting);
+
+    if (appSetting.GenerateData)
+        await app.Services.GetService<GeneratorService>().GenerateAll();
+
+    //Отчасти костыль
+    var graphClient = app.Services.GetService<IGraphClient>();
+    graphClient.OperationCompleted += (sender, e) => app.Logger.LogInformation(e.QueryText.Replace("\r\n", " "));
+
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+        options.RoutePrefix = string.Empty;
+    });
+
+    app.UseCors();
+
+    app.UseHttpsRedirection();
+    app.UseStaticFiles();
+
+    app.UseHealthChecks("/healthcheck");
+
+    app.UseAuthentication();
+    app.UseRouting();
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Run();
 }
-
-var appSetting = new ApplicationSettings();
-configuration.GetSection("ApplicationSettings").Bind(appSetting);
-
-if (appSetting.GenerateData)
-    await app.Services.GetService<GeneratorService>().GenerateAll();
-
-//Отчасти костыль
-var graphClient = app.Services.GetService<IGraphClient>();
-graphClient.OperationCompleted += (sender, e) => app.Logger.LogInformation(e.QueryText.Replace("\r\n", " "));
-
-app.UseSwagger();
-app.UseSwaggerUI(options =>
+catch (Exception exception)
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-    options.RoutePrefix = string.Empty;
-});
-
-app.UseCors();
-
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-
-app.UseHealthChecks("/healthcheck");
-
-app.UseAuthentication();
-app.UseRouting();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+    // NLog: catch setup errors
+    logger.Fatal(exception, "Stopped program because of exception");
+    throw;
+}
+finally
+{
+    // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
+    LogManager.Shutdown();
+}

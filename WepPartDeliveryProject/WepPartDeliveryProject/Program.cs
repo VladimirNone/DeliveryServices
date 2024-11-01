@@ -5,26 +5,27 @@ using DbManager.Neo4j.DataGenerator;
 using DbManager.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Neo4jClient;
-using Neo4jClient.Execution;
-using Newtonsoft.Json;
+using NLog;
+using NLog.Web;
 using System.Text;
 using WepPartDeliveryProject;
 using WepPartDeliveryProject.BackgroundServices;
 
-var builder = WebApplication.CreateBuilder(args);
+var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-var services = builder.Services;
-var configuration = builder.Configuration;
+    // NLog: Setup NLog for Dependency injection
+    builder.Logging.ClearProviders();
+    builder.Host.UseNLog();
+
+    // Add services to the container.
+    var services = builder.Services;
+    var configuration = builder.Configuration;
 
 services.AddAutoMapper(typeof(MapperProfile));
 services.AddSingleton<JwtService>();
@@ -44,14 +45,14 @@ builder.Services.AddCors(options =>
         });
 });
 
-services.AddControllers().AddNewtonsoftJson(options =>
-        {
-            options.SerializerSettings.MaxDepth = 3;
-            options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
-        }
-    ); 
-//services.AddEndpointsApiExplorer();
-services.AddSwaggerGen();
+    services.AddControllers().AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.MaxDepth = 3;
+                options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+            }
+        );
+    //services.AddEndpointsApiExplorer();
+    services.AddSwaggerGen();
 
 // Register application setting
 services.AddOptions<Neo4jSettings>().Bind(configuration.GetSection("Neo4jSettings"));
@@ -63,38 +64,38 @@ services.AddHealthChecks()
     .AddCheck<GraphHealthCheck>(nameof(GraphHealthCheck), tags: ["live"])
     .AddCheck<DeliveryHealthCheck>(nameof(DeliveryHealthCheck), tags: ["ready"]);
 
-services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
-})
-    .AddJwtBearer(options =>
+    services.AddAuthentication(options =>
     {
-        options.RequireHttpsMetadata = false;
-        options.SaveToken = true;
-        options.TokenValidationParameters = new TokenValidationParameters
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+    })
+        .AddJwtBearer(options =>
         {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection("ApplicationSettings:JwtSecretKey").Value)),
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-        };
-    });
+            options.RequireHttpsMetadata = false;
+            options.SaveToken = true;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection("ApplicationSettings:JwtSecretKey").Value)),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = true,
+            };
+        });
 
 services.AddHostedService<StartupBackgroundService>();
 services.AddHostedService<KafkaConsumerBackgroundService>();
 
-var app = builder.Build();
+    var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
+    // Configure the HTTP request pipeline.
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseExceptionHandler("/Error");
+        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+        app.UseHsts();
+    }
 
 app.UseSwagger();
 app.UseSwaggerUI(options =>
@@ -103,17 +104,29 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 });
 
-app.UseCors();
+    app.UseCors();
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
+    app.UseHttpsRedirection();
+    app.UseStaticFiles();
 
-app.UseHealthChecks("/health");
+    app.UseHealthChecks("/healthcheck");
 
-app.UseAuthentication();
-app.UseRouting();
-app.UseAuthorization();
+    app.UseAuthentication();
+    app.UseRouting();
+    app.UseAuthorization();
 
-app.MapControllers();
+    app.MapControllers();
 
-app.Run();
+    app.Run();
+}
+catch (Exception exception)
+{
+    // NLog: catch setup errors
+    logger.Fatal(exception, "Stopped program because of exception");
+    throw;
+}
+finally
+{
+    // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
+    LogManager.Shutdown();
+}

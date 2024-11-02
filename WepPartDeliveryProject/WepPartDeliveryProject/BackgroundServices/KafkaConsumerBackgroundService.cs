@@ -1,26 +1,31 @@
 ﻿using Confluent.Kafka;
-using Microsoft.Extensions.Logging;
+using DbManager.AppSettings;
+using DbManager.Services;
+using Microsoft.Extensions.Options;
 
 namespace WepPartDeliveryProject.BackgroundServices
 {
     public class KafkaConsumerBackgroundService : BackgroundService
     {
-        private IConsumer<Ignore, string> _consumerBuilder;
-        private readonly string _topic;
+        private IConsumer<string, string> _consumerBuilder;
+        private readonly string _containerEventsTopic;
         private readonly ILogger<KafkaConsumerBackgroundService> _logger;
+        private readonly ObjectCasheKafkaChanger _objectCasheKafkaChanger;
 
-        public KafkaConsumerBackgroundService(IConfiguration configuration, ILogger<KafkaConsumerBackgroundService> logger)
+        public KafkaConsumerBackgroundService(ObjectCasheKafkaChanger objectCasheKafkaChanger, ILogger<KafkaConsumerBackgroundService> logger, IOptions<KafkaSettings> kafkaOptions)
         {
+            var kafkaSettings = kafkaOptions.Value;
             var consumerConfig = new ConsumerConfig
             {
-                BootstrapServers = configuration["BootstrapServers"],
-                GroupId = "1",
+                BootstrapServers = kafkaSettings.BootstrapServers,
+                GroupId = kafkaSettings.GroupId,
                 AutoOffsetReset = AutoOffsetReset.Latest,
                 Acks = Acks.All,
             };
-            this._consumerBuilder = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
-            this._topic = configuration["ContainerEventsTopic"] ?? "ContainerEvents";
+            this._consumerBuilder = new ConsumerBuilder<string, string>(consumerConfig).Build();
+            this._containerEventsTopic = kafkaSettings.ContainerEventsTopic ?? "ContainerEvents";
             this._logger = logger;
+            this._objectCasheKafkaChanger = objectCasheKafkaChanger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -32,15 +37,20 @@ namespace WepPartDeliveryProject.BackgroundServices
         {
             try
             {
-                this._logger.LogInformation($"KafkaConsumerBackgroundService subscribe to {this._topic}");
-                this._consumerBuilder.Subscribe(this._topic);
+                this._logger.LogInformation($"KafkaConsumerBackgroundService subscribe to {this._containerEventsTopic}");
+                this._consumerBuilder.Subscribe(this._containerEventsTopic);
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     try
                     {
-                        var consumer = _consumerBuilder.Consume(cancellationToken);
-                        Console.WriteLine($"Processing Employee Name: {consumer.Message.Value}");
-
+                        var consume = _consumerBuilder.Consume(cancellationToken);
+                        if(consume != null)
+                        {
+                            if(consume.Topic == this._containerEventsTopic)
+                            {
+                                this._objectCasheKafkaChanger.AddToQueue(consume);
+                            }
+                        }
                     }
                     catch (OperationCanceledException ex)
                     {

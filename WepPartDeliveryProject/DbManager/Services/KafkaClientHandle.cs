@@ -1,5 +1,7 @@
 ﻿using Confluent.Kafka;
+using DbManager.AppSettings;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,9 +27,10 @@ namespace DbManager.Services
     {
         IProducer<byte[], byte[]> kafkaProducer;
 
-        public KafkaClientHandle(IConfiguration config)
+        public KafkaClientHandle(IOptions<KafkaSettings> kafkaOptions)
         {
-            var conf = new ProducerConfig { BootstrapServers = config["BootstrapServers"], };
+            var kafkaSettings = kafkaOptions.Value;
+            var conf = new ProducerConfig { BootstrapServers = kafkaSettings.BootstrapServers, };
             this.kafkaProducer = new ProducerBuilder<byte[], byte[]>(conf).Build();
         }
 

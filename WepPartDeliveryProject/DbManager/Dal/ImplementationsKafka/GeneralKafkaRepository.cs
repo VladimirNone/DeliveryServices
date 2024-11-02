@@ -1,8 +1,12 @@
-﻿using DbManager.Data;
+﻿using DbManager.AppSettings;
+using DbManager.Data;
+using DbManager.Data.Kafka;
 using DbManager.Neo4j.Implementations;
 using DbManager.Services;
 using Microsoft.Extensions.Configuration;
-using Neo4jClient;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace DbManager.Dal.ImplementationsKafka
 {
@@ -10,18 +14,27 @@ namespace DbManager.Dal.ImplementationsKafka
         where TNode : INode
     {
         private readonly KafkaDependentProducer<string, string> _kafkaProducer;
+        private readonly KafkaSettings _kafkaSettings;
         private readonly string _topic;
+        private int kkk;
 
-        public GeneralKafkaRepository(BoltGraphClientFactory boltGraphClientFactory, KafkaDependentProducer<string, string> kafkaProducer, IConfiguration configuration) : base(boltGraphClientFactory)
+        public GeneralKafkaRepository(BoltGraphClientFactory boltGraphClientFactory, KafkaDependentProducer<string, string> kafkaProducer, IOptions<KafkaSettings> kafkaOptions) : base(boltGraphClientFactory)
         {
-            this._topic = configuration["ContainerEventsTopic"] ?? "ContainerEvents";
+            this._kafkaSettings = kafkaOptions.Value;
+            this._topic = this._kafkaSettings.ContainerEventsTopic ?? "ContainerEvents";
             this._kafkaProducer = kafkaProducer;
         }
 
         public override async Task AddNodeAsync(TNode node)
         {
             await base.AddNodeAsync(node);
-            await this._kafkaProducer.ProduceAsync(this._topic, new Confluent.Kafka.Message<string, string>() { Key = node.Id.ToString(),  Value = node?.GetType()?.Name ?? "node is  null" });
+            var message = new Confluent.Kafka.Message<string, string>() { Key = node.Id.ToString(), Value = JsonConvert.SerializeObject(node) };
+            message.Headers = new Confluent.Kafka.Headers
+            {
+                { KafkaConsts.OwnerGroupId, Encoding.UTF8.GetBytes(this._kafkaSettings.GroupId) },
+                { KafkaConsts.ObjectType, Encoding.UTF8.GetBytes(node.GetType().ToString()) }
+            };
+            await this._kafkaProducer.ProduceAsync(this._topic, message);
         }
 
         public override async Task DeleteNodeWithAllRelations(TNode node)

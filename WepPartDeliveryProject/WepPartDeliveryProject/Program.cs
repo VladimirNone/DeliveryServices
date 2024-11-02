@@ -52,6 +52,7 @@ try
     // Register application setting
     services.AddOptions<Neo4jSettings>().Bind(configuration.GetSection("Neo4jSettings"));
     services.AddOptions<ApplicationSettings>().Bind(configuration.GetSection("ApplicationSettings"));
+    services.AddOptions<KafkaSettings>().Bind(configuration.GetSection("KafkaSettings"));
 
     services.AddDbInfrastructure(configuration);
     services.AddSingleton<DeliveryHealthCheck>();

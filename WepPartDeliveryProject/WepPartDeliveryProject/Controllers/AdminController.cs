@@ -51,7 +51,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getDishes")]
         public async Task<IActionResult> GetDishes(string searchText = "", int page = 0)
         {
-            var dishes = await ((IDishRepository)_repositoryFactory.GetRepository<Dish>(true))
+            var dishes = await ((IDishRepository)_repositoryFactory.GetRepository<Dish>())
                 .SearchDishesByNameAndDescription(searchText, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
 
             var pageEnded = dishes.Count() < _appSettings.CountOfItemsOnWebPage + 1;
@@ -71,7 +71,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getUsers")]
         public async Task<IActionResult> GetUsers(string searchText = "", int page = 0)
         {
-            var usersAsTuples = await ((IUserRepository)_repositoryFactory.GetRepository<User>(true)).SearchUsersByIdAndLoginForAdmin(searchText, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1);
+            var usersAsTuples = await ((IUserRepository)_repositoryFactory.GetRepository<User>()).SearchUsersByIdAndLoginForAdmin(searchText, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1);
 
             var rightUsers = usersAsTuples.Select(h => _mapper.Map(h.Item2, _mapper.Map<UserForAdminOutDTO>(h.Item1))).ToList();
             
@@ -83,13 +83,13 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getRoles")]   
         public IActionResult GetRoles()
         {
-            return Ok(((IUserRepository)_repositoryFactory.GetRepository<User>(true)).UserRolePriority.Keys.ToList().Except(new List<String>() { "User"}));
+            return Ok(((IUserRepository)_repositoryFactory.GetRepository<User>()).UserRolePriority.Keys.ToList().Except(new List<String>() { "User"}));
         }
 
         [HttpPost("addUserRole")]
         public async Task<IActionResult> AddUserRole(List<ManipulateUserDataInDTO> inputData)
         {
-            var userRepo = (IUserRepository)_repositoryFactory.GetRepository<User>(true);
+            var userRepo = (IUserRepository)_repositoryFactory.GetRepository<User>();
             var usersDicrionary = (await userRepo.GetNodesByPropertyAsync("Id", inputData.Select(h => h.UserId).ToArray())).ToDictionary(h => h.Id.ToString());
 
             foreach (var manipulateUsersData in inputData)
@@ -108,7 +108,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpPost("removeUserRole")]
         public async Task<IActionResult> RemoveUserRole(List<ManipulateUserDataInDTO> inputData)
         {
-            var userRepo = (IUserRepository)_repositoryFactory.GetRepository<User>(true);
+            var userRepo = (IUserRepository)_repositoryFactory.GetRepository<User>();
             var usersDicrionary = (await userRepo.GetNodesByPropertyAsync("Id", inputData.Select(h => h.UserId).ToArray())).ToDictionary(h=>h.Id.ToString());
 
             foreach (var manipulateUsersData in inputData)
@@ -127,7 +127,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpPost("blockUsers")]
         public async Task<IActionResult> BlockUsers(List<ManipulateUserDataInDTO> inputData)
         {
-            var userRepo = (IUserRepository)_repositoryFactory.GetRepository<User>(true);
+            var userRepo = (IUserRepository)_repositoryFactory.GetRepository<User>();
             var users = await userRepo.GetNodesByPropertyAsync("Id", inputData.Select(h=>h.UserId).ToArray());
             foreach (var user in users)
             {
@@ -141,7 +141,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpPost("unblockUsers")]
         public async Task<IActionResult> UnblockUsers(List<ManipulateUserDataInDTO> inputData)
         {
-            var userRepo = (IUserRepository)_repositoryFactory.GetRepository<User>(true);
+            var userRepo = (IUserRepository)_repositoryFactory.GetRepository<User>();
             var users = await userRepo.GetNodesByPropertyAsync("Id", inputData.Select(h => h.UserId).ToArray());
             foreach (var user in users)
             {

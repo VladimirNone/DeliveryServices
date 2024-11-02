@@ -64,7 +64,7 @@ namespace WepPartDeliveryProject.Controllers
                 DeliveryAddress = inputData.DeliveryAddress, 
                 PhoneNumber = inputData.PhoneNumber };
 
-            var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>(true);
+            var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>();
 
             await orderRepo.AddNodeAsync(order);
 
@@ -114,7 +114,7 @@ namespace WepPartDeliveryProject.Controllers
                 return BadRequest("You don't have refresh token. You need to login or signup to system");
             }
 
-            var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>(true);
+            var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>();
 
             var orders = await orderRepo.GetOrdersByStateRelatedWithNode<Client>(userId, (OrderStateEnum)numberOfState, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1);
 
@@ -209,7 +209,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpPost("moveToNextStage")]
         public async Task<IActionResult> MoveToNextStage(ManipulateOrderDataInDTO inputData)
         {
-            var orderRepo = (IOrderRepository) _repositoryFactory.GetRepository<Order>(true);
+            var orderRepo = (IOrderRepository) _repositoryFactory.GetRepository<Order>();
             var newHasOrderState = await orderRepo.MoveOrderToNextStage(inputData.OrderId, "Изменено администрацией");
 
             if(newHasOrderState != null){
@@ -222,7 +222,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpPost("moveToPreviousStage")]
         public async Task<IActionResult> MoveToPreviousStage(ManipulateOrderDataInDTO inputData)
         {
-            var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>(true);
+            var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>();
             if (await orderRepo.MoveOrderToPreviousStage(inputData.OrderId))
                 return Ok();
             return BadRequest("Заказ находится на начальной стадии и его состояние не может перейти на предыдущую стадию");

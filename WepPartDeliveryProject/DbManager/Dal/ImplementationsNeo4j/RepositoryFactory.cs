@@ -2,6 +2,7 @@
 using DbManager.Data;
 using DbManager.Neo4j.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace DbManager.Neo4j.Implementations
 {
@@ -17,25 +18,26 @@ namespace DbManager.Neo4j.Implementations
             this._services = serviceProvider;
         }
 
-        public IGeneralRepository<TEntity> GetRepository<TEntity>(bool hasCustomRepository = false) where TEntity : INode
+        public IGeneralRepository<TEntity> GetRepository<TEntity>() where TEntity : INode
         {
-            if (hasCustomRepository)
-            {
-                var repo = _services.GetService<IGeneralRepository<TEntity>>();
-                if(repo != null)
-                {
-                    return repo;
-                }
-            }
-
             var typeEntity = typeof(TEntity);
-            if (!repositories.ContainsKey(typeEntity)) 
-            { 
-                var generalRepo = new GeneralNeo4jRepository<TEntity>(this._boltGraphClientFactory);
-                repositories.Add(typeEntity, generalRepo);
+
+            if(repositories.TryGetValue(typeEntity, out var resRepo))
+            {
+                return (IGeneralRepository<TEntity>)resRepo;
             }
 
-            return (IGeneralRepository<TEntity>)repositories[typeEntity];
+            var repo = _services.GetService<IGeneralRepository<TEntity>>();
+            if (repo != null)
+            {
+                repositories.Add(typeEntity, repo);
+                return repo;
+            }
+
+            repo = new GeneralNeo4jRepository<TEntity>(this._boltGraphClientFactory);
+            repositories.Add(typeEntity, repo);
+
+            return repo;
         }
     }
 }

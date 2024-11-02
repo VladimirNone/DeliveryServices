@@ -37,7 +37,7 @@ namespace WepPartDeliveryProject.Controllers
                 return BadRequest("You don't have refresh token. You need to login or signup to system");
             }
 
-            var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>(true);
+            var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>();
 
             var workedIns = await _repositoryFactory.GetRepository<KitchenWorker>().GetRelationsOfNodesAsync<WorkedIn, Kitchen>(userId);
             var kitchen = (Kitchen)workedIns.FirstOrDefault().NodeTo;
@@ -52,7 +52,7 @@ namespace WepPartDeliveryProject.Controllers
         }
 
         [HttpGet("getWorkers")]
-        public async Task<IActionResult> GeWorkers()
+        public async Task<IActionResult> GetWorkers()
         {
             var userId = Request.Cookies["X-UserId"];
             if (userId == null)

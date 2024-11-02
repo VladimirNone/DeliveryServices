@@ -52,7 +52,7 @@ namespace WepPartDeliveryProject.Controllers
         {
             var resQueryData = new List<StatisticQueryDataItemOutDTO>();
 
-            var resData = await ((IOrderRepository)_repositoryFactory.GetRepository<Order>(true)).GetOrderPriceAndCountStatistic();
+            var resData = await ((IOrderRepository)_repositoryFactory.GetRepository<Order>()).GetOrderPriceAndCountStatistic();
 
             foreach (var item in resData)
             {
@@ -67,7 +67,7 @@ namespace WepPartDeliveryProject.Controllers
         {
             var resQueryData = new List<StatisticQueryDataItemOutDTO>();
 
-            var clientRepo = (IClientRepository)_repositoryFactory.GetRepository<Client>(true);
+            var clientRepo = (IClientRepository)_repositoryFactory.GetRepository<Client>();
 
             var topClients = await clientRepo.GetTopClientBySumPriceOrderStatistic(10);
             topClients.Reverse();
@@ -85,7 +85,7 @@ namespace WepPartDeliveryProject.Controllers
         {
             var resQueryData = new List<StatisticQueryDataItemOutDTO>();
 
-            var delManRepo = (IDeliveryManRepository)_repositoryFactory.GetRepository<DeliveryMan>(true);
+            var delManRepo = (IDeliveryManRepository)_repositoryFactory.GetRepository<DeliveryMan>();
 
             var topDelMen = await delManRepo.GetTopDeliveryMenByCountOrder(10);
             topDelMen.Reverse();
@@ -104,7 +104,7 @@ namespace WepPartDeliveryProject.Controllers
             //месяц только для диапазона, выводиться будет как название dataset
             var resQueryData = new List<StatisticQueryDataItemOutDTO>();
 
-            var resData = await ((IOrderRepository)_repositoryFactory.GetRepository<Order>(true)).GetCancelledOrderGroupedByMonthStatistic();
+            var resData = await ((IOrderRepository)_repositoryFactory.GetRepository<Order>()).GetCancelledOrderGroupedByMonthStatistic();
 
             var nameDatasets = new List<string>();
 
@@ -145,7 +145,7 @@ namespace WepPartDeliveryProject.Controllers
         {
             var resQueryData = new List<StatisticQueryDataItemOutDTO>();
 
-            var resData = await ((IOrderRepository)_repositoryFactory.GetRepository<Order>(true)).GetCountFinishedOrderAndClientsStatistic();
+            var resData = await ((IOrderRepository)_repositoryFactory.GetRepository<Order>()).GetCountFinishedOrderAndClientsStatistic();
 
             foreach (var item in resData)
             {
@@ -160,7 +160,7 @@ namespace WepPartDeliveryProject.Controllers
         {
             var resQueryData = new List<StatisticQueryDataItemOutDTO>();
 
-            var resData = await ((IOrderRepository)_repositoryFactory.GetRepository<Order>(true)).GetNodesAsync(limitCount:100);
+            var resData = await ((IOrderRepository)_repositoryFactory.GetRepository<Order>()).GetNodesAsync(limitCount:100);
 
             for (int i = 0, j = 1; i < OrderState.OrderStatesFromDb.Count; i++, j *= 2)
             {
@@ -199,7 +199,7 @@ namespace WepPartDeliveryProject.Controllers
         {
             var resQueryData = new List<StatisticQueryDataItemOutDTO>();
 
-            var resData = await ((IOrderRepository)_repositoryFactory.GetRepository<Order>(true)).GetCountOrdersAndOrderedDishesForEveryKitchenStatistic();
+            var resData = await ((IOrderRepository)_repositoryFactory.GetRepository<Order>()).GetCountOrdersAndOrderedDishesForEveryKitchenStatistic();
 
             foreach (var item in resData)
             {
@@ -214,7 +214,7 @@ namespace WepPartDeliveryProject.Controllers
         {
             var resQueryData = new List<StatisticQueryDataItemOutDTO>();
 
-            var dishRepo = (IDishRepository)_repositoryFactory.GetRepository<Dish>(true);
+            var dishRepo = (IDishRepository)_repositoryFactory.GetRepository<Dish>();
 
             var topDish = await dishRepo.GetTopDishByCountOrderedStatistic(10);
             topDish.Reverse();

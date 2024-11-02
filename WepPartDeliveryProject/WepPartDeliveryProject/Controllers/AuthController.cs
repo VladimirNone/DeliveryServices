@@ -71,7 +71,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpPost("refreshAccessToken")]
         public async Task<IActionResult> RefreshAccessToken()
         {
-            var userRepo = (IUserRepository)_repositoryFactory.GetRepository<User>(true);
+            var userRepo = (IUserRepository)_repositoryFactory.GetRepository<User>();
 
             var userId = Request.Cookies["X-UserId"];
             if (userId == null)

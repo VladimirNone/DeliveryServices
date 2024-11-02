@@ -37,7 +37,7 @@ namespace WepPartDeliveryProject.Controllers
                 return BadRequest("You don't have refresh token. You need to login or signup to system");
             }
 
-            var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>(true);
+            var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>();
 
             var delMan = await _repositoryFactory.GetRepository<DeliveryMan>().GetNodeAsync(userId);
 

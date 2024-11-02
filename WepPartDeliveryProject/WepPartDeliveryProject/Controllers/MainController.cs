@@ -115,7 +115,7 @@ namespace WepPartDeliveryProject.Controllers
         public async Task<IActionResult> GetCart(string searchText, int page = 0)
         {
             //обычному пользователю не должен быть доступен удаленный или недоступный продукт
-            var dishes = await ((IDishRepository)_repositoryFactory.GetRepository<Dish>(true))
+            var dishes = await ((IDishRepository)_repositoryFactory.GetRepository<Dish>())
                 .SearchDishesByNameAndDescription(searchText, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
 
             var pageEnded = dishes.Count() < _appSettings.CountOfItemsOnWebPage + 1;

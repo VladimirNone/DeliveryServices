@@ -12,8 +12,7 @@ namespace DbManager.Neo4j.Interfaces
         /// Get repository for work with database nodes
         /// </summary>
         /// <typeparam name="TEntity">Type node from database</typeparam>
-        /// <param name="hasCustomRepository">Return custom repository if it register as service</param>
         /// <returns>IGeneralRepository for work with database</returns>
-        IGeneralRepository<TEntity> GetRepository<TEntity>(bool hasCustomRepository = false) where TEntity : INode;
+        IGeneralRepository<TEntity> GetRepository<TEntity>() where TEntity : INode;
     }
 }

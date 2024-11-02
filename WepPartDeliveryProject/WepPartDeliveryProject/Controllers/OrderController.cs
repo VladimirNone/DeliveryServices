@@ -68,14 +68,14 @@ namespace WepPartDeliveryProject.Controllers
 
             await orderRepo.AddNodeAsync(order);
 
-/*            var kitchens = await _repositoryFactory.GetRepository<Kitchen>().GetNodesAsync();
-            var randomKitchen = kitchens[new Random().Next(0, kitchens.Count)];*/
-            var randomKitchen = await _repositoryFactory.GetRepository<Kitchen>().GetNodeAsync("82e5e232-1987-4dcd-bd3a-8841e3f7707b");
+            var kitchens = await _repositoryFactory.GetRepository<Kitchen>().GetNodesAsync();
+            var randomKitchen = kitchens[new Random().Next(0, kitchens.Count)];
+            //var randomKitchen = await _repositoryFactory.GetRepository<Kitchen>().GetNodeAsync("82e5e232-1987-4dcd-bd3a-8841e3f7707b");
 
 
-/*            var deliveryMen = await _repositoryFactory.GetRepository<DeliveryMan>().GetNodesAsync();
-            var randomdelMan = deliveryMen[new Random().Next(0, deliveryMen.Count)];*/
-            var randomdelMan = await _repositoryFactory.GetRepository<DeliveryMan>().GetNodeAsync("7ac11adb-3631-4e01-af74-eeeb7287a034");
+            var deliveryMen = await _repositoryFactory.GetRepository<DeliveryMan>().GetNodesAsync();
+            var randomdelMan = deliveryMen[new Random().Next(0, deliveryMen.Count)];
+            //var randomdelMan = await _repositoryFactory.GetRepository<DeliveryMan>().GetNodeAsync("7ac11adb-3631-4e01-af74-eeeb7287a034");
 
             await orderRepo.CreateOrderRelationInDB(order, userId, dishes, randomKitchen, randomdelMan, res, inputData.Comment);
 

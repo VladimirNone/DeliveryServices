@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Neo4jClient;
+using System.Text.RegularExpressions;
 
 namespace DbManager
 {
@@ -20,7 +21,7 @@ namespace DbManager
         {
             var graphClient = new BoltGraphClient(this._neo4jSettings.Neo4jConnection, this._neo4jSettings.Neo4jUser, this._neo4jSettings.Neo4jPassword);
             graphClient.ConnectAsync().Wait();
-            graphClient.OperationCompleted += (sender, e) => this._logger.LogTrace(e.QueryText.Replace("\r\n", " "));
+            graphClient.OperationCompleted += (sender, e) => this._logger.LogTrace(Regex.Replace(e.QueryText.Replace("\\r\\n", " "), @"PasswordHash:\s*\[.*?\]", "PasswordHash: [*]", RegexOptions.Singleline));
             return graphClient;
         }
 
@@ -28,7 +29,7 @@ namespace DbManager
         {
             var graphClient = new BoltGraphClient(this._neo4jSettings.Neo4jConnection, this._neo4jSettings.Neo4jUser, this._neo4jSettings.Neo4jPassword);
             await graphClient.ConnectAsync();
-            graphClient.OperationCompleted += (sender, e) => this._logger.LogTrace(e.QueryText.Replace("\r\n", " "));
+            graphClient.OperationCompleted += (sender, e) => this._logger.LogTrace(Regex.Replace(e.QueryText.Replace("\\r\\n", " "), @"PasswordHash:\s*\[.*?\]", "PasswordHash: [*]", RegexOptions.Singleline));
             return graphClient;
         }
     }

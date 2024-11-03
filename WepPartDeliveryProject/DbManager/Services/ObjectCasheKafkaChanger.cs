@@ -59,7 +59,7 @@ namespace DbManager.Services
                                 //Получаем тип объекта
                                 var objectType = Type.GetType(Encoding.UTF8.GetString(consumeResult.Message.Headers.GetLastBytes(KafkaConsts.ObjectType)));
 
-                                this._repositoryFactory.GetRepository()
+                                //this._repositoryFactory.GetRepository()
                             }
                         }
                     }

@@ -25,7 +25,7 @@ namespace DbManager.Dal.ImplementationsKafka
             this._kafkaProducer = kafkaProducer;
         }
 
-        public override async Task AddNodeAsync(TNode node)
+        public override async Task AddNodeAsync(INode node)
         {
             await base.AddNodeAsync(node);
             var message = new Confluent.Kafka.Message<string, string>() { Key = node.Id.ToString(), Value = JsonConvert.SerializeObject(node) };
@@ -37,7 +37,7 @@ namespace DbManager.Dal.ImplementationsKafka
             await this._kafkaProducer.ProduceAsync(this._topic, message);
         }
 
-        public override async Task DeleteNodeWithAllRelations(TNode node)
+        public override async Task DeleteNodeWithAllRelations(INode node)
         {
             await base.DeleteNodeWithAllRelations(node);
         }
@@ -72,7 +72,7 @@ namespace DbManager.Dal.ImplementationsKafka
             await base.SetNewNodeType(nodeId, nodeTypeName);
         }
 
-        public override async Task UpdateNodeAsync(TNode node)
+        public override async Task UpdateNodeAsync(INode node)
         {
             await base.UpdateNodeAsync(node);
         }

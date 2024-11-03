@@ -5,7 +5,7 @@ using Neo4jClient.Cypher;
 
 namespace DbManager.Neo4j.Implementations
 {
-    public class GeneralNeo4jRepository<TNode> : IGeneralRepository<TNode> 
+    public class GeneralNeo4jRepository<TNode> : IGeneralRepository<TNode>
         where TNode : INode
     {
         protected readonly IGraphClient _dbContext;
@@ -15,19 +15,19 @@ namespace DbManager.Neo4j.Implementations
             this._dbContext = boltGraphClientFactory.GetGraphClient();
         }
 
-        public async Task AddNodeAsync(TNode newNode)
+        public async Task AddNodeAsync(INode newNode)
         {
-            if(newNode.Id == Guid.Empty)
+            if (newNode.Id == Guid.Empty)
                 newNode.Id = Guid.NewGuid();
             await _dbContext.Cypher
-                .Merge($"(newNode:{typeof(TNode).Name} {{Id: $id}})")
+                .Merge($"(newNode:{newNode.GetType().Name} {{Id: $id}})")
                 .OnCreate()
                 .Set("newNode = $newEntity")
                 .WithParams(new
                 {
                     id = newNode.Id,
                     newEntity = newNode
-                })  
+                })
                 .ExecuteWithoutResultsAsync();
         }
 
@@ -39,10 +39,10 @@ namespace DbManager.Neo4j.Implementations
             }
         }
 
-        public async Task UpdateNodeAsync(TNode node)
+        public async Task UpdateNodeAsync(INode node)
         {
             await _dbContext.Cypher
-                .Match($"(updateNode:{typeof(TNode).Name} {{Id: $id}})")
+                .Match($"(updateNode:{node.GetType().Name} {{Id: $id}})")
                 .Set("updateNode = $updatedEntity")
                 .WithParams(new
                 {
@@ -75,18 +75,22 @@ namespace DbManager.Neo4j.Implementations
             => await GetNodeAsync(Guid.Parse(id));
 
         public async Task<TNode> GetNodeAsync(Guid id)
+            => (TNode)await GetNodeAsync(id.ToString(), typeof(TNode));
+
+        public async Task<INode> GetNodeAsync(string id, Type typeOfNode)
         {
             var res = await _dbContext.Cypher
-                .Match($"(entity:{typeof(TNode).Name} {{Id: $id}})")
+                .Match($"(entity:{typeOfNode.Name} {{Id: $id}})")
                 .WithParams(new
                 {
                     id,
                 })
+                //нужен конректный тип к которому необходимо это приводить, чтобы это можно было десериализовать
                 .Return(entity => entity.As<TNode>())
                 .ResultsAsync;
 
             if (res.Count() != 1)
-                throw new Exception($"Count of nodes with such Id don't equels 1. Type: {typeof(TNode).Name}");
+                throw new Exception($"Count of nodes with such Id don't equels 1. Type: {typeOfNode.Name}");
 
             return res.First();
         }
@@ -106,10 +110,10 @@ namespace DbManager.Neo4j.Implementations
             return res.ToList();
         }
 
-        public async Task DeleteNodeWithAllRelations(TNode node)
+        public async Task DeleteNodeWithAllRelations(INode node)
         {
             await _dbContext.Cypher
-                .Match($"(entity:{typeof(TNode).Name} {{Id: $id}})-[r]-()")
+                .Match($"(entity:{node.GetType().Name} {{Id: $id}})-[r]-()")
                 .WithParams(new
                 {
                     id = node.Id,
@@ -375,6 +379,11 @@ namespace DbManager.Neo4j.Implementations
                 return direction;
 
             return relationInEntity.Value ? "<" + direction: direction + ">";
+        }
+
+        public void Dispose()
+        {
+            this._dbContext.Dispose();
         }
     }
 }

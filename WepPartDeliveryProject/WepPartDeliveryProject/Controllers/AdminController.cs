@@ -17,7 +17,7 @@ namespace WepPartDeliveryProject.Controllers
     [Authorize(Roles = "Admin")]
     [Route("[controller]")]
     [ApiController]
-    public class AdminController : Controller
+    public class AdminController : ControllerBase
     {
         private readonly IRepositoryFactory _repositoryFactory;
         private readonly ApplicationSettings _appSettings;
@@ -153,7 +153,7 @@ namespace WepPartDeliveryProject.Controllers
         }
 
         [HttpPost("changeDeleteStatusOfDish")]
-        public async Task<IActionResult> ChangeDeleteStatusOfDish(ManipulateDishDataInDTO inputData)
+        public async Task<IActionResult> ChangeDeleteStatusOfDish([FromBody] ManipulateDishDataInDTO inputData)
         {
             var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(inputData.Id.ToString());
             if (dish == null)
@@ -168,7 +168,7 @@ namespace WepPartDeliveryProject.Controllers
         }
 
         [HttpPost("changeVisibleStatusOfDish")]
-        public async Task<IActionResult> ChangeVisibleStatusOfDish(ManipulateDishDataInDTO inputData)
+        public async Task<IActionResult> ChangeVisibleStatusOfDish([FromBody] ManipulateDishDataInDTO inputData)
         {
             var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(inputData.Id.ToString());
             if (dish == null)

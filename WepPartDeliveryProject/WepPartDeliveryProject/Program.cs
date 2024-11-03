@@ -33,7 +33,7 @@ try
             {
                 policy
                     .WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value)
-                    //.WithOrigins("https://fe1e-176-124-28-223.ngrok-free.app")
+                    .WithOrigins("http://localhost:3000")
                     //.WithHeaders(HeaderNames.ContentType, HeaderNames.Cookie)
                     .AllowAnyHeader()
                     .AllowAnyMethod()

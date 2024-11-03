@@ -39,5 +39,15 @@ namespace DbManager.Neo4j.Implementations
 
             return repo;
         }
+
+        public IGeneralRepository GetRepository(Type typeOfNode) 
+        {
+            if (repositories.TryGetValue(typeOfNode, out var resRepo))
+            {
+                return (IGeneralRepository)resRepo;
+            }
+
+            throw new InvalidOperationException($"Repository with type {typeOfNode} don't exist or cached");
+        }
     }
 }

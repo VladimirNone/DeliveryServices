@@ -116,7 +116,7 @@ namespace WepPartDeliveryProject.Controllers
                 foreach (var order in resData[i].Item2)
                 {
                     var previousHasOrderState = order.Story[order.Story.Count - 2];
-                    previousHasOrderState.NodeTo = ObjectCache<OrderState>.Instanse.ToList().Find(el => el.Id == previousHasOrderState.NodeToId);
+                    previousHasOrderState.NodeTo = ObjectCache<OrderState>.Instance.ToList().Find(el => el.Id == previousHasOrderState.NodeToId);
                     var previousNameOfState = ((OrderState)previousHasOrderState.NodeTo).NameOfState;
                     var dataItem = resQueryData.Find(el => el.X == previousNameOfState);
 
@@ -163,13 +163,13 @@ namespace WepPartDeliveryProject.Controllers
 
             var resData = await ((IOrderRepository)_repositoryFactory.GetRepository<Order>()).GetNodesAsync(limitCount:100);
 
-            for (int i = 0, j = 1; i < ObjectCache<OrderState>.Instanse.Count(); i++, j *= 2)
+            for (int i = 0, j = 1; i < ObjectCache<OrderState>.Instance.Count(); i++, j *= 2)
             {
                 if (j == (int)OrderStateEnum.Cancelled || j == (int)OrderStateEnum.Finished)
                 {
                     break;
                 }
-                var curState = ObjectCache<OrderState>.Instanse.First(h => h.NumberOfStage == j);
+                var curState = ObjectCache<OrderState>.Instance.First(h => h.NumberOfStage == j);
 
                 var orderMinutesBetweenCurStateAndNext = new List<int>();
                 var needRemoveOrders = new List<Order>();

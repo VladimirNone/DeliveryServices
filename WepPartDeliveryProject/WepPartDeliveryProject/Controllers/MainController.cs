@@ -52,7 +52,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getOrderStates")]
         public async Task<IActionResult> GetOrderStates()
         {
-            var states = _mapper.Map<List<OrderStateItemOutDTO>>(ObjectCache<OrderState>.Instanse.ToList());
+            var states = _mapper.Map<List<OrderStateItemOutDTO>>(ObjectCache<OrderState>.Instance.ToList());
 
             return Ok(states);
         }
@@ -60,7 +60,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getCategoriesList")]
         public IActionResult GetCategoriesList()
         {
-            var categories = ObjectCache<Category>.Instanse.ToList();
+            var categories = ObjectCache<Category>.Instance.ToList();
             return Ok(categories);
         }
 
@@ -101,7 +101,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getDishesList/{category}")]
         public async Task<IActionResult> GetDishesList(string category)
         {
-            var choicedCategory = ObjectCache<Category>.Instanse.ToList().Single(h=>h.LinkName == category);
+            var choicedCategory = ObjectCache<Category>.Instance.ToList().Single(h=>h.LinkName == category);
             var categoryDishes = await _repositoryFactory.GetRepository<Category>().GetRelationsOfNodesAsync<ContainsDish, Dish>(choicedCategory, orderByProperty: "Name");
 
             var dishes = categoryDishes.Select(h => (Dish)h.NodeTo).ToList();

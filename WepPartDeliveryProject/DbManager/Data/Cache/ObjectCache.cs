@@ -11,9 +11,11 @@ namespace DbManager.Data.Cache
 
         private static object _accessRoot = new object ();
 
+        public static Dictionary<Type, object> Instances;
+
         private static ObjectCache<T> _instance;
 
-        public static ObjectCache<T> Instanse
+        public static ObjectCache<T> Instance
         {
             get
             {
@@ -34,7 +36,7 @@ namespace DbManager.Data.Cache
             if(this._cache.TryGetValue(key, out var value))
                 return value;
 
-            if(this.ResolveItem != null)
+            if (this.ResolveItem != null)
             {
                 var e = new ResolveItemEventArgs<T, Guid>(key);
                 this.ResolveItem.Invoke(this, e);

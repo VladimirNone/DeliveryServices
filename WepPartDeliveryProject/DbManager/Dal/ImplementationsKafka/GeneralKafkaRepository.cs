@@ -10,13 +10,12 @@ using System.Text;
 
 namespace DbManager.Dal.ImplementationsKafka
 {
-    internal class GeneralKafkaRepository<TNode> : GeneralNeo4jRepository<TNode>
+    public class GeneralKafkaRepository<TNode> : GeneralNeo4jRepository<TNode>
         where TNode : INode
     {
         private readonly KafkaDependentProducer<string, string> _kafkaProducer;
         private readonly KafkaSettings _kafkaSettings;
         private readonly string _topic;
-        private int kkk;
 
         public GeneralKafkaRepository(BoltGraphClientFactory boltGraphClientFactory, KafkaDependentProducer<string, string> kafkaProducer, IOptions<KafkaSettings> kafkaOptions) : base(boltGraphClientFactory)
         {

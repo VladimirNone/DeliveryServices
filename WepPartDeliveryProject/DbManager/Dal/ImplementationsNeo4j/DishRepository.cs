@@ -1,7 +1,11 @@
-﻿using DbManager.Data;
+﻿using DbManager.AppSettings;
+using DbManager.Dal.ImplementationsKafka;
+using DbManager.Data;
 using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Neo4j.Interfaces;
+using DbManager.Services;
+using Microsoft.Extensions.Options;
 using Neo4jClient;
 using System;
 using System.Collections.Generic;
@@ -11,9 +15,10 @@ using System.Threading.Tasks;
 
 namespace DbManager.Neo4j.Implementations
 {
-    public class DishRepository : GeneralNeo4jRepository<Dish>, IDishRepository
+    public class DishRepository : GeneralKafkaRepository<Dish>, IDishRepository
     {
-        public DishRepository(BoltGraphClientFactory boltGraphClientFactory) : base(boltGraphClientFactory)
+        public DishRepository(BoltGraphClientFactory boltGraphClientFactory, KafkaDependentProducer<string, string> kafkaProducer, IOptions<KafkaSettings> kafkaOptions) 
+            : base(boltGraphClientFactory, kafkaProducer, kafkaOptions)
         {
         }
 

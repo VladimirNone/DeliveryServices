@@ -1,7 +1,7 @@
 ﻿
 namespace DbManager.Data.Cache
 {
-    public interface IObjectCache<T>
+    public interface IObjectCache<T> where T : IModel
     {
         T Get(Guid key);
         void AddList(List<T> data);

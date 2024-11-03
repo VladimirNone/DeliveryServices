@@ -192,11 +192,11 @@ namespace WepPartDeliveryProject.Controllers
 
             var order = await orderRepo.GetNodeAsync(inputData.OrderId);
             var orderHasState = order.Story.Last();
-            var orderState = ObjectCache<OrderState>.Instanse.Single(h => h.Id == orderHasState.NodeToId);
+            var orderState = ObjectCache<OrderState>.Instance.Single(h => h.Id == orderHasState.NodeToId);
 
             await orderRepo.DeleteRelationOfNodesAsync<HasOrderState, OrderState>(order, orderState);
 
-            var cancelState = ObjectCache<OrderState>.Instanse.First(h => h.NumberOfStage == (int)OrderStateEnum.Cancelled);
+            var cancelState = ObjectCache<OrderState>.Instance.First(h => h.NumberOfStage == (int)OrderStateEnum.Cancelled);
             var relationCancel = new HasOrderState() { Comment = inputData.ReasonOfCancel, NodeFromId = order.Id, NodeToId = cancelState.Id, TimeStartState = DateTime.Now };
 
             order.Story.Add(relationCancel);

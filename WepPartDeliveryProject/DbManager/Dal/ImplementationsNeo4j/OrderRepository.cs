@@ -22,13 +22,13 @@ namespace DbManager.Neo4j.Implementations
         public async Task<List<Order>> GetOrdersByStateRelatedWithNode<TNode>(string nodeId, string nameOfState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
             where TNode : INode
         {
-            return await GetOrdersByStateRelatedWithNode<TNode>(Guid.Parse(nodeId), ObjectCache<OrderState>.Instanse.Single(h=>h.NameOfState == nameOfState).Id, skipCount, limitCount, orderByProperty);
+            return await GetOrdersByStateRelatedWithNode<TNode>(Guid.Parse(nodeId), ObjectCache<OrderState>.Instance.Single(h=>h.NameOfState == nameOfState).Id, skipCount, limitCount, orderByProperty);
         }
 
         public async Task<List<Order>> GetOrdersByStateRelatedWithNode<TNode>(string nodeId, OrderStateEnum orderState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
             where TNode : INode
         {
-            return await GetOrdersByStateRelatedWithNode<TNode>(Guid.Parse(nodeId), ObjectCache<OrderState>.Instanse.Single(h => (OrderStateEnum)h.NumberOfStage == orderState).Id, skipCount, limitCount, orderByProperty);
+            return await GetOrdersByStateRelatedWithNode<TNode>(Guid.Parse(nodeId), ObjectCache<OrderState>.Instance.Single(h => (OrderStateEnum)h.NumberOfStage == orderState).Id, skipCount, limitCount, orderByProperty);
         }
 
         public async Task<List<Order>> GetOrdersByStateRelatedWithNode<TNode>(Guid nodeId, Guid orderStateId, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
@@ -63,7 +63,7 @@ namespace DbManager.Neo4j.Implementations
         {
             var order = await GetNodeAsync(Guid.Parse(orderId));
             var orderHasState = order.Story.Last();
-            var orderState = ObjectCache<OrderState>.Instanse.Single(h => h.Id == orderHasState.NodeToId);
+            var orderState = ObjectCache<OrderState>.Instance.Single(h => h.Id == orderHasState.NodeToId);
             //Если заказ был отменен или завершен, то ничего не произойдет
             if ((OrderStateEnum)orderState.NumberOfStage == OrderStateEnum.Cancelled || (OrderStateEnum)orderState.NumberOfStage == OrderStateEnum.Finished)
                 return null;
@@ -73,7 +73,7 @@ namespace DbManager.Neo4j.Implementations
             {
                 Comment = comment, 
                 NodeFromId = order.Id, 
-                NodeToId = ObjectCache<OrderState>.Instanse.Single(h => h.NumberOfStage == orderState.NumberOfStage * 2).Id,
+                NodeToId = ObjectCache<OrderState>.Instance.Single(h => h.NumberOfStage == orderState.NumberOfStage * 2).Id,
                 TimeStartState = DateTime.Now 
             };
 
@@ -81,7 +81,7 @@ namespace DbManager.Neo4j.Implementations
             await RelateNodesAsync(newOrderState);
             await UpdateNodeAsync(order);
 
-            newOrderState.NodeTo = ObjectCache<OrderState>.Instanse.Single(h => h.NumberOfStage == orderState.NumberOfStage * 2);
+            newOrderState.NodeTo = ObjectCache<OrderState>.Instance.Single(h => h.NumberOfStage == orderState.NumberOfStage * 2);
 
             return newOrderState;
         }
@@ -90,7 +90,7 @@ namespace DbManager.Neo4j.Implementations
         {
             var order = await GetNodeAsync(Guid.Parse(orderId));
             var orderHasState = order.Story.Last();
-            var orderState = ObjectCache<OrderState>.Instanse.Single(h => h.Id == orderHasState.NodeToId);
+            var orderState = ObjectCache<OrderState>.Instance.Single(h => h.Id == orderHasState.NodeToId);
             //Если заказ только попал в очередь
             if ((OrderStateEnum)orderState.NumberOfStage == OrderStateEnum.InQueue)
                 return false;
@@ -120,7 +120,7 @@ namespace DbManager.Neo4j.Implementations
 
             await RelateNodesAsync(new DeliveredBy() { NodeFrom = deliveryMan, NodeTo = order });
 
-            var firstState = ObjectCache<OrderState>.Instanse.First(h => h.NumberOfStage == (int)OrderStateEnum.InQueue);
+            var firstState = ObjectCache<OrderState>.Instance.First(h => h.NumberOfStage == (int)OrderStateEnum.InQueue);
             var relationCancel = new HasOrderState() { Comment = comment, NodeFromId = order.Id, NodeToId = firstState.Id, TimeStartState = DateTime.Now };
 
             order.Story.Add(relationCancel);

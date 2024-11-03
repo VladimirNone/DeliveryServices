@@ -27,7 +27,7 @@ namespace DbManager.Mapper
                 .ForMember(h=>h.OrderStateId, (o) => o.MapFrom(src=>src.Id));
 
             CreateMap<HasOrderState, OrderStateItemOutDTO>()
-                .BeforeMap((h,k) => h.NodeTo = ObjectCache<OrderState>.Instanse.FirstOrDefault(s=>s.Id == h.NodeToId))
+                .BeforeMap((h,k) => h.NodeTo = ObjectCache<OrderState>.Instance.FirstOrDefault(s=>s.Id == h.NodeToId))
                 .ForMember(h => h.OrderStateId, (o) => o.MapFrom(src => src.NodeToId))
                 .ForMember(h => h.NumberOfStage, (o) => o.MapFrom(src => ((OrderState)src.NodeTo).NumberOfStage))
                 .ForMember(h => h.NameOfState, (o) => o.MapFrom(src => ((OrderState)src.NodeTo).NameOfState))

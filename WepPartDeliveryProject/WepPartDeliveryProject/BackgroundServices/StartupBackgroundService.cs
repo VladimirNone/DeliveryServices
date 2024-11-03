@@ -46,20 +46,20 @@ namespace WepPartDeliveryProject.BackgroundServices
                     this._logger.LogInformation("Finish generate data");
                 }
                 this._logger.LogInformation("Start loading containers");
-                ObjectCache<Category>.Instanse.AddList(await this._repoFactory.GetRepository<Category>().GetNodesAsync());
-                ObjectCache<OrderState>.Instanse.AddList(await this._repoFactory.GetRepository<OrderState>().GetNodesAsync());
+                ObjectCache<Category>.Instance.AddList(await this._repoFactory.GetRepository<Category>().GetNodesAsync());
+                ObjectCache<OrderState>.Instance.AddList(await this._repoFactory.GetRepository<OrderState>().GetNodesAsync());
 
                 this._logger.LogInformation("Start prepare dishes");
                 await this.PrepareDishes( this._configuration.GetSection("ClientAppSettings:PathToPublicSourceDirecroty")?.Value, 
                                         this._configuration.GetSection("ClientAppSettings:DirectoryWithDishImages")?.Value);
                 this._logger.LogInformation("Finish prepare dishes");
 
-                ObjectCache<Dish>.Instanse.AddList(await this._repoFactory.GetRepository<Dish>().GetNodesAsync());
-                ObjectCache<DeliveryMan>.Instanse.AddList(await this._repoFactory.GetRepository<DeliveryMan>().GetNodesAsync());
-                ObjectCache<Kitchen>.Instanse.AddList(await this._repoFactory.GetRepository<Kitchen>().GetNodesAsync());
-                ObjectCache<KitchenWorker>.Instanse.AddList(await this._repoFactory.GetRepository<KitchenWorker>().GetNodesAsync());
-                ObjectCache<Client>.Instanse.AddList(await this._repoFactory.GetRepository<Client>().GetNodesAsync());
-                ObjectCache<Admin>.Instanse.AddList(await this._repoFactory.GetRepository<Admin>().GetNodesAsync());
+                ObjectCache<Dish>.Instance.AddList(await this._repoFactory.GetRepository<Dish>().GetNodesAsync());
+                ObjectCache<DeliveryMan>.Instance.AddList(await this._repoFactory.GetRepository<DeliveryMan>().GetNodesAsync());
+                ObjectCache<Kitchen>.Instance.AddList(await this._repoFactory.GetRepository<Kitchen>().GetNodesAsync());
+                ObjectCache<KitchenWorker>.Instance.AddList(await this._repoFactory.GetRepository<KitchenWorker>().GetNodesAsync());
+                ObjectCache<Client>.Instance.AddList(await this._repoFactory.GetRepository<Client>().GetNodesAsync());
+                ObjectCache<Admin>.Instance.AddList(await this._repoFactory.GetRepository<Admin>().GetNodesAsync());
                 this._logger.LogInformation("Finish loading containers");
             });
             this._deliveryHealthCheck.StartupCompleted = true;
@@ -73,7 +73,7 @@ namespace WepPartDeliveryProject.BackgroundServices
             var categoryRepo = this._repoFactory.GetRepository<Category>();
             var dishRepo = this._repoFactory.GetRepository<Dish>();
 
-            foreach (var category in ObjectCache<Category>.Instanse.ToList())
+            foreach (var category in ObjectCache<Category>.Instance.ToList())
             {
                 var categoryDishes = (await categoryRepo.GetRelationsOfNodesAsync<ContainsDish, Dish>(category)).Select(h => (Dish)h.NodeTo);
 

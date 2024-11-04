@@ -1,16 +1,11 @@
 ﻿using Confluent.Kafka;
-using DbManager.AppSettings;
 using DbManager.Dal;
 using DbManager.Data.Cache;
 using DbManager.Data.Kafka;
-using DbManager.Data.Nodes;
-using DbManager.Neo4j.Implementations;
 using DbManager.Neo4j.Interfaces;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 using System.Reflection;
-using System.Text;
 
 namespace DbManager.Services
 {
@@ -20,14 +15,12 @@ namespace DbManager.Services
         private ConcurrentDictionary<Type, ObjectCasheInfo> objectCachers = new ConcurrentDictionary<Type, ObjectCasheInfo>();
         private Thread _workThread;
         private ILogger<ObjectCasheKafkaChanger> _logger;
-        private KafkaSettings _kafkaSettings;
         private readonly IRepositoryFactory _repositoryFactory;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
-        public ObjectCasheKafkaChanger(IRepositoryFactory repositoryFactory, ILogger<ObjectCasheKafkaChanger> logger, IOptions<KafkaSettings> kafkaOptions)
+        public ObjectCasheKafkaChanger(IRepositoryFactory repositoryFactory, ILogger<ObjectCasheKafkaChanger> logger)
         {
             this._logger = logger;
-            this._kafkaSettings = kafkaOptions.Value;
             this._repositoryFactory = repositoryFactory;
 
 

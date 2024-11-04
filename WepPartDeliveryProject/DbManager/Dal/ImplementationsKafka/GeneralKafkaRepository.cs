@@ -1,5 +1,6 @@
 ﻿using DbManager.AppSettings;
 using DbManager.Data;
+using DbManager.Data.Cache;
 using DbManager.Data.Kafka;
 using DbManager.Neo4j.Implementations;
 using DbManager.Services;
@@ -13,32 +14,25 @@ namespace DbManager.Dal.ImplementationsKafka
     public class GeneralKafkaRepository<TNode> : GeneralNeo4jRepository<TNode>
         where TNode : INode
     {
-        private readonly KafkaDependentProducer<string, string> _kafkaProducer;
-        private readonly KafkaSettings _kafkaSettings;
-        private readonly string _topic;
+        private readonly KafkaCacheEventProducer _kafkaProducer;
 
-        public GeneralKafkaRepository(BoltGraphClientFactory boltGraphClientFactory, KafkaDependentProducer<string, string> kafkaProducer, IOptions<KafkaSettings> kafkaOptions) : base(boltGraphClientFactory)
+        public GeneralKafkaRepository(BoltGraphClientFactory boltGraphClientFactory, KafkaCacheEventProducer kafkaProducer) : base(boltGraphClientFactory)
         {
-            this._kafkaSettings = kafkaOptions.Value;
-            this._topic = this._kafkaSettings.ContainerEventsTopic ?? "ContainerEvents";
             this._kafkaProducer = kafkaProducer;
         }
 
         public override async Task AddNodeAsync(INode node)
         {
             await base.AddNodeAsync(node);
-            var message = new Confluent.Kafka.Message<string, string>() { Key = node.Id.ToString(), Value = JsonConvert.SerializeObject(node) };
-            message.Headers = new Confluent.Kafka.Headers
-            {
-                { KafkaConsts.OwnerGroupId, Encoding.UTF8.GetBytes(this._kafkaSettings.GroupId) },
-                { KafkaConsts.ObjectType, Encoding.UTF8.GetBytes(node.GetType().ToString()) }
-            };
-            await this._kafkaProducer.ProduceAsync(this._topic, message);
+
+            await this._kafkaProducer.ProduceEventAsync(node, KafkaChangeCacheEvent.AddMethodName);
         }
 
         public override async Task DeleteNodeWithAllRelations(INode node)
         {
             await base.DeleteNodeWithAllRelations(node);
+
+            await this._kafkaProducer.ProduceEventAsync(node, KafkaChangeCacheEvent.TryRemoveMethodName);
         }
 
         public override async Task DeleteRelationOfNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode)
@@ -74,6 +68,8 @@ namespace DbManager.Dal.ImplementationsKafka
         public override async Task UpdateNodeAsync(INode node)
         {
             await base.UpdateNodeAsync(node);
+
+            await this._kafkaProducer.ProduceEventAsync(node, KafkaChangeCacheEvent.UpdateMethodName);
         }
 
         public override async Task UpdateNodesPropertiesAsync(TNode node)

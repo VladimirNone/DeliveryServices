@@ -73,9 +73,9 @@ namespace DbManager.Data.Cache
                 throw new ArgumentException($"Object with type = {typeof(T)} and key = {key} were not updated in cache. It were updated other process.");
         }
 
-        public bool TryRemove(Guid key, out T value)
+        public bool TryRemove(Guid key)
         {
-            if(this._cache.TryRemove(key, out value))
+            if(this._cache.TryRemove(key, out _))
                 return true;
             return false;
         }

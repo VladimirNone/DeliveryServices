@@ -22,16 +22,14 @@ namespace DbManager.Services
         private ILogger<ObjectCasheKafkaChanger> _logger;
         private KafkaSettings _kafkaSettings;
         private readonly IRepositoryFactory _repositoryFactory;
-        private readonly DeliveryHealthCheck _deliveryHealthCheck;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-        private TimeSpan _workInterval = new TimeSpan(0, 0, 1);
 
-        public ObjectCasheKafkaChanger(IRepositoryFactory repositoryFactory, DeliveryHealthCheck deliveryHealthCheck, ILogger<ObjectCasheKafkaChanger> logger, IOptions<KafkaSettings> kafkaOptions)
+        public ObjectCasheKafkaChanger(IRepositoryFactory repositoryFactory, ILogger<ObjectCasheKafkaChanger> logger, IOptions<KafkaSettings> kafkaOptions)
         {
             this._logger = logger;
             this._kafkaSettings = kafkaOptions.Value;
             this._repositoryFactory = repositoryFactory;
-            this._deliveryHealthCheck = deliveryHealthCheck;
+
 
             this._workThread = new Thread(this.WorkFunction)
             {
@@ -55,39 +53,56 @@ namespace DbManager.Services
                     try
                     {
                         //Если в очереди что-то появилось и при этом сервис разогрелся, то забираем сообщение и парсим его
-                        if(this.queue.TryDequeue(out consumeResult) && this._deliveryHealthCheck.StartupCompleted)
+                        if(this.queue.TryDequeue(out consumeResult))
                         {
-                            //Если есть заголовок с именем группы
-                            if (consumeResult.Message.Headers.TryGetLastBytes(KafkaConsts.OwnerGroupId, out var groupIdBytes))
+                            var kafkaChangeCacheEvent = Newtonsoft.Json.JsonConvert.DeserializeObject<KafkaChangeCacheEvent>(consumeResult.Message.Value);
+                            //Получаем тип объекта
+                            var objectType = kafkaChangeCacheEvent.TypeCacheObject;
+
+                            ObjectCasheInfo objectCacheInfo;
+                            if (!objectCachers.TryGetValue(objectType, out objectCacheInfo))
                             {
-                                //Получаем тип объекта
-                                var objectType = Type.GetType(Encoding.UTF8.GetString(consumeResult.Message.Headers.GetLastBytes(KafkaConsts.ObjectType)));
+                                objectCacheInfo = new ObjectCasheInfo(); 
+                                objectCacheInfo.Repository = this._repositoryFactory.GetRepository(objectType);
 
-                                ObjectCasheInfo objectCacheInfo;
-                                if (!objectCachers.TryGetValue(objectType, out objectCacheInfo))
-                                {
-                                    objectCacheInfo = new ObjectCasheInfo(); 
-                                    objectCacheInfo.Repository = this._repositoryFactory.GetRepository(objectType);
+                                // Создаем тип ObjectCache<T> с заданным T
+                                Type cacheType = typeof(ObjectCache<>).MakeGenericType(objectType);
+                                // Получаем свойство "Instance" для созданного типа
+                                var instanceProperty = cacheType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
 
-                                    // Создаем тип ObjectCache<T> с заданным T
-                                    Type cacheType = typeof(ObjectCache<>).MakeGenericType(objectType);
-                                    // Получаем свойство "Instance" для созданного типа
-                                    var instanceProperty = cacheType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+                                objectCacheInfo.InstanceObject = instanceProperty?.GetValue(null);
+                                objectCacheInfo.AddMethod = cacheType.GetMethod(KafkaChangeCacheEvent.AddMethodName, BindingFlags.Public | BindingFlags.Instance);
+                                objectCacheInfo.UpdateMethod = cacheType.GetMethod(KafkaChangeCacheEvent.UpdateMethodName, BindingFlags.Public | BindingFlags.Instance);
+                                objectCacheInfo.TryRemoveMethod = cacheType.GetMethod(KafkaChangeCacheEvent.TryRemoveMethodName, BindingFlags.Public | BindingFlags.Instance);
 
-                                    objectCacheInfo.InstanceObject = instanceProperty?.GetValue(null);
-                                    objectCacheInfo.AddMethod = cacheType.GetMethod("Add", BindingFlags.Public | BindingFlags.Instance);
-                                    objectCacheInfo.UpdateMethod = cacheType.GetMethod("Update", BindingFlags.Public | BindingFlags.Instance);
-                                    objectCacheInfo.TryRemoveMethod = cacheType.GetMethod("TryRemove", BindingFlags.Public | BindingFlags.Instance);
-
-                                    this.objectCachers[objectType] = objectCacheInfo;
-                                }
-
-                                var node = objectCacheInfo.Repository.GetNodeAsync(consumeResult.Key, objectType).Result;
-
-                                // Вызвать метод "Add" с необходимыми параметрами
-                                objectCacheInfo.AddMethod?.Invoke(objectCacheInfo.InstanceObject, new object[] { Guid.Parse(consumeResult.Key), node });
+                                this.objectCachers[objectType] = objectCacheInfo;
                             }
+
+                            var node = objectCacheInfo.Repository.GetNodeAsync(consumeResult.Key, objectType).Result;
+
+                            switch (kafkaChangeCacheEvent.MethodName)
+                            {
+                                case KafkaChangeCacheEvent.AddMethodName:
+                                    // Вызываем метод "Add" с необходимыми параметрами
+                                    objectCacheInfo.AddMethod?.Invoke(objectCacheInfo.InstanceObject, new object[] { Guid.Parse(consumeResult.Key), node });
+                                    break;
+                                case KafkaChangeCacheEvent.UpdateMethodName:
+                                    // Вызываем метод "Add" с необходимыми параметрами
+                                    objectCacheInfo.UpdateMethod?.Invoke(objectCacheInfo.InstanceObject, new object[] { Guid.Parse(consumeResult.Key), node });
+                                    break;
+                                case KafkaChangeCacheEvent.TryRemoveMethodName:
+                                    // Вызываем метод "Add" с необходимыми параметрами
+                                    objectCacheInfo.TryRemoveMethod?.Invoke(objectCacheInfo.InstanceObject, new object[] { Guid.Parse(consumeResult.Key) });
+                                    break;
+                                default:
+                                    throw new ArgumentException($"KafkaChangeCacheEvent.MethodName with value \"{ kafkaChangeCacheEvent.MethodName }\" can't be processed");
+                            }
+
                         }
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        this._logger.LogError(ex.ToString());
                     }
                     catch (Exception ex)
                     {
@@ -98,8 +113,6 @@ namespace DbManager.Services
                         }
                         this._logger.LogError(ex.ToString());
                     }
-
-                    this._cancellationTokenSource.Token.WaitHandle.WaitOne(this._workInterval);
                 }
             }
             catch (ThreadInterruptedException)

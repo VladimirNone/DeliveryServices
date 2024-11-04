@@ -19,13 +19,15 @@ namespace DbManager
         public static void AddDbInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             // This is to register Neo4j Client Object as a singleton
-            services.AddSingleton<ObjectCasheKafkaChanger>();
             services.AddSingleton<BoltGraphClientFactory>();
 
             services.AddSingleton<KafkaClientHandle>();
             services.AddSingleton<KafkaDependentProducer<string, string>>();
+            services.AddSingleton<KafkaCacheEventProducer>();
 
             services.AddSingleton<IRepositoryFactory, RepositoryFactory>();
+
+            services.AddSingleton<ObjectCasheKafkaChanger>();
 
             services.AddTransient<IPasswordService, PasswordService>();
 

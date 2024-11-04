@@ -7,6 +7,6 @@ namespace DbManager.Data.Cache
         void AddList(List<T> data);
         void Add(Guid key, T value);
         void Update(Guid key, T value);
-        bool TryRemove(Guid key, out T value);
+        bool TryRemove(Guid key);
     }
 }

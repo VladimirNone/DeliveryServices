@@ -14,16 +14,14 @@ namespace DbManager.Neo4j.Implementations
     {
         private readonly IServiceProvider _services;
         private readonly Dictionary<Type, object> repositories = new Dictionary<Type, object>();
-        private readonly KafkaDependentProducer<string, string> _kafkaDependentProducer;
-        private readonly IOptions<KafkaSettings> _kafkaOptions;
+        private readonly KafkaCacheEventProducer _kafkaProducer;
         private readonly BoltGraphClientFactory _boltGraphClientFactory;
 
-        public RepositoryFactory(BoltGraphClientFactory boltGraphClientFactory, KafkaDependentProducer<string, string> kafkaDependentProducer, IOptions<KafkaSettings> kafkaSettings, IServiceProvider serviceProvider)
+        public RepositoryFactory(BoltGraphClientFactory boltGraphClientFactory, KafkaCacheEventProducer kafkaProducer, IServiceProvider serviceProvider)
         {
             this._boltGraphClientFactory = boltGraphClientFactory;
             this._services = serviceProvider;
-            this._kafkaDependentProducer = kafkaDependentProducer;
-            this._kafkaOptions = kafkaSettings;
+            this._kafkaProducer = kafkaProducer;
         }
 
         public IGeneralRepository<TEntity> GetRepository<TEntity>() where TEntity : INode
@@ -42,7 +40,7 @@ namespace DbManager.Neo4j.Implementations
                 return repo;
             }
 
-            repo = new GeneralKafkaRepository<TEntity>(this._boltGraphClientFactory, this._kafkaDependentProducer, this._kafkaOptions);
+            repo = new GeneralKafkaRepository<TEntity>(this._boltGraphClientFactory, this._kafkaProducer);
             repositories.Add(typeEntity, repo);
 
             return repo;

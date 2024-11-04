@@ -1,4 +1,5 @@
 ﻿using Confluent.Kafka;
+using DbManager;
 using DbManager.AppSettings;
 using DbManager.Services;
 using Microsoft.Extensions.Options;
@@ -10,9 +11,10 @@ namespace WepPartDeliveryProject.BackgroundServices
         private IConsumer<string, string> _consumerBuilder;
         private readonly string _containerEventsTopic;
         private readonly ILogger<KafkaConsumerBackgroundService> _logger;
+        private readonly DeliveryHealthCheck _deliveryHealthCheck;
         private readonly ObjectCasheKafkaChanger _objectCasheKafkaChanger;
 
-        public KafkaConsumerBackgroundService(ObjectCasheKafkaChanger objectCasheKafkaChanger, ILogger<KafkaConsumerBackgroundService> logger, IOptions<KafkaSettings> kafkaOptions)
+        public KafkaConsumerBackgroundService(ObjectCasheKafkaChanger objectCasheKafkaChanger, DeliveryHealthCheck deliveryHealthCheck, ILogger<KafkaConsumerBackgroundService> logger, IOptions<KafkaSettings> kafkaOptions)
         {
             var kafkaSettings = kafkaOptions.Value;
             var consumerConfig = new ConsumerConfig
@@ -26,6 +28,7 @@ namespace WepPartDeliveryProject.BackgroundServices
             this._containerEventsTopic = kafkaSettings.ContainerEventsTopic ?? "ContainerEvents";
             this._logger = logger;
             this._objectCasheKafkaChanger = objectCasheKafkaChanger;
+            this._deliveryHealthCheck = deliveryHealthCheck;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -37,6 +40,11 @@ namespace WepPartDeliveryProject.BackgroundServices
         {
             try
             {
+                //не подписываемся на топик пока не разогреется текущий сервис
+                while (!this._deliveryHealthCheck.StartupCompleted) 
+                {
+                    cancellationToken.WaitHandle.WaitOne(200);
+                }
                 this._logger.LogInformation($"KafkaConsumerBackgroundService subscribe to {this._containerEventsTopic}");
                 this._consumerBuilder.Subscribe(this._containerEventsTopic);
                 while (!cancellationToken.IsCancellationRequested)

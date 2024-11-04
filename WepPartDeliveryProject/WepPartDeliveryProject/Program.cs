@@ -10,6 +10,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using System.Diagnostics.Metrics;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using WepPartDeliveryProject;
 using WepPartDeliveryProject.BackgroundServices;
@@ -35,6 +36,10 @@ try
 
     // Note: Switch between Explicit/Exponential by setting HistogramAggregation in appsettings.json
     var histogramAggregation = configuration.GetValue("HistogramAggregation", defaultValue: "explicit")!.ToLowerInvariant();
+
+    // Create a service to expose ActivitySource, and Metric Instruments
+    // for manual instrumentation
+    services.AddSingleton<Instrumentation>();
 
     // Configure OpenTelemetry logging, metrics, & tracing with auto-start using the
     // AddOpenTelemetry extension from OpenTelemetry.Extensions.Hosting.
@@ -72,7 +77,7 @@ try
         {
             // Ensure the MeterProvider subscribes to any custom Meters.
             builder
-                //.AddMeter()
+                .AddMeter(Instrumentation.MeterName)
                 .SetExemplarFilter(ExemplarFilterType.TraceBased)
                 .AddRuntimeInstrumentation()
                 .AddProcessInstrumentation()

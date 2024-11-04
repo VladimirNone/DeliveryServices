@@ -5,6 +5,7 @@ using DbManager.Data.Kafka;
 using DbManager.Neo4j.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
+using System.Diagnostics.Metrics;
 using System.Reflection;
 
 namespace DbManager.Services
@@ -16,13 +17,15 @@ namespace DbManager.Services
         private Thread _workThread;
         private ILogger<ObjectCasheKafkaChanger> _logger;
         private readonly IRepositoryFactory _repositoryFactory;
+        private readonly Counter<long> _cacheEventCounter;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
-        public ObjectCasheKafkaChanger(IRepositoryFactory repositoryFactory, ILogger<ObjectCasheKafkaChanger> logger)
+        public ObjectCasheKafkaChanger(IRepositoryFactory repositoryFactory, Instrumentation instrumentation, ILogger<ObjectCasheKafkaChanger> logger)
         {
             this._logger = logger;
             this._repositoryFactory = repositoryFactory;
 
+            this._cacheEventCounter = instrumentation.CacheEventCounter;
 
             this._workThread = new Thread(this.WorkFunction)
             {
@@ -34,6 +37,7 @@ namespace DbManager.Services
         public void AddToQueue(ConsumeResult<string, string> consumeResult)
         {
             this.queue.Enqueue(consumeResult);
+            this._cacheEventCounter.Add(1);
         }
 
 		private void WorkFunction()
@@ -91,6 +95,7 @@ namespace DbManager.Services
                                     throw new ArgumentException($"KafkaChangeCacheEvent.MethodName with value \"{ kafkaChangeCacheEvent.MethodName }\" can't be processed");
                             }
 
+                            this._cacheEventCounter.Add(-1);
                         }
                     }
                     catch (ArgumentException ex)

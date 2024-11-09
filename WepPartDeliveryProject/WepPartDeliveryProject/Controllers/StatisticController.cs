@@ -87,7 +87,7 @@ namespace WepPartDeliveryProject.Controllers
 
             var delManRepo = (IDeliveryManRepository)_repositoryFactory.GetRepository<DeliveryMan>();
 
-            var topDelMen = await delManRepo.GetTopDeliveryMenByCountOrder(10);
+            var topDelMen = await delManRepo.GetTopDeliveryMenByCountOrderStatistic(10);
             topDelMen.Reverse();
 
             foreach (var item in topDelMen)

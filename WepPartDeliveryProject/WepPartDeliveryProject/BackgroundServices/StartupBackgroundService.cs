@@ -19,9 +19,10 @@ namespace WepPartDeliveryProject.BackgroundServices
         private ApplicationSettings _appSettings { get; set; }
         private GeneratorService _generatorService { get; set; }
         private IRepositoryFactory _repoFactory;
+        private Instrumentation _instrumentation;
 
         public StartupBackgroundService(DeliveryHealthCheck deliveryHealthCheck, BoltGraphClientFactory boltGraphClientFactory, IConfiguration configuration, 
-            IOptions<ApplicationSettings> appSettingsOptions, GeneratorService generatorService, IRepositoryFactory repositoryFactory)
+            IOptions<ApplicationSettings> appSettingsOptions, GeneratorService generatorService, IRepositoryFactory repositoryFactory, Instrumentation instrumentation)
         {
             this._deliveryHealthCheck = deliveryHealthCheck;
             this._boltGraphClientFactory = boltGraphClientFactory;
@@ -29,12 +30,14 @@ namespace WepPartDeliveryProject.BackgroundServices
             this._appSettings = appSettingsOptions.Value;
             this._generatorService = generatorService;
             this._repoFactory = repositoryFactory;
+            this._instrumentation = instrumentation;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await Task.Run(async () =>
             {
+                using var activity = this._instrumentation.ActivitySource.StartActivity($"{nameof(StartupBackgroundService)}");
                 var graphClient = await _boltGraphClientFactory.GetGraphClientAsync();
                 if (this._appSettings.GenerateData)
                 {
@@ -43,7 +46,7 @@ namespace WepPartDeliveryProject.BackgroundServices
                 await this.PrepareData( this._configuration.GetSection("ClientAppSettings:PathToPublicSourceDirecroty")?.Value, 
                                         this._configuration.GetSection("ClientAppSettings:DirectoryWithDishImages")?.Value);
                 
-            });
+            }, stoppingToken);
             this._deliveryHealthCheck.StartupCompleted = true;
         }
 

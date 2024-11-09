@@ -5,6 +5,7 @@ using DbManager.Neo4j.Interfaces;
 using Neo4jClient;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,27 +14,31 @@ namespace DbManager.Neo4j.Implementations
 {
     public class DishRepository : GeneralNeo4jRepository<Dish>, IDishRepository
     {
-        public DishRepository(BoltGraphClientFactory boltGraphClientFactory) : base(boltGraphClientFactory)
+        public DishRepository(BoltGraphClientFactory boltGraphClientFactory, Instrumentation instrumentation) : base(boltGraphClientFactory, instrumentation)
         {
         }
 
         public async Task<List<Dish>> SearchDishesByNameAndDescription(string searchText, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(SearchDishesByNameAndDescription), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "node." + orderByProperty[i];
 
-            var res = await _dbContext.Cypher
+            var cypher = _dbContext.Cypher
                 .Match($"(node:{typeof(Dish).Name})")
                 .Where($"toLower(node.Name) contains($searchText) or toLower(node.Description) contains($searchText)")
                 .WithParams(new
-                    {
-                        searchText
-                    })
+                {
+                    searchText
+                }) 
                 .Return((node) => node.As<Dish>())
-                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount)
-                .ResultsAsync;
+                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount);
 
-            return res.ToList();
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            return (await cypher.ResultsAsync).ToList();
         }
 
         public async Task<List<(Dish, int)>> GetTopDishByCountOrderedStatistic(int topCount)
@@ -41,6 +46,9 @@ namespace DbManager.Neo4j.Implementations
             /*match (o:Order)-[r:ORDEREDDISH]-(d:Dish) 
             with count(r) as countR, d
             return d, countR order by countR desc limit 10*/
+
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetTopDishByCountOrderedStatistic), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
 
             var res = await _dbContext.Cypher
                 .Match($"(node:{typeof(Order).Name})-[relation:{typeof(OrderedDish).Name.ToUpper()}]-(relatedNode:{typeof(Dish).Name})")

@@ -13,7 +13,7 @@ namespace DbManager.Neo4j.Implementations
 {
     public class ClientRepository : GeneralNeo4jRepository<Client>, IClientRepository
     {
-        public ClientRepository(BoltGraphClientFactory boltGraphClientFactory) : base(boltGraphClientFactory)
+        public ClientRepository(BoltGraphClientFactory boltGraphClientFactory, Instrumentation instrumentation) : base(boltGraphClientFactory, instrumentation)
         {
         }
 
@@ -22,6 +22,9 @@ namespace DbManager.Neo4j.Implementations
             /*match (c:Client)-[r:ORDERED]-(o:Order)
             with c, sum(o.Price) as sum, count(o) as count
             return c,sum,count order by sum limit 10*/
+
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetTopClientBySumPriceOrderStatistic), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
 
             var res = await _dbContext.Cypher
                 .Match($"(node:{typeof(Client).Name})-[relation:{typeof(Ordered).Name.ToUpper()}]-(relatedNode:{typeof(Order).Name})")

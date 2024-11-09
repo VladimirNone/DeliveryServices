@@ -12,15 +12,18 @@ namespace DbManager.Neo4j.Implementations
 {
     public class DeliveryManRepository : GeneralNeo4jRepository<DeliveryMan>, IDeliveryManRepository
     {
-        public DeliveryManRepository(BoltGraphClientFactory boltGraphClientFactory) : base(boltGraphClientFactory)
+        public DeliveryManRepository(BoltGraphClientFactory boltGraphClientFactory, Instrumentation instrumentation) : base(boltGraphClientFactory, instrumentation)
         {
         }
 
-        public async Task<List<(DeliveryMan, int)>> GetTopDeliveryMenByCountOrder(int topCount)
+        public async Task<List<(DeliveryMan, int)>> GetTopDeliveryMenByCountOrderStatistic(int topCount)
         {
             /*match (c:DeliveryMan)-[r:DELIVEREDBY]-(o:Order)
             with c, count(o) as count
             return c,count order by COUNT desc limit 10*/
+
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetTopDeliveryMenByCountOrderStatistic), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
 
             var res = await _dbContext.Cypher
                 .Match($"(node:{typeof(DeliveryMan).Name})-[relation:{typeof(DeliveredBy).Name.ToUpper()}]-(relatedNode:{typeof(Order).Name})")

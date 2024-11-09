@@ -11,11 +11,13 @@ namespace DbManager.Neo4j.Implementations
         private readonly IServiceProvider _services;
         private readonly Dictionary<Type, object> repositories = new Dictionary<Type, object>();
         private readonly BoltGraphClientFactory _boltGraphClientFactory;
+        private Instrumentation _instrumentation;
 
-        public RepositoryFactory(BoltGraphClientFactory boltGraphClientFactory, IServiceProvider serviceProvider)
+        public RepositoryFactory(BoltGraphClientFactory boltGraphClientFactory, IServiceProvider serviceProvider, Instrumentation instrumentation)
         {
             this._boltGraphClientFactory = boltGraphClientFactory;
             this._services = serviceProvider;
+            this._instrumentation = instrumentation;
         }
 
         public IGeneralRepository<TEntity> GetRepository<TEntity>() where TEntity : INode
@@ -34,7 +36,7 @@ namespace DbManager.Neo4j.Implementations
                 return repo;
             }
 
-            repo = new GeneralNeo4jRepository<TEntity>(this._boltGraphClientFactory);
+            repo = new GeneralNeo4jRepository<TEntity>(this._boltGraphClientFactory, this._instrumentation);
             repositories.Add(typeEntity, repo);
 
             return repo;

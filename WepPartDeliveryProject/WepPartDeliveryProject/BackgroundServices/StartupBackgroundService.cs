@@ -21,9 +21,10 @@ namespace WepPartDeliveryProject.BackgroundServices
         private GeneratorService _generatorService { get; set; }
         private IRepositoryFactory _repoFactory;
         private ILogger<StartupBackgroundService> _logger;
+        private Instrumentation _instrumentation;
 
         public StartupBackgroundService(DeliveryHealthCheck deliveryHealthCheck, BoltGraphClientFactory boltGraphClientFactory, IConfiguration configuration, 
-            IOptions<ApplicationSettings> appSettingsOptions, GeneratorService generatorService, IRepositoryFactory repositoryFactory, ILogger<StartupBackgroundService> logger)
+            IOptions<ApplicationSettings> appSettingsOptions, GeneratorService generatorService, IRepositoryFactory repositoryFactory, Instrumentation instrumentation, ILogger<StartupBackgroundService> logger)
         {
             this._deliveryHealthCheck = deliveryHealthCheck;
             this._boltGraphClientFactory = boltGraphClientFactory;
@@ -32,13 +33,15 @@ namespace WepPartDeliveryProject.BackgroundServices
             this._generatorService = generatorService;
             this._repoFactory = repositoryFactory;
             this._logger = logger;
+            this._instrumentation = instrumentation;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await Task.Run(async () =>
             {
-                using var graphClient = await _boltGraphClientFactory.GetGraphClientAsync();
+                using var activity = this._instrumentation.ActivitySource.StartActivity($"{nameof(StartupBackgroundService)}");
+                var graphClient = await _boltGraphClientFactory.GetGraphClientAsync();
                 if (this._appSettings.GenerateData)
                 {
                     this._logger.LogInformation("Start generate data");

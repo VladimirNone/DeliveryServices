@@ -9,17 +9,23 @@ namespace DbManager.Neo4j.Implementations
         where TNode : INode
     {
         protected readonly IGraphClient _dbContext;
+        protected readonly Instrumentation _instrumentation;
 
-        public GeneralNeo4jRepository(BoltGraphClientFactory boltGraphClientFactory)
+        public GeneralNeo4jRepository(BoltGraphClientFactory boltGraphClientFactory, Instrumentation instrumentation)
         {
+            this._instrumentation = instrumentation;
             this._dbContext = boltGraphClientFactory.GetGraphClient();
         }
 
         public virtual async Task AddNodeAsync(INode newNode)
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(AddNodeAsync), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             if (newNode.Id == Guid.Empty)
                 newNode.Id = Guid.NewGuid();
-            await _dbContext.Cypher
+
+            var cypher = _dbContext.Cypher
                 .Merge($"(newNode:{newNode.GetType().Name} {{Id: $id}})")
                 .OnCreate()
                 .Set("newNode = $newEntity")
@@ -27,12 +33,17 @@ namespace DbManager.Neo4j.Implementations
                 {
                     id = newNode.Id,
                     newEntity = newNode
-                })
-                .ExecuteWithoutResultsAsync();
+                });
+
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            await cypher.ExecuteWithoutResultsAsync();
         }
 
         public async Task AddNodesAsync(List<TNode> newNodes)
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(AddNodesAsync), System.Diagnostics.ActivityKind.Client);
+
             foreach (var item in newNodes)
             {
                 await AddNodeAsync(item);
@@ -41,19 +52,28 @@ namespace DbManager.Neo4j.Implementations
 
         public virtual async Task UpdateNodeAsync(INode node)
         {
-            await _dbContext.Cypher
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(UpdateNodeAsync), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
+            var cypher = _dbContext.Cypher
                 .Match($"(updateNode:{node.GetType().Name} {{Id: $id}})")
                 .Set("updateNode = $updatedEntity")
                 .WithParams(new
                 {
                     id = node.Id,
                     updatedEntity = node
-                })
-                .ExecuteWithoutResultsAsync();
+                });
+
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            await cypher.ExecuteWithoutResultsAsync();
         }
 
         public virtual async Task UpdateNodesPropertiesAsync(TNode node)
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(UpdateNodesPropertiesAsync), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             var properties = typeof(TNode).GetProperties();
             var query = _dbContext.Cypher
                 .Match($"(updateNode:{typeof(TNode).Name} {{Id: $id}})");
@@ -63,12 +83,15 @@ namespace DbManager.Neo4j.Implementations
                 query = query.Set($"updateNode.{property.Name} = $updatedEntity.{property.Name}");
             }
 
-            await query.WithParams(new
+            var cypher = query.WithParams(new
             {
                 id = node.Id,
                 updatedEntity = node
-            })
-                .ExecuteWithoutResultsAsync();
+            });
+
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            await cypher.ExecuteWithoutResultsAsync();
         }
 
         public async Task<TNode> GetNodeAsync(string id)
@@ -79,15 +102,21 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<INode> GetNodeAsync(string id, Type typeOfNode)
         {
-            var res = await _dbContext.Cypher
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetNodeAsync), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
+            var cypher = _dbContext.Cypher
                 .Match($"(entity:{typeOfNode.Name} {{Id: $id}})")
                 .WithParams(new
                 {
                     id,
                 })
                 //нужен конректный тип к которому необходимо это приводить, чтобы это можно было десериализовать
-                .Return(entity => entity.As<TNode>())
-                .ResultsAsync;
+                .Return(entity => entity.As<TNode>());
+
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            var res = await cypher.ResultsAsync;
 
             if (res.Count() != 1)
                 throw new Exception($"Count of nodes with such Id don't equels 1. Type: {typeOfNode.Name}");
@@ -97,36 +126,48 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<List<TNode>> GetNodesAsync(int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetNodesAsync), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "entity." + orderByProperty[i];
 
-            var query = _dbContext.Cypher
+            var cypher = _dbContext.Cypher
                 .Match($"(entity:{typeof(TNode).Name})")
                 .Return(entity => entity.As<TNode>())
                 .ChangeQueryForPagination(orderByProperty, skipCount, limitCount);
 
-            var res = await query.ResultsAsync;
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
 
-            return res.ToList();
+            return (await cypher.ResultsAsync).ToList();
         }
 
         public virtual async Task DeleteNodeWithAllRelations(INode node)
         {
-            await _dbContext.Cypher
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(DeleteNodeWithAllRelations), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
+            var cypher = _dbContext.Cypher
                 .Match($"(entity:{node.GetType().Name} {{Id: $id}})-[r]-()")
                 .WithParams(new
                 {
                     id = node.Id,
                 })
-                .Delete("r, entity")
-                .ExecuteWithoutResultsAsync();
+                .Delete("r, entity");
+
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            await cypher.ExecuteWithoutResultsAsync();
         }
 
         public virtual async Task RelateNodesAsync<TRelation>(TRelation relation)
             where TRelation : IRelation
         {
-            if(relation.NodeFromId == null || relation.NodeToId == null)
-            { 
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(RelateNodesAsync), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
+            if (relation.NodeFromId == null || relation.NodeToId == null)
+            {
                 throw new Exception("NodeFromId or NodeToId is null. Method RelateNodesAsync where TRelation is " + typeof(TRelation));
             }
             var typeNodeFrom = typeof(TRelation).BaseType.GenericTypeArguments[0];
@@ -135,7 +176,7 @@ namespace DbManager.Neo4j.Implementations
             if (relation.Id == Guid.Empty)
                 relation.Id = Guid.NewGuid();
 
-            await _dbContext.Cypher
+            var cypher = _dbContext.Cypher
                 .Match($"(node {{Id: $entityId}}), (otherNode {{Id: $otherNodeId}})")
                 .Create($"(node){direction}(otherNode)")
                 .Set("relation=$newRelation")
@@ -144,17 +185,23 @@ namespace DbManager.Neo4j.Implementations
                     entityId = relation.NodeFromId,
                     otherNodeId = relation.NodeToId,
                     newRelation = relation
-                })
-                .ExecuteWithoutResultsAsync();
+                });
+
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            await cypher.ExecuteWithoutResultsAsync();
         }
 
         public virtual async Task UpdateRelationNodesAsync<TRelation>(TRelation updatedRelation)
             where TRelation : IRelation
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(UpdateRelationNodesAsync), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             var typeNodeFrom = typeof(TRelation).BaseType.GenericTypeArguments[0];
             var direction = GetDirection(updatedRelation.GetType().Name, "relation", typeNodeFrom == typeof(TNode));
 
-            await _dbContext.Cypher
+            var cypher = _dbContext.Cypher
                 .Match($"(node {{Id: $id}}){direction}(relatedNode {{Id: $relatedNodeId}})")
                 .Set("relation=$updatedRelation")
                 .WithParams(new
@@ -162,20 +209,26 @@ namespace DbManager.Neo4j.Implementations
                     id = updatedRelation.NodeFromId,
                     relatedNodeId = updatedRelation.NodeToId,
                     updatedRelation
-                })
-                .ExecuteWithoutResultsAsync();
+                });
+
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            await cypher.ExecuteWithoutResultsAsync();
         }
 
         public async Task<TRelation> GetRelationBetweenTwoNodesAsync<TRelation, TRelatedNode>(TNode node, TRelatedNode relatedNode, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
             where TRelation : IRelation
             where TRelatedNode : INode
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetRelationBetweenTwoNodesAsync), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "relation." + orderByProperty[i];
 
             var direction = GetDirection(typeof(TRelation).Name, "relation");
 
-            var res = await _dbContext.Cypher
+            var cypher = _dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name} {{Id: $relatedNodeId}})")
                 .WithParams(new
                 {
@@ -183,8 +236,11 @@ namespace DbManager.Neo4j.Implementations
                     relatedNodeId = relatedNode.Id,
                 })
                 .Return(relation => relation.As<TRelation>())
-                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount)
-                .ResultsAsync;
+                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount);
+
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            var res = await cypher.ResultsAsync;
 
             if (res.Count() < 1)
                 throw new Exception($"Nodes don't have relation ({typeof(TNode).Name})-[{typeof(TRelation).Name.ToUpper()})]-({typeof(TRelatedNode).Name})");
@@ -192,17 +248,20 @@ namespace DbManager.Neo4j.Implementations
             return res.First();
         }
 
-        public async Task<List<TRelation>> GetRelationsOfNodesAsync<TRelation, TRelatedNode>(TNode node, int? skipCount = null, int? limitCount = null, params string[] orderByProperty) 
-            where TRelation: IRelation
-            where TRelatedNode: INode
+        public async Task<List<TRelation>> GetRelationsOfNodesAsync<TRelation, TRelatedNode>(TNode node, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
+            where TRelation : IRelation
+            where TRelatedNode : INode
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetRelationsOfNodesAsync), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "relatedNode." + orderByProperty[i];
 
             var direction = GetDirection(typeof(TRelation).Name, "relation");
             var typeNodeFrom = typeof(TRelation).BaseType.GenericTypeArguments[0];
 
-            var res = await _dbContext.Cypher
+            var cypher = _dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name})")
                 .WithParams(new
                 {
@@ -213,8 +272,11 @@ namespace DbManager.Neo4j.Implementations
                     nodeRelations = relation.As<TRelation>(),
                     relationNodes = relatedNode.As<TRelatedNode>()
                 })
-                .ChangeQueryForPaginationAnonymousType(orderByProperty, skipCount, limitCount)
-                .ResultsAsync;
+                .ChangeQueryForPaginationAnonymousType(orderByProperty, skipCount, limitCount);
+
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            var res = await cypher.ResultsAsync;
 
             var nodeIsNodeFrom = typeof(TNode) == typeNodeFrom;
             var relations = res.Select(h =>
@@ -229,8 +291,10 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<List<TRelation>> GetRelationsOfNodesAsync<TRelation, TRelatedNode>(string nodeId, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
             where TRelation : IRelation
-            where TRelatedNode : INode 
+            where TRelatedNode : INode
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetRelationsOfNodesAsync), System.Diagnostics.ActivityKind.Client);
+
             var node = await GetNodeAsync(nodeId);
 
             return await GetRelationsOfNodesAsync<TRelation, TRelatedNode>(node, skipCount, limitCount, orderByProperty);
@@ -240,65 +304,83 @@ namespace DbManager.Neo4j.Implementations
             where TRelation : IRelation
             where TRelatedNode : INode
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(DeleteRelationOfNodesAsync), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             var direction = GetDirection(typeof(TRelation).Name, "relation");
 
-            await _dbContext.Cypher
+            var cypher = _dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}}){direction}(relatedNode:{typeof(TRelatedNode).Name} {{Id: $relatedNodeId}})")
                 .Delete("relation")
                 .WithParams(new
                 {
                     id = node.Id,
                     relatedNodeId = relatedNode.Id,
-                })
-                .ExecuteWithoutResultsAsync();
+                });
+
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            await cypher.ExecuteWithoutResultsAsync();
         }
 
         public async Task<List<TNode>> GetNodesWithoutRelation<TRelation>(int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetNodesWithoutRelation), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "node." + orderByProperty[i];
 
-            var directionIn = GetDirection(typeof(TRelation).Name); 
+            var directionIn = GetDirection(typeof(TRelation).Name);
             var directionOut = GetDirection(typeof(TRelation).Name);
 
-            var result = await _dbContext.Cypher
+            var cypher = _dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name})")
                 .Where($"not (node){directionIn}() and not (node){directionOut}()")
                 .Return(node => node.As<TNode>())
-                .ChangeQueryForPagination(orderByProperty,skipCount,limitCount)
-                .ResultsAsync;
+                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount);
 
-            return result.ToList();
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            return (await cypher.ResultsAsync).ToList();
         }
 
         public async Task<List<TNode>> GetNodesByIdAsync(string[] ids, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetNodesByIdAsync), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "node." + orderByProperty[i];
 
-            var result = await _dbContext.Cypher
+            var cypher = _dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name})")
                 .Where($"node.Id in [\"{string.Join("\",\"", ids)}\"]")
                 .Return(node => node.As<TNode>())
-                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount)
-                .ResultsAsync;
+                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount);
 
-            return result.ToList();
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            return (await cypher.ResultsAsync).ToList();
         }
 
         public async Task<List<TNode>> GetNodesByPropertyAsync(string nameOfProperty, string[] propertyValues, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetNodesByPropertyAsync), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "node." + orderByProperty[i];
 
-            var result = await _dbContext.Cypher
+            var cypher = _dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name})")
                 .Where($"node.{nameOfProperty} in [\"{string.Join("\",\"", propertyValues)}\"]")
                 .Return(node => node.As<TNode>())
-                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount)
-                .ResultsAsync;
+                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount);
 
-            return result.ToList();
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            return (await cypher.ResultsAsync).ToList();
         }
 
         public virtual async Task SetNewNodeType<TNewNodeType>(string nodeId)
@@ -309,14 +391,18 @@ namespace DbManager.Neo4j.Implementations
 
         public virtual async Task SetNewNodeType(string nodeId, string nodeTypeName)
         {
-            await _dbContext.Cypher
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(SetNewNodeType), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
+            var cypher = _dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}})")
                 .Set($"node:{nodeTypeName}")
                 .WithParams(new
                 {
                     id = nodeId,
-                })
-                .ExecuteWithoutResultsAsync();
+                });
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+            await cypher.ExecuteWithoutResultsAsync();
         }
 
         public virtual async Task RemoveNodeType<TNodeType>(string nodeId)
@@ -327,14 +413,20 @@ namespace DbManager.Neo4j.Implementations
 
         public virtual async Task RemoveNodeType(string nodeId, string nodeTypeName)
         {
-            await _dbContext.Cypher
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(RemoveNodeType), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
+            var cypher = _dbContext.Cypher
                 .Match($"(node:{typeof(TNode).Name} {{Id: $id}})")
                 .Remove($"node:{nodeTypeName}")
                 .WithParams(new
                 {
                     id = nodeId,
-                })
-                .ExecuteWithoutResultsAsync();
+                });
+
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            await cypher.ExecuteWithoutResultsAsync();
         }
 
         public async Task<bool> HasNodeType<TNodeType>(string nodeId)
@@ -345,16 +437,20 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<bool> HasNodeType(string nodeId, string nodeType)
         {
-            var result = await _dbContext.Cypher
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(HasNodeType), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
+            var cypher = _dbContext.Cypher
                 .Match($"(node:{typeof(User).Name} {{Id: $id}})")
                 .WithParams(new
                 {
                     id = nodeId,
                 })
-                .ReturnDistinct<List<string>>("labels(node)")
-                .ResultsAsync;
+                .ReturnDistinct<List<string>>("labels(node)");
 
-            var clearResult = result.First().ToList();
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            var clearResult = (await cypher.ResultsAsync).First().ToList();
 
             if (clearResult.Contains(nodeType))
                 return true;
@@ -372,13 +468,13 @@ namespace DbManager.Neo4j.Implementations
         protected string GetDirection(string nameRelation, string? relationInstanceName = "", bool? relationInEntity = null)
         {
             string direction = "-[]-";
-            if(!string.IsNullOrEmpty(nameRelation))
+            if (!string.IsNullOrEmpty(nameRelation))
                 direction = $"-[{relationInstanceName}:{nameRelation.ToUpper()}]-";
 
             if (relationInEntity == null)
                 return direction;
 
-            return relationInEntity.Value ? "<" + direction: direction + ">";
+            return relationInEntity.Value ? "<" + direction : direction + ">";
         }
 
         public void Dispose()

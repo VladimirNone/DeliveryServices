@@ -14,7 +14,7 @@ namespace DbManager.Neo4j.Implementations
 {
     public class UserRepository : GeneralNeo4jRepository<User>, IUserRepository
     {
-        public UserRepository(BoltGraphClientFactory boltGraphClientFactory) : base(boltGraphClientFactory)
+        public UserRepository(BoltGraphClientFactory boltGraphClientFactory, Instrumentation instrumentation) : base(boltGraphClientFactory, instrumentation)
         {
         }
 
@@ -28,11 +28,11 @@ namespace DbManager.Neo4j.Implementations
 
         private string GetMaxPriorityRole(List<string> roles)
         {
-            var maxPriRole = UserRolePriority.First(h=>h.Value == 0).Key;
+            var maxPriRole = UserRolePriority.First(h => h.Value == 0).Key;
 
             foreach (var role in roles)
             {
-                if(UserRolePriority.TryGetValue(role, out _))
+                if (UserRolePriority.TryGetValue(role, out _))
                 {
                     if (UserRolePriority[role] > UserRolePriority[maxPriRole])
                     {
@@ -50,26 +50,31 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<List<string>> GetUserRoles(string userId)
         {
-            var result = await _dbContext.Cypher
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetUserRoles), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
+            var cypher = _dbContext.Cypher
                 .Match($"(node:{typeof(User).Name} {{Id: $id}})")
                 .WithParams(new
                 {
                     id = userId,
                 })
-                .ReturnDistinct<List<string>>("labels(node)")
-                .ResultsAsync;
+                .ReturnDistinct<List<string>>("labels(node)");
 
-            var clearResult = result.First().ToList();
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
 
-            return clearResult;
+            return (await cypher.ResultsAsync).First().ToList();
         }
 
         public async Task<List<(User, List<string>)>> GetUsersForAdmin(int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetUsersForAdmin), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "node." + orderByProperty[i];
 
-            var res = await _dbContext.Cypher
+            var cypher = _dbContext.Cypher
                 .Match($"(node:{typeof(User).Name})")
                 .With("node, labels(node) as roles")
                 .Return((node, roles) => new
@@ -77,18 +82,22 @@ namespace DbManager.Neo4j.Implementations
                     user = node.As<User>(),
                     userRoles = roles.As<List<string>>()
                 })
-                .ChangeQueryForPaginationAnonymousType(orderByProperty, skipCount, limitCount)
-                .ResultsAsync;
+                .ChangeQueryForPaginationAnonymousType(orderByProperty, skipCount, limitCount);
 
-            return res.Select(h=>(h.user, h.userRoles)).ToList();
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            return (await cypher.ResultsAsync).Select(h => (h.user, h.userRoles)).ToList();
         }
 
         public async Task<List<(User, List<string>)>> SearchUsersByIdAndLoginForAdmin(string searchText, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(SearchUsersByIdAndLoginForAdmin), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "node." + orderByProperty[i];
 
-            var res = await _dbContext.Cypher
+            var cypher = _dbContext.Cypher
                 .Match($"(node:{typeof(User).Name})")
                 .Where($"toLower(node.Id) contains($searchText) or toLower(node.Login) contains($searchText)")
                 .WithParams(new
@@ -101,18 +110,22 @@ namespace DbManager.Neo4j.Implementations
                     user = node.As<User>(),
                     userRoles = roles.As<List<string>>()
                 })
-                .ChangeQueryForPaginationAnonymousType(orderByProperty, skipCount, limitCount)
-                .ResultsAsync;
+                .ChangeQueryForPaginationAnonymousType(orderByProperty, skipCount, limitCount);
 
-            return res.Select(h => (h.user, h.userRoles)).ToList();
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            return (await cypher.ResultsAsync).Select(h => (h.user, h.userRoles)).ToList();
         }
 
         public async Task<List<User>> SearchUsersByIdAndLogin(string searchText, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(SearchUsersByIdAndLogin), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "node." + orderByProperty[i];
 
-            var res = await _dbContext.Cypher
+            var cypher = _dbContext.Cypher
                 .Match($"(node:{typeof(User).Name})")
                 .Where($"toLower(node.Id) contains($searchText) or toLower(node.Login) contains($searchText)")
                 .WithParams(new
@@ -120,10 +133,11 @@ namespace DbManager.Neo4j.Implementations
                     searchText
                 })
                 .Return((node) => node.As<User>())
-                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount)
-                .ResultsAsync;
+                .ChangeQueryForPagination(orderByProperty, skipCount, limitCount);
 
-            return res.ToList();
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            return (await cypher.ResultsAsync).ToList();
         }
     }
 }

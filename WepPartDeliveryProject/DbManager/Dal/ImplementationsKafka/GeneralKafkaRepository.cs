@@ -16,7 +16,7 @@ namespace DbManager.Dal.ImplementationsKafka
     {
         private readonly KafkaCacheEventProducer _kafkaProducer;
 
-        public GeneralKafkaRepository(BoltGraphClientFactory boltGraphClientFactory, KafkaCacheEventProducer kafkaProducer) : base(boltGraphClientFactory)
+        public GeneralKafkaRepository(BoltGraphClientFactory boltGraphClientFactory, KafkaCacheEventProducer kafkaProducer, Instrumentation instrumentation) : base(boltGraphClientFactory, instrumentation)
         {
             this._kafkaProducer = kafkaProducer;
         }

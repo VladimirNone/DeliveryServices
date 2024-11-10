@@ -1,8 +1,13 @@
-﻿using DbManager.Data.DTOs;
+﻿using AutoMapper;
+using DbManager;
+using DbManager.Data;
+using DbManager.Data.DTOs;
 using DbManager.Data.Nodes;
+using DbManager.Data.Relations;
 using DbManager.Neo4j.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using DbManager.Data.Relations;
 using AutoMapper;
@@ -22,8 +27,9 @@ namespace WepPartDeliveryProject.Controllers
         private readonly ApplicationSettings _appSettings;
         private readonly IMapper _mapper;
         private readonly JwtService _jwtService;
+        private readonly Instrumentation _instrumentation;
 
-        public OrderController(IRepositoryFactory repositoryFactory, IMapper mapper, JwtService jwtService, IOptions<ApplicationSettings> appSettingsOptions)
+        public OrderController(IRepositoryFactory repositoryFactory, IMapper mapper, JwtService jwtService, Instrumentation instrumentation, IOptions<ApplicationSettings> appSettingsOptions)
         {
             // Fetch settings object from configuration
             _appSettings = appSettingsOptions.Value;
@@ -31,6 +37,7 @@ namespace WepPartDeliveryProject.Controllers
             _repositoryFactory = repositoryFactory;
             _mapper = mapper;
             _jwtService = jwtService;
+            _instrumentation = instrumentation;
         }
 
         [AllowAnonymous]

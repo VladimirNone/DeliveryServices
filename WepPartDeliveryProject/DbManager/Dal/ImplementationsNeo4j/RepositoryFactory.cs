@@ -16,12 +16,14 @@ namespace DbManager.Neo4j.Implementations
         private readonly Dictionary<Type, object> repositories = new Dictionary<Type, object>();
         private readonly KafkaCacheEventProducer _kafkaProducer;
         private readonly BoltGraphClientFactory _boltGraphClientFactory;
+        private Instrumentation _instrumentation;
 
-        public RepositoryFactory(BoltGraphClientFactory boltGraphClientFactory, KafkaCacheEventProducer kafkaProducer, IServiceProvider serviceProvider)
+        public RepositoryFactory(BoltGraphClientFactory boltGraphClientFactory, KafkaCacheEventProducer kafkaProducer, IServiceProvider serviceProvider, Instrumentation instrumentation)
         {
             this._boltGraphClientFactory = boltGraphClientFactory;
             this._services = serviceProvider;
             this._kafkaProducer = kafkaProducer;
+            this._instrumentation = instrumentation;
         }
 
         public IGeneralRepository<TEntity> GetRepository<TEntity>() where TEntity : INode
@@ -40,7 +42,7 @@ namespace DbManager.Neo4j.Implementations
                 return repo;
             }
 
-            repo = new GeneralKafkaRepository<TEntity>(this._boltGraphClientFactory, this._kafkaProducer);
+            repo = new GeneralKafkaRepository<TEntity>(this._boltGraphClientFactory, this._kafkaProducer, this._instrumentation);
             repositories.Add(typeEntity, repo);
 
             return repo;

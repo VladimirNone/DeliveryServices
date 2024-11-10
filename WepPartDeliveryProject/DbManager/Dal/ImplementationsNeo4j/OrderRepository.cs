@@ -15,7 +15,7 @@ namespace DbManager.Neo4j.Implementations
 {
     public class OrderRepository : GeneralNeo4jRepository<Order>, IOrderRepository
     {
-        public OrderRepository(BoltGraphClientFactory boltGraphClientFactory) : base(boltGraphClientFactory)
+        public OrderRepository(BoltGraphClientFactory boltGraphClientFactory, Instrumentation instrumentation) : base(boltGraphClientFactory, instrumentation)
         {
         }
 
@@ -34,13 +34,16 @@ namespace DbManager.Neo4j.Implementations
         public async Task<List<Order>> GetOrdersByStateRelatedWithNode<TNode>(Guid nodeId, Guid orderStateId, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
             where TNode : INode
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetOrdersByStateRelatedWithNode), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             for (int i = 0; i < orderByProperty.Length; i++)
                 orderByProperty[i] = "orders." + orderByProperty[i];
 
             var directionInOrderCB = GetDirection("");
             var directionInOrderHOS = GetDirection(typeof(HasOrderState).Name, "rel");
 
-            var res = await _dbContext.Cypher
+            var cypher = _dbContext.Cypher
                 .Match(
                     $"(node:{typeof(TNode).Name} {{Id: $nodeId}})" +
                     $"{directionInOrderCB}" +
@@ -53,14 +56,17 @@ namespace DbManager.Neo4j.Implementations
                         orderStateId,
                     })
                 .Return(orders => orders.As<Order>())
-                .ChangeQueryForPagination(orderByProperty.Concat(new[] { "rel.TimeStartState desc" }).ToArray(), skipCount, limitCount)
-                .ResultsAsync;
+                .ChangeQueryForPagination(orderByProperty.Concat(new[] { "rel.TimeStartState desc" }).ToArray(), skipCount, limitCount);
 
-            return res.ToList();
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            return (await cypher.ResultsAsync).ToList();
         }
 
         public async Task<HasOrderState?> MoveOrderToNextStage(string orderId, string comment)
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(MoveOrderToNextStage), System.Diagnostics.ActivityKind.Client);
+
             var order = await GetNodeAsync(Guid.Parse(orderId));
             var orderHasState = order.Story.Last();
             var orderState = ObjectCache<OrderState>.Instance.Single(h => h.Id == orderHasState.NodeToId);
@@ -88,6 +94,8 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<bool> MoveOrderToPreviousStage(string orderId)
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(MoveOrderToPreviousStage), System.Diagnostics.ActivityKind.Client);
+
             var order = await GetNodeAsync(Guid.Parse(orderId));
             var orderHasState = order.Story.Last();
             var orderState = ObjectCache<OrderState>.Instance.Single(h => h.Id == orderHasState.NodeToId);
@@ -108,7 +116,9 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task CreateOrderRelationInDB(Order order, string? userId, List<Dish> dishes, Kitchen kitchen, DeliveryMan deliveryMan, Dictionary<string, int> countOfDishes, string? comment)
         {
-            if(userId != null)
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(CreateOrderRelationInDB), System.Diagnostics.ActivityKind.Client);
+
+            if (userId != null)
                 await RelateNodesAsync(new Ordered() { NodeFromId = Guid.Parse(userId), NodeTo = order });
 
             foreach (var dish in dishes)
@@ -130,6 +140,9 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<List<(string, double, int)>> GetOrderPriceAndCountStatistic()
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetOrderPriceAndCountStatistic), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             /*MATCH (node:Order)-[relation:HASORDERSTATE]-(relatedNode:OrderState {NumberOfStage: 16}) 
             WITH date.truncate('month', datetime(relation.TimeStartState)) as time , sum(node.Price) as sum, count(relatedNode) as count 
             where time > date("2022-11-01") and time < date("2023-03-01")
@@ -157,6 +170,9 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<List<(string, int, int)>> GetCountFinishedOrderAndClientsStatistic()
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetCountFinishedOrderAndClientsStatistic), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             /*MATCH (node:Client)-[relation:ORDERED]-(relatedNode:Order)-[relation2:HASORDERSTATE]-(relatedNode2:OrderState {NumberOfStage: 16})
             with count(relatedNode) as countOfOrders, count(distinct node) as countOfClients, date.truncate('month', datetime(relation2.TimeStartState)) as time
             RETURN countOfOrders, countOfClients, time order by time */
@@ -183,6 +199,9 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<List<(string, List<Order>)>> GetCancelledOrderGroupedByMonthStatistic()
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetCancelledOrderGroupedByMonthStatistic), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             /* MATCH(node:Order)-[relation: HASORDERSTATE]-(relatedNode:OrderState {NumberOfStage: 32})
             with node, date.truncate('month', datetime(relation.TimeStartState)) as time
             RETURN node, time order by time */
@@ -208,6 +227,9 @@ namespace DbManager.Neo4j.Implementations
 
         public async Task<List<(Kitchen, int, int)>> GetCountOrdersAndOrderedDishesForEveryKitchenStatistic()
         {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetCountOrdersAndOrderedDishesForEveryKitchenStatistic), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
             /*match(k:Kitchen)-[]-(o:Order)-[r:ORDEREDDISH]-(d:Dish)
             with k, count(distinct o) as countO, sum(r.Count) as sumD
             return k,countO, sumD */

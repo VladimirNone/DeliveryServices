@@ -10,6 +10,6 @@ namespace DbManager.Neo4j.Interfaces
 {
     public interface IDeliveryManRepository : IGeneralRepository<DeliveryMan>
     {
-        Task<List<(DeliveryMan, int)>> GetTopDeliveryMenByCountOrder(int topCount);
+        Task<List<(DeliveryMan, int)>> GetTopDeliveryMenByCountOrderStatistic(int topCount);
     }
 }

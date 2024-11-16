@@ -6,7 +6,6 @@ using DbManager.Neo4j.Interfaces;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry.Context.Propagation;
 using System.Collections.Concurrent;
-using System.Diagnostics.Metrics;
 using System.Reflection;
 using System.Text;
 
@@ -19,7 +18,6 @@ namespace DbManager.Services
         private Thread _workThread;
         private ILogger<ObjectCasheKafkaChanger> _logger;
         private readonly IRepositoryFactory _repositoryFactory;
-        private readonly Counter<long> _cacheEventCounter;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private readonly Instrumentation _instrumentation;
 
@@ -27,8 +25,6 @@ namespace DbManager.Services
         {
             this._logger = logger;
             this._repositoryFactory = repositoryFactory;
-
-            this._cacheEventCounter = instrumentation.CacheEventCounter;
 
             this._instrumentation = instrumentation;
 
@@ -39,7 +35,7 @@ namespace DbManager.Services
         public void AddToQueue(ConsumeResult<string, string> consumeResult)
         {
             this.queue.Enqueue(consumeResult);
-            this._cacheEventCounter.Add(1);
+            this._instrumentation.CacheEventCounter.Add(1);
         }
 
         private void WorkFunction()
@@ -104,7 +100,7 @@ namespace DbManager.Services
                                 throw new ArgumentException($"KafkaChangeCacheEvent.MethodName with value \"{kafkaChangeCacheEvent.MethodName}\" can't be processed");
                         }
                         activity?.AddEvent(new System.Diagnostics.ActivityEvent($"Method {kafkaChangeCacheEvent.MethodName} were executed"));
-                        this._cacheEventCounter.Add(-1);
+                        this._instrumentation.CacheEventCounter.Add(-1);
                         
                     }
                     catch (ArgumentException ex)
@@ -116,7 +112,7 @@ namespace DbManager.Services
                         if (consumeResult != null)
                         {
                             //в теории возможно ситуация, когда мы добавили объект и тут же его обновили/удалили или обновили и после удалили, однако события были обработаны в другом порядке
-                            this.queue.Enqueue(consumeResult);
+                            this.AddToQueue(consumeResult);
                         }
                         this._logger.LogError(ex.ToString());
                     }

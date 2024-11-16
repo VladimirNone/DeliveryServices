@@ -79,7 +79,6 @@ try
             // Ensure the MeterProvider subscribes to any custom Meters.
             builder
                 .AddMeter(Instrumentation.MeterName)
-                .SetExemplarFilter(ExemplarFilterType.TraceBased)
                 .AddRuntimeInstrumentation()
                 .AddProcessInstrumentation()
                 .AddHttpClientInstrumentation()
@@ -196,6 +195,8 @@ try
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
         options.RoutePrefix = string.Empty;
     });
+
+    app.UseRequestCounter();
 
     app.UseCors();
 

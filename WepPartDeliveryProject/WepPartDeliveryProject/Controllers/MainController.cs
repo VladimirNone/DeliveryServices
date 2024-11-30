@@ -42,7 +42,7 @@ namespace WepPartDeliveryProject.Controllers
             //обычному пользователю не должен быть доступен удаленный или недоступный продукт
             var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesAsync(_appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
 
-            var pageEnded = dishes.Count() < _appSettings.CountOfItemsOnWebPage + 1;
+            var pageEnded = dishes.Count < _appSettings.CountOfItemsOnWebPage + 1;
 
             PrepareDish(dishes);
 
@@ -50,25 +50,21 @@ namespace WepPartDeliveryProject.Controllers
         }
 
         [HttpGet("getOrderStates")]
-        public async Task<IActionResult> GetOrderStates()
+        public IActionResult GetOrderStates()
         {
-            var states = _mapper.Map<List<OrderStateItemOutDTO>>(ObjectCache<OrderState>.Instance.ToList());
-
-            return Ok(states);
+            return Ok(_mapper.Map<List<OrderStateItemOutDTO>>(ObjectCache<OrderState>.Instance.ToList()));
         }
 
         [HttpGet("getCategoriesList")]
         public IActionResult GetCategoriesList()
         {
-            var categories = ObjectCache<Category>.Instance.ToList();
-            return Ok(categories);
+            return Ok(ObjectCache<Category>.Instance.ToList());
         }
 
         [HttpGet("getDishIds")]
         public async Task<IActionResult> GetDishIds()
         {
-            var dishIds = (await _repositoryFactory.GetRepository<Dish>().GetNodesAsync()).Select(h=>h.Id).ToList();
-            return Ok(dishIds);
+            return Ok((await _repositoryFactory.GetRepository<Dish>().GetNodesAsync()).Select(h => h.Id));
         }
 
         [HttpGet("getDish/{id}")]

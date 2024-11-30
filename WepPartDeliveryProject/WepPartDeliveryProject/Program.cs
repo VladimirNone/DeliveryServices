@@ -10,6 +10,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using System.Diagnostics.Metrics;
 using System.Text;
+using System.Text.Json.Serialization;
 using WepPartDeliveryProject;
 using WepPartDeliveryProject.BackgroundServices;
 
@@ -134,12 +135,24 @@ try
             });
     });
 
-    services.AddControllers().AddNewtonsoftJson(options =>
-            {
-                options.SerializerSettings.MaxDepth = 3;
-                options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
-            }
-        );
+    var jsonSerializer = configuration.GetSection("JsonSerializer").Value;
+    if (!string.IsNullOrEmpty(jsonSerializer) && jsonSerializer == "Newtonsoft")
+    {
+        services.AddControllers().AddNewtonsoftJson(options =>
+        {
+            options.SerializerSettings.MaxDepth = 3;
+            options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+        });
+    }
+    else
+    {
+        services.AddControllers().AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            options.JsonSerializerOptions.WriteIndented = true;
+        });
+    }
+
     //services.AddEndpointsApiExplorer();
     services.AddSwaggerGen();
 
@@ -147,7 +160,7 @@ try
     services.AddOptions<Neo4jSettings>().Bind(configuration.GetSection("Neo4jSettings"));
     services.AddOptions<ApplicationSettings>().Bind(configuration.GetSection("ApplicationSettings"));
 
-    services.AddDbInfrastructure(configuration);
+    services.AddDbInfrastructure();
     services.AddSingleton<DeliveryHealthCheck>();
     services.AddHealthChecks()
         .AddCheck<GraphHealthCheck>(nameof(GraphHealthCheck), tags: ["live"])

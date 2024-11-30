@@ -1,20 +1,17 @@
-﻿using DbManager.Neo4j.Implementations;
-using DbManager.Neo4j.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
-using Neo4jClient;
-using DbManager.Data.Nodes;
-using DbManager.Services;
-using DbManager.Neo4j.DataGenerator;
-using Microsoft.Extensions.Configuration;
-using DbManager.Data.Relations;
+﻿using DbManager.Dal;
 using DbManager.Data;
-using DbManager.Dal;
+using DbManager.Data.Nodes;
+using DbManager.Neo4j.DataGenerator;
+using DbManager.Neo4j.Implementations;
+using DbManager.Neo4j.Interfaces;
+using DbManager.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DbManager
 {
     public static class ServiceRegistration
     {
-        public static void AddDbInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        public static void AddDbInfrastructure(this IServiceCollection services)
         {
             // This is to register Neo4j Client Object as a singleton
             services.AddSingleton<BoltGraphClientFactory>();

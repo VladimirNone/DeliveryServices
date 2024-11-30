@@ -196,6 +196,12 @@ try
         app.UseExceptionHandler("/Error");
         // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         app.UseHsts();
+
+    }
+    else
+    {
+        // Логирование запросов
+        app.UseRequestLogger();
     }
 
     app.UseSwagger();
@@ -204,8 +210,6 @@ try
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
         options.RoutePrefix = string.Empty;
     });
-
-    app.UseRequestCounter();
 
     app.UseCors();
 

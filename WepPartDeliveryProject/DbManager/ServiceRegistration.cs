@@ -5,13 +5,7 @@ using DbManager.Neo4j.DataGenerator;
 using DbManager.Neo4j.Implementations;
 using DbManager.Neo4j.Interfaces;
 using DbManager.Services;
-using DbManager.Neo4j.DataGenerator;
-using Microsoft.Extensions.Configuration;
-using DbManager.Data.Relations;
-using DbManager.Data;
-using DbManager.Dal;
-using DbManager.AppSettings;
-using DbManager.Data.Cache;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DbManager
 {

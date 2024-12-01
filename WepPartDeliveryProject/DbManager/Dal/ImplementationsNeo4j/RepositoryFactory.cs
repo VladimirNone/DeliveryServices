@@ -3,15 +3,17 @@ using DbManager.Data;
 using DbManager.Neo4j.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System.Collections.Concurrent;
 
 namespace DbManager.Neo4j.Implementations
 {
     public class RepositoryFactory: IRepositoryFactory
     {
         private readonly IServiceProvider _services;
-        private readonly Dictionary<Type, object> repositories = new Dictionary<Type, object>();
+        private readonly ConcurrentDictionary<Type, object> repositories = new ConcurrentDictionary<Type, object>();
         private readonly BoltGraphClientFactory _boltGraphClientFactory;
         private Instrumentation _instrumentation;
+        private object sync = new object();
 
         public RepositoryFactory(BoltGraphClientFactory boltGraphClientFactory, IServiceProvider serviceProvider, Instrumentation instrumentation)
         {
@@ -32,14 +34,17 @@ namespace DbManager.Neo4j.Implementations
             var repo = _services.GetService<IGeneralRepository<TEntity>>();
             if (repo != null)
             {
-                repositories.Add(typeEntity, repo);
-                return repo;
+                if (repositories.TryAdd(typeEntity, repo))
+                    return repo;
+                else
+                    return (IGeneralRepository<TEntity>)repositories[typeEntity];
             }
 
             repo = new GeneralNeo4jRepository<TEntity>(this._boltGraphClientFactory, this._instrumentation);
-            repositories.Add(typeEntity, repo);
-
-            return repo;
+            if (repositories.TryAdd(typeEntity, repo))
+                return repo;
+            else
+                return (IGeneralRepository<TEntity>)repositories[typeEntity];
         }
 
         public IGeneralRepository GetRepository(Type typeOfNode) 

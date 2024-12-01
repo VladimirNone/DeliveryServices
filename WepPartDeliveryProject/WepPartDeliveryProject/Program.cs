@@ -138,6 +138,7 @@ try
     var jsonSerializer = configuration.GetSection("JsonSerializer").Value;
     if (!string.IsNullOrEmpty(jsonSerializer) && jsonSerializer == "Newtonsoft")
     {
+        logger.Info("Newtonsoft JsonSerializer used for controllers");
         services.AddControllers().AddNewtonsoftJson(options =>
         {
             options.SerializerSettings.MaxDepth = 3;
@@ -146,6 +147,7 @@ try
     }
     else
     {
+        logger.Info("System.Text JsonSerializer used for controllers");
         services.AddControllers().AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;

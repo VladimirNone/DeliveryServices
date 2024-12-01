@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WepPartDeliveryProject", "W
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbManager", "DbManager\DbManager.csproj", "{9EA1DC5F-F985-42F4-B939-593F72E886A7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderWorker", "OrderWorker\OrderWorker.csproj", "{C3F1387D-359C-4163-92EF-0EB42D2AB60A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{9EA1DC5F-F985-42F4-B939-593F72E886A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9EA1DC5F-F985-42F4-B939-593F72E886A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9EA1DC5F-F985-42F4-B939-593F72E886A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3F1387D-359C-4163-92EF-0EB42D2AB60A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3F1387D-359C-4163-92EF-0EB42D2AB60A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3F1387D-359C-4163-92EF-0EB42D2AB60A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3F1387D-359C-4163-92EF-0EB42D2AB60A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

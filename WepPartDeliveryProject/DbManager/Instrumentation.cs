@@ -14,12 +14,9 @@ namespace DbManager
             string? version = typeof(Instrumentation).Assembly.GetName().Version?.ToString();
             this.ActivitySource = new ActivitySource(ActivitySourceName, version);
             this.Meter = new Meter(MeterName, version);
-            this.CacheEventCounter = this.Meter.CreateUpDownCounter<long>("cache.events", description: "The number of events for changing object cache on cluster.");
         }
 
         public ActivitySource ActivitySource { get; }
-
-        public UpDownCounter<long> CacheEventCounter { get; }
 
         public void Dispose()
         {

@@ -1,22 +1,20 @@
 ﻿using DbManager.Data;
 using DbManager.Data.Cache;
+using DbManager.Data.Kafka;
 using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Neo4j.Interfaces;
-using Neo4jClient;
-using Neo4jClient.Cypher;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using DbManager.Services;
 
 namespace DbManager.Neo4j.Implementations
 {
     public class OrderRepository : GeneralNeo4jRepository<Order>, IOrderRepository
     {
-        public OrderRepository(BoltGraphClientFactory boltGraphClientFactory, Instrumentation instrumentation) : base(boltGraphClientFactory, instrumentation)
+        private readonly KafkaEventProducer _kafkaProducer;
+
+        public OrderRepository(BoltGraphClientFactory boltGraphClientFactory, KafkaEventProducer kafkaProducer, Instrumentation instrumentation) : base(boltGraphClientFactory, instrumentation)
         {
+            this._kafkaProducer = kafkaProducer;
         }
 
         public async Task<List<Order>> GetOrdersByStateRelatedWithNode<TNode>(string nodeId, string nameOfState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)

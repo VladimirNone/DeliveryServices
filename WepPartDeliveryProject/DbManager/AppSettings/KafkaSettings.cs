@@ -7,5 +7,7 @@
         public string GroupId { get; set; }
 
         public string ContainerEventsTopic { get; set; }
+
+        public string ContainerOrdersTopic { get; set; }
     }
 }

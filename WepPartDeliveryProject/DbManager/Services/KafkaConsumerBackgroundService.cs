@@ -1,10 +1,10 @@
 ﻿using Confluent.Kafka;
-using DbManager;
 using DbManager.AppSettings;
-using DbManager.Services;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace WepPartDeliveryProject.BackgroundServices
+namespace DbManager.Services
 {
     public class KafkaConsumerBackgroundService : BackgroundService
     {
@@ -12,9 +12,9 @@ namespace WepPartDeliveryProject.BackgroundServices
         private readonly string _containerEventsTopic;
         private readonly ILogger<KafkaConsumerBackgroundService> _logger;
         private readonly DeliveryHealthCheck _deliveryHealthCheck;
-        private readonly ObjectCasheKafkaChanger _objectCasheKafkaChanger;
+        private readonly QueryKafkaWorker _queryKafkaWorker;
 
-        public KafkaConsumerBackgroundService(ObjectCasheKafkaChanger objectCasheKafkaChanger, DeliveryHealthCheck deliveryHealthCheck, ILogger<KafkaConsumerBackgroundService> logger, IOptions<KafkaSettings> kafkaOptions)
+        public KafkaConsumerBackgroundService(QueryKafkaWorker queryKafkaWorker, DeliveryHealthCheck deliveryHealthCheck, ILogger<KafkaConsumerBackgroundService> logger, IOptions<KafkaSettings> kafkaOptions)
         {
             var kafkaSettings = kafkaOptions.Value;
             var consumerConfig = new ConsumerConfig
@@ -27,7 +27,7 @@ namespace WepPartDeliveryProject.BackgroundServices
             this._consumerBuilder = new ConsumerBuilder<string, string>(consumerConfig).Build();
             this._containerEventsTopic = kafkaSettings.ContainerEventsTopic ?? "ContainerEvents";
             this._logger = logger;
-            this._objectCasheKafkaChanger = objectCasheKafkaChanger;
+            this._queryKafkaWorker = queryKafkaWorker;
             this._deliveryHealthCheck = deliveryHealthCheck;
         }
 
@@ -56,7 +56,7 @@ namespace WepPartDeliveryProject.BackgroundServices
                         {
                             if(consume.Topic == this._containerEventsTopic)
                             {
-                                this._objectCasheKafkaChanger.AddToQueue(consume);
+                                this._queryKafkaWorker.AddToQueue(consume);
                             }
                         }
                     }

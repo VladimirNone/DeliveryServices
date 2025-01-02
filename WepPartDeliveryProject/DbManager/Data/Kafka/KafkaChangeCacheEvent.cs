@@ -1,10 +1,11 @@
 ﻿using DbManager.Data.Cache;
+using DbManager.Data.Nodes;
 
 namespace DbManager.Data.Kafka
 {
     public class KafkaChangeCacheEvent
     {
-        public Type TypeCacheObject { get; set; }
+        public Type TypeObject { get; set; }
         public string MethodName { get; set; }
 
         public const string AddMethodName = nameof(ObjectCache<INode>.Add);
@@ -12,5 +13,8 @@ namespace DbManager.Data.Kafka
         public const string TryRemoveMethodName = nameof(ObjectCache<INode>.TryRemove);
     }
 
-
+    public class KafkaChangeOrderEvent : KafkaChangeCacheEvent
+    {
+        public Order Order { get; set; }
+    }
 }

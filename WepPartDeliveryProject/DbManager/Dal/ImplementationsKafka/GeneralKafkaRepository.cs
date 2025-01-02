@@ -14,9 +14,9 @@ namespace DbManager.Dal.ImplementationsKafka
     public class GeneralKafkaRepository<TNode> : GeneralNeo4jRepository<TNode>
         where TNode : INode
     {
-        private readonly KafkaCacheEventProducer _kafkaProducer;
+        private readonly KafkaEventProducer _kafkaProducer;
 
-        public GeneralKafkaRepository(BoltGraphClientFactory boltGraphClientFactory, KafkaCacheEventProducer kafkaProducer, Instrumentation instrumentation) : base(boltGraphClientFactory, instrumentation)
+        public GeneralKafkaRepository(BoltGraphClientFactory boltGraphClientFactory, KafkaEventProducer kafkaProducer, Instrumentation instrumentation) : base(boltGraphClientFactory, instrumentation)
         {
             this._kafkaProducer = kafkaProducer;
         }

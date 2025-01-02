@@ -24,11 +24,9 @@ namespace DbManager
 
             services.AddSingleton<KafkaClientHandle>();
             services.AddSingleton<KafkaDependentProducer<string, string>>();
-            services.AddSingleton<KafkaCacheEventProducer>();
+            services.AddSingleton<KafkaEventProducer>();
 
             services.AddSingleton<IRepositoryFactory, RepositoryFactory>();
-
-            services.AddSingleton<ObjectCasheKafkaChanger>();
 
             services.AddTransient<IPasswordService, PasswordService>();
 

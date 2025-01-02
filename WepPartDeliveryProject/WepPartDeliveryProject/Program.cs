@@ -1,6 +1,7 @@
 using DbManager;
 using DbManager.AppSettings;
 using DbManager.Mapper;
+using DbManager.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using NLog;
@@ -98,6 +99,7 @@ try
         });
 
     services.AddHostedService<StartupBackgroundService>();
+    services.AddSingleton<QueryKafkaWorker, ObjectCasheQueryKafkaWorker>();
     services.AddHostedService<KafkaConsumerBackgroundService>();
 
     var app = builder.Build();

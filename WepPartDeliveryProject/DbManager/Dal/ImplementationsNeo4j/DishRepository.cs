@@ -18,7 +18,7 @@ namespace DbManager.Neo4j.Implementations
 {
     public class DishRepository : GeneralKafkaRepository<Dish>, IDishRepository
     {
-        public DishRepository(BoltGraphClientFactory boltGraphClientFactory, KafkaCacheEventProducer kafkaProducer, Instrumentation instrumentation) 
+        public DishRepository(BoltGraphClientFactory boltGraphClientFactory, KafkaEventProducer kafkaProducer, Instrumentation instrumentation) 
             : base(boltGraphClientFactory, kafkaProducer, instrumentation)
         {
         }

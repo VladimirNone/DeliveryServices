@@ -15,12 +15,12 @@ namespace DbManager.Neo4j.Implementations
     {
         private readonly IServiceProvider _services;
         private readonly ConcurrentDictionary<Type, object> repositories = new ConcurrentDictionary<Type, object>();
-        private readonly KafkaCacheEventProducer _kafkaProducer;
+        private readonly KafkaEventProducer _kafkaProducer;
         private readonly BoltGraphClientFactory _boltGraphClientFactory;
         private Instrumentation _instrumentation;
         private object sync = new object();
 
-        public RepositoryFactory(BoltGraphClientFactory boltGraphClientFactory, KafkaCacheEventProducer kafkaProducer, IServiceProvider serviceProvider, Instrumentation instrumentation)
+        public RepositoryFactory(BoltGraphClientFactory boltGraphClientFactory, KafkaEventProducer kafkaProducer, IServiceProvider serviceProvider, Instrumentation instrumentation)
         {
             this._boltGraphClientFactory = boltGraphClientFactory;
             this._services = serviceProvider;

@@ -6,39 +6,36 @@ using DbManager.Neo4j.Interfaces;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry.Context.Propagation;
 using System.Collections.Concurrent;
+using System.Diagnostics.Metrics;
 using System.Reflection;
 using System.Text;
 
 namespace DbManager.Services
 {
-    public class ObjectCasheKafkaChanger : IDisposable
+    public class ObjectCasheQueryKafkaWorker : QueryKafkaWorker
     {
-        private ConcurrentQueue<ConsumeResult<string, string>> queue = new ConcurrentQueue<ConsumeResult<string, string>>();
-        private ConcurrentDictionary<Type, ObjectCasheInfo> objectCachers = new ConcurrentDictionary<Type, ObjectCasheInfo>();
-        private Thread _workThread;
-        private ILogger<ObjectCasheKafkaChanger> _logger;
+        private readonly ConcurrentDictionary<Type, ObjectCasheInfo> objectCachers = new ConcurrentDictionary<Type, ObjectCasheInfo>();
+        private readonly ILogger<ObjectCasheQueryKafkaWorker> _logger;
         private readonly IRepositoryFactory _repositoryFactory;
-        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private readonly Instrumentation _instrumentation;
+        private UpDownCounter<long> _cacheEventCounter { get; }
 
-        public ObjectCasheKafkaChanger(IRepositoryFactory repositoryFactory, Instrumentation instrumentation, ILogger<ObjectCasheKafkaChanger> logger)
+        public ObjectCasheQueryKafkaWorker(IRepositoryFactory repositoryFactory, Instrumentation instrumentation, ILogger<ObjectCasheQueryKafkaWorker> logger) : base()
         {
             this._logger = logger;
             this._repositoryFactory = repositoryFactory;
 
             this._instrumentation = instrumentation;
-
-            this._workThread = new Thread(this.WorkFunction) { Name = "ObjectCasheKafkaChanger" };
-            this._workThread.Start();
+            this._cacheEventCounter = instrumentation.Meter.CreateUpDownCounter<long>("cache.events", description: "The number of events for changing object cache on cluster.");
         }
 
-        public void AddToQueue(ConsumeResult<string, string> consumeResult)
+        public override void AddToQueue(ConsumeResult<string, string> consumeResult)
         {
-            this.queue.Enqueue(consumeResult);
-            this._instrumentation.CacheEventCounter.Add(1);
+            base.AddToQueue(consumeResult);
+            this._cacheEventCounter.Add(1);
         }
 
-        private void WorkFunction()
+        protected override void WorkFunction()
         {
             try
             {
@@ -47,17 +44,17 @@ namespace DbManager.Services
                     ConsumeResult<string, string> consumeResult = null;
                     try
                     {
-                        //Если в очереди что-то появилось и при этом сервис разогрелся, то забираем сообщение и парсим его
-                        if (!this.queue.TryDequeue(out consumeResult))
+                        //Если в очереди что-то появилось, то забираем сообщение и парсим его
+                        if (!this._queue.TryDequeue(out consumeResult))
                             continue;
                         
                         var parentContext = Propagators.DefaultTextMapPropagator.Extract(default, consumeResult.Message.Headers, (headers, key) => headers.TryGetLastBytes(key, out var headerBytes) ? [Encoding.UTF8.GetString(headerBytes)] : []);
                         //Возможно имеет смысл сделать линком, т.к. все ноды будут читать и обновлять контейнеры
-                        using var activity = this._instrumentation.ActivitySource.StartActivity("ObjectCasheKafkaChanger", System.Diagnostics.ActivityKind.Consumer, parentContext.ActivityContext);
+                        using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(ObjectCasheQueryKafkaWorker), System.Diagnostics.ActivityKind.Consumer, parentContext.ActivityContext);
 
                         var kafkaChangeCacheEvent = Newtonsoft.Json.JsonConvert.DeserializeObject<KafkaChangeCacheEvent>(consumeResult.Message.Value);
                         //Получаем тип объекта
-                        var objectType = kafkaChangeCacheEvent.TypeCacheObject;
+                        var objectType = kafkaChangeCacheEvent.TypeObject;
 
                         ObjectCasheInfo objectCacheInfo;
                         if (!objectCachers.TryGetValue(objectType, out objectCacheInfo))
@@ -80,27 +77,27 @@ namespace DbManager.Services
                             activity?.AddEvent(new System.Diagnostics.ActivityEvent("Finish CreatingCachInfo"));
                         }
                         activity?.AddEvent(new System.Diagnostics.ActivityEvent("Start GetNodeAsync"));
-                        var node = objectCacheInfo.Repository.GetNodeAsync(consumeResult.Key, objectType).Result;
+                        var node = objectCacheInfo.Repository.GetNodeAsync(consumeResult.Message.Key, objectType).Result;
                         activity?.AddEvent(new System.Diagnostics.ActivityEvent($"Finish GetNodeAsync and start execute method: {kafkaChangeCacheEvent.MethodName}"));
                         switch (kafkaChangeCacheEvent.MethodName)
                         {
                             case KafkaChangeCacheEvent.AddMethodName:
                                 // Вызываем метод "Add" с необходимыми параметрами
-                                objectCacheInfo.AddMethod?.Invoke(objectCacheInfo.InstanceObject, new object[] { Guid.Parse(consumeResult.Key), node });
+                                objectCacheInfo.AddMethod?.Invoke(objectCacheInfo.InstanceObject, new object[] { Guid.Parse(consumeResult.Message.Key), node });
                                 break;
                             case KafkaChangeCacheEvent.UpdateMethodName:
-                                // Вызываем метод "Add" с необходимыми параметрами
-                                objectCacheInfo.UpdateMethod?.Invoke(objectCacheInfo.InstanceObject, new object[] { Guid.Parse(consumeResult.Key), node });
+                                // Вызываем метод "Update" с необходимыми параметрами
+                                objectCacheInfo.UpdateMethod?.Invoke(objectCacheInfo.InstanceObject, new object[] { Guid.Parse(consumeResult.Message.Key), node });
                                 break;
                             case KafkaChangeCacheEvent.TryRemoveMethodName:
-                                // Вызываем метод "Add" с необходимыми параметрами
-                                objectCacheInfo.TryRemoveMethod?.Invoke(objectCacheInfo.InstanceObject, new object[] { Guid.Parse(consumeResult.Key) });
+                                // Вызываем метод "TryRemove" с необходимыми параметрами
+                                objectCacheInfo.TryRemoveMethod?.Invoke(objectCacheInfo.InstanceObject, new object[] { Guid.Parse(consumeResult.Message.Key) });
                                 break;
                             default:
                                 throw new ArgumentException($"KafkaChangeCacheEvent.MethodName with value \"{kafkaChangeCacheEvent.MethodName}\" can't be processed");
                         }
                         activity?.AddEvent(new System.Diagnostics.ActivityEvent($"Method {kafkaChangeCacheEvent.MethodName} were executed"));
-                        this._instrumentation.CacheEventCounter.Add(-1);
+                        this._cacheEventCounter.Add(-1);
                         
                     }
                     catch (ArgumentException ex)
@@ -120,7 +117,7 @@ namespace DbManager.Services
             }
             catch (ThreadInterruptedException)
             {
-                this._logger.LogError("ObjectCasheKafkaChanger was interrupted.");
+                this._logger.LogError($"{nameof(ObjectCasheQueryKafkaWorker)} was interrupted.");
             }
             catch (Exception ex)
             {
@@ -135,20 +132,6 @@ namespace DbManager.Services
             public MethodInfo? UpdateMethod { get; set; }
             public MethodInfo? TryRemoveMethod { get; set; }
             public IGeneralRepository Repository { get; set; }
-        }
-
-        public void Dispose()
-        {
-            if (this._workThread != null)
-            {
-                this._cancellationTokenSource.Cancel();
-
-                this._workThread.Interrupt();
-                this._workThread.Join();
-                this._workThread = null;
-
-                this._cancellationTokenSource.Dispose();
-            }
         }
     }
 }

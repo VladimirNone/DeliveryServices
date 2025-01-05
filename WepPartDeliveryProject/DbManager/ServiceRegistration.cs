@@ -1,4 +1,5 @@
 ﻿using DbManager.Dal;
+using DbManager.Dal.ImplementationsKafka;
 using DbManager.Data;
 using DbManager.Data.Nodes;
 using DbManager.Neo4j.DataGenerator;
@@ -17,7 +18,13 @@ namespace DbManager
 {
     public static class ServiceRegistration
     {
-        public static void AddDbInfrastructure(this IServiceCollection services)
+        public enum DatabaseProvider
+        {
+            Neo4j,
+            Neo4jKafka,
+        }
+
+        public static void AddDbInfrastructure(this IServiceCollection services, DatabaseProvider databaseProvider = DatabaseProvider.Neo4jKafka)
         {
             // This is to register Neo4j Client Object as a singleton
             services.AddSingleton<BoltGraphClientFactory>();
@@ -26,19 +33,42 @@ namespace DbManager
             services.AddSingleton<KafkaDependentProducer<string, string>>();
             services.AddSingleton<KafkaEventProducer>();
 
-            services.AddSingleton<IRepositoryFactory, RepositoryFactory>();
+            switch (databaseProvider)
+            {
+                case DatabaseProvider.Neo4j:
+                    AddNeo4jRepositoryInfrastructure(services);
+                    break;
+                case DatabaseProvider.Neo4jKafka:
+                    AddKafkaRepositoryInfrastructure(services);
+                    break;
+            }
 
             services.AddTransient<IPasswordService, PasswordService>();
 
             services.AddTransient<DataGenerator>();
             services.AddSingleton<GeneratorService>();
+        }
 
+        public static void AddNeo4jRepositoryInfrastructure(this IServiceCollection services)
+        {
+            services.AddSingleton<IRepositoryFactory, RepositoryFactory>();
             // This is the registration for custom repository class
             services.AddTransient<IGeneralRepository<Order>, OrderRepository>();
             services.AddTransient<IGeneralRepository<Dish>, DishRepository>();
             services.AddTransient<IGeneralRepository<User>, UserRepository>();
             services.AddTransient<IGeneralRepository<Client>, ClientRepository>();
             services.AddTransient<IGeneralRepository<DeliveryMan>, DeliveryManRepository>();
+        }
+
+        public static void AddKafkaRepositoryInfrastructure(this IServiceCollection services)
+        {
+            services.AddSingleton<IRepositoryFactory, KafkaRepositoryFactory>();
+            // This is the registration for custom repository class
+            services.AddTransient<IGeneralRepository<Order>, OrderKafkaRepository>();
+            services.AddTransient<IGeneralRepository<Dish>, DishKafkaRepository>();
+            services.AddTransient<IGeneralRepository<User>, UserKafkaRepository>();
+            services.AddTransient<IGeneralRepository<Client>, ClientKafkaRepository>();
+            services.AddTransient<IGeneralRepository<DeliveryMan>, DeliveryManKafkaRepository>();
         }
 
         public static void AddCustomOpenTelemetry(this IServiceCollection services, IConfiguration configuration, out string metricsExporter)

@@ -47,7 +47,7 @@ try
     services.AddOptions<Neo4jSettings>().Bind(configuration.GetSection("Neo4jSettings"));
     services.AddOptions<KafkaSettings>().Bind(configuration.GetSection("KafkaSettings"));
 
-    services.AddDbInfrastructure();
+    services.AddDbInfrastructure(ServiceRegistration.DatabaseProvider.Neo4j);
     services.AddSingleton<DeliveryHealthCheck>();
     services.AddHealthChecks()
         .AddCheck<GraphHealthCheck>(nameof(GraphHealthCheck), tags: ["live"])

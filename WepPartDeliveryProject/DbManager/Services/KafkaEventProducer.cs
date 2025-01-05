@@ -82,7 +82,7 @@ namespace DbManager.Services
                 if (activity != null)
                     Propagators.DefaultTextMapPropagator.Inject(new PropagationContext(activity.Context, Baggage.Current), message.Headers ??= new Headers(), (headers, key, value) => headers.Add(key, Encoding.UTF8.GetBytes(value)));
 
-                var result = await this._kafkaProducer.ProduceAsync(this._eventTopic, message);
+                var result = await this._kafkaProducer.ProduceAsync(this._orderTopic, message);
                 this.HandleDeliveryResult(activity, result);
 
                 return true;

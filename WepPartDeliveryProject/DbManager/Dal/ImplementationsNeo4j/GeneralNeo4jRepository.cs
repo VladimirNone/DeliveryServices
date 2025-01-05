@@ -1,5 +1,7 @@
-﻿using DbManager.Dal;
+﻿using Confluent.Kafka;
+using DbManager.Dal;
 using DbManager.Data;
+using DbManager.Data.Kafka;
 using Neo4jClient;
 using Neo4jClient.Cypher;
 
@@ -10,6 +12,7 @@ namespace DbManager.Neo4j.Implementations
     {
         protected readonly IGraphClient _dbContext;
         protected readonly Instrumentation _instrumentation;
+        protected Func<INode, string, Task<bool>> _changeCacheEvent;
 
         public GeneralNeo4jRepository(BoltGraphClientFactory boltGraphClientFactory, Instrumentation instrumentation)
         {
@@ -38,6 +41,9 @@ namespace DbManager.Neo4j.Implementations
             activity?.SetTag("cypher.query", cypher.Query.QueryText);
 
             await cypher.ExecuteWithoutResultsAsync();
+
+            if(this._changeCacheEvent != null)
+                await this._changeCacheEvent(newNode, KafkaChangeCacheEvent.AddMethodName);
         }
 
         public async Task AddNodesAsync(List<TNode> newNodes)
@@ -67,6 +73,9 @@ namespace DbManager.Neo4j.Implementations
             activity?.SetTag("cypher.query", cypher.Query.QueryText);
 
             await cypher.ExecuteWithoutResultsAsync();
+
+            if (this._changeCacheEvent != null)
+                await this._changeCacheEvent(node, KafkaChangeCacheEvent.UpdateMethodName);
         }
 
         public virtual async Task UpdateNodesPropertiesAsync(TNode node)
@@ -158,6 +167,9 @@ namespace DbManager.Neo4j.Implementations
             activity?.SetTag("cypher.query", cypher.Query.QueryText);
 
             await cypher.ExecuteWithoutResultsAsync();
+
+            if (this._changeCacheEvent != null)
+                await this._changeCacheEvent(node, KafkaChangeCacheEvent.TryRemoveMethodName);
         }
 
         public virtual async Task RelateNodesAsync<TRelation>(TRelation relation)

@@ -65,13 +65,9 @@ namespace WepPartDeliveryProject.Controllers
         {
             var dish = ObjectCache<Dish>.Instance.First(h => h.Id == id);
 
-            var userId = Request.Cookies["X-UserId"];
-            if (userId != null)
+            if (dish.IsDeleted || !dish.IsAvailableForUser)
             {
-                if (dish.IsDeleted || !dish.IsAvailableForUser)
-                {
-                    return BadRequest("Данный продукт был скрыт или удален");
-                }
+                return BadRequest("Данный продукт был скрыт или удален");
             }
 
             return Ok(await Task.FromResult(dish));
@@ -105,7 +101,7 @@ namespace WepPartDeliveryProject.Controllers
         {
             //обычному пользователю не должен быть доступен удаленный или недоступный продукт
             var dishes = ObjectCache<Dish>.Instance
-                .Where(h => !h.IsDeleted && h.IsAvailableForUser && (h.Description.ToLower().Contains(searchText) || h.Name.ToLower().Contains(searchText)))
+                .Where(h => !h.IsDeleted && h.IsAvailableForUser && (h.Description.ToLower().Contains(searchText.ToLower()) || h.Name.ToLower().Contains(searchText.ToLower())))
                 .OrderBy(h => h.Name)
                 .Skip(_appSettings.CountOfItemsOnWebPage * page)
                 .Take(_appSettings.CountOfItemsOnWebPage + 1)
@@ -128,9 +124,9 @@ namespace WepPartDeliveryProject.Controllers
                 return BadRequest("You don't have refresh token. You need to login or signup to system");
             }
 
-            var user = _mapper.Map<ProfileUserOutDTO>(ObjectCache<User>.Instance.First(h=> h.Id == Guid.Parse(userId)));
+            var user = _mapper.Map<ProfileUserOutDTO>(await _repositoryFactory.GetRepository<User>().GetNodeAsync(userId));
 
-            return Ok(await Task.FromResult(user));
+            return Ok(user);
         }
 
         private void PrepareDish(List<Dish> dishes)

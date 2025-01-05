@@ -10,11 +10,8 @@ namespace DbManager.Neo4j.Implementations
 {
     public class OrderRepository : GeneralNeo4jRepository<Order>, IOrderRepository
     {
-        private readonly KafkaEventProducer _kafkaProducer;
-
-        public OrderRepository(BoltGraphClientFactory boltGraphClientFactory, KafkaEventProducer kafkaProducer, Instrumentation instrumentation) : base(boltGraphClientFactory, instrumentation)
+        public OrderRepository(BoltGraphClientFactory boltGraphClientFactory, Instrumentation instrumentation) : base(boltGraphClientFactory, instrumentation)
         {
-            this._kafkaProducer = kafkaProducer;
         }
 
         public async Task<List<Order>> GetOrdersByStateRelatedWithNode<TNode>(string nodeId, string nameOfState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
@@ -61,7 +58,7 @@ namespace DbManager.Neo4j.Implementations
             return (await cypher.ResultsAsync).ToList();
         }
 
-        public async Task<HasOrderState?> MoveOrderToNextStage(string orderId, string comment)
+        public virtual async Task<HasOrderState?> MoveOrderToNextStage(string orderId, string comment)
         {
             using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(MoveOrderToNextStage), System.Diagnostics.ActivityKind.Client);
 
@@ -90,7 +87,7 @@ namespace DbManager.Neo4j.Implementations
             return newOrderState;
         }
 
-        public async Task<bool> MoveOrderToPreviousStage(string orderId)
+        public virtual async Task<bool> MoveOrderToPreviousStage(string orderId)
         {
             using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(MoveOrderToPreviousStage), System.Diagnostics.ActivityKind.Client);
 
@@ -112,7 +109,7 @@ namespace DbManager.Neo4j.Implementations
             return true;
         }
 
-        public async Task CreateOrderRelationInDB(Order order, string? userId, List<Dish> dishes, Kitchen kitchen, DeliveryMan deliveryMan, Dictionary<string, int> countOfDishes, string? comment)
+        public virtual async Task CreateOrderRelationInDB(Order order, string? userId, List<Dish> dishes, Kitchen kitchen, DeliveryMan deliveryMan, Dictionary<string, int> countOfDishes, string? comment)
         {
             using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(CreateOrderRelationInDB), System.Diagnostics.ActivityKind.Client);
 

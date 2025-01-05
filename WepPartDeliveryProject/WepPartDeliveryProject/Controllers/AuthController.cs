@@ -80,7 +80,7 @@ namespace WepPartDeliveryProject.Controllers
 
             var inputRefreshToken = Request.Cookies["X-Refresh-Token"];
 
-            var userNode = ObjectCache<User>.Instance.First(h => h.Id == Guid.Parse(userId));
+            var userNode = await userRepo.GetNodeAsync(userId);
 
             if (userNode.IsBlocked)
                 return BadRequest("Ваш аккаунт был заблокирован!");

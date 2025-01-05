@@ -1,25 +1,12 @@
-﻿using DbManager.AppSettings;
-using DbManager.Dal.ImplementationsKafka;
-using DbManager.Data;
-using DbManager.Data.Nodes;
+﻿using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Neo4j.Interfaces;
-using DbManager.Services;
-using Microsoft.Extensions.Options;
-using Neo4jClient;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DbManager.Neo4j.Implementations
 {
-    public class DishRepository : GeneralKafkaRepository<Dish>, IDishRepository
+    public class DishRepository : GeneralNeo4jRepository<Dish>, IDishRepository
     {
-        public DishRepository(BoltGraphClientFactory boltGraphClientFactory, KafkaEventProducer kafkaProducer, Instrumentation instrumentation) 
-            : base(boltGraphClientFactory, kafkaProducer, instrumentation)
+        public DishRepository(BoltGraphClientFactory boltGraphClientFactory, Instrumentation instrumentation) : base(boltGraphClientFactory, instrumentation)
         {
         }
 

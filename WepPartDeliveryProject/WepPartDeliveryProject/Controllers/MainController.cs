@@ -74,13 +74,9 @@ namespace WepPartDeliveryProject.Controllers
         {
             var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(id);
 
-            var userId = Request.Cookies["X-UserId"];
-            if (userId != null)
+            if (dish.IsDeleted || !dish.IsAvailableForUser)
             {
-                if (dish.IsDeleted || !dish.IsAvailableForUser)
-                {
-                    return BadRequest("Данный продукт был скрыт или удален");
-                }
+                return BadRequest("Данный продукт был скрыт или удален");
             }
 
             return Ok(dish);

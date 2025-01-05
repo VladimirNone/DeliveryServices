@@ -15,6 +15,7 @@ using DbManager.Data;
 using System.Xml.Linq;
 using Microsoft.Extensions.Options;
 using DbManager.Data.Cache;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace WepPartDeliveryProject.Controllers
 {
@@ -48,7 +49,7 @@ namespace WepPartDeliveryProject.Controllers
 
             var res = jsonData != null ? JsonConvert.DeserializeObject<Dictionary<string, int>>(jsonData) : new Dictionary<string, int>();
 
-            var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesByPropertyAsync("Id", res.Keys.ToArray());
+            var dishes = ObjectCache<Dish>.Instance.Where(h => res.Keys.Contains(h.Id.ToString()));
 
             return Ok(dishes);
         }
@@ -64,7 +65,7 @@ namespace WepPartDeliveryProject.Controllers
             if (res.Count == 0)
                 return BadRequest("При оформлении заказа, в корзине отсутсвовали продукты");
 
-            var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesByPropertyAsync("Id", res.Keys.ToArray());
+            var dishes = ObjectCache<Dish>.Instance.Where(h => res.Keys.Contains(h.Id.ToString())).ToList();
 
             var order = new Order() { 
                 SumWeight = dishes.Sum(h=>h.Weight), 
@@ -96,7 +97,7 @@ namespace WepPartDeliveryProject.Controllers
         {
             var order = await _repositoryFactory.GetRepository<Order>().GetNodeAsync(inputData.OrderId);
 
-            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(inputData.DishId);
+            var dish = ObjectCache<Dish>.Instance.First(h => h.Id == Guid.Parse(inputData.DishId));
 
             var orderedDish = await _repositoryFactory.GetRepository<Dish>().GetRelationBetweenTwoNodesAsync<OrderedDish, Order>(dish, order);
 

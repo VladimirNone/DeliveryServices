@@ -60,7 +60,7 @@ namespace DbManager.Services
                             continue;
                         }
                         activity?.AddEvent(new System.Diagnostics.ActivityEvent("Start catch dublicate Order"));
-                        var order = 
+                        var order = kafkaChangeOrderEvent.Order;
                         //TODO: add adding and searching dublicate by key of order
                         activity?.AddEvent(new System.Diagnostics.ActivityEvent("Finish catch dublicate Order"));
                         /*---------------------------------------------------------------------------*/
@@ -69,11 +69,11 @@ namespace DbManager.Services
                         {
                             case KafkaChangeCacheEvent.AddMethodName:
                                 // Вызываем метод "Add" с необходимыми параметрами
-                                this._orderRepository.AddNodeAsync();
+                                this._orderRepository.AddNodeAsync(order).Wait();
                                 break;
                             case KafkaChangeCacheEvent.UpdateMethodName:
                                 // Вызываем метод "Add" с необходимыми параметрами
-                                objectCacheInfo.UpdateMethod?.Invoke(objectCacheInfo.InstanceObject, new object[] { Guid.Parse(consumeResult.Message.Key), node });
+                                this._orderRepository.UpdateNodeAsync(order).Wait();
                                 break;
                             case KafkaChangeCacheEvent.TryRemoveMethodName:
                                 throw new ArgumentException($"KafkaChangeCacheEvent.MethodName with value \"{kafkaChangeOrderEvent.MethodName}\" can't be processed for order");

@@ -42,13 +42,13 @@ namespace WepPartDeliveryProject.Controllers
             var workedIns = await _repositoryFactory.GetRepository<KitchenWorker>().GetRelationsOfNodesAsync<WorkedIn, Kitchen>(userId);
             var kitchen = (Kitchen)workedIns.FirstOrDefault().NodeTo;
 
-            var orders = await orderRepo.GetOrdersByStateRelatedWithNode<Kitchen>(kitchen.Id.ToString(), (OrderStateEnum)numberOfState, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1);
+            var orders = (await orderRepo.GetOrdersByStateRelatedWithNode<Kitchen>(kitchen.Id.ToString(), (OrderStateEnum)numberOfState, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1)).ToList();
 
-            var ordersOut = _mapper.Map<List<OrderOutDTO>>(orders);
+            var ordersOut = _mapper.Map<List<OrderOutDTO>>(orders.GetRange(0, orders.Count() > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : orders.Count()));
 
-            var pageEnded = ordersOut.Count() < _appSettings.CountOfItemsOnWebPage + 1;
+            var pageEnded = orders.Count() < _appSettings.CountOfItemsOnWebPage + 1;
 
-            return Ok(new { orders = ordersOut.GetRange(0, ordersOut.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : ordersOut.Count), pageEnded });
+            return Ok(new { orders = ordersOut, pageEnded });
         }
 
         [HttpGet("getWorkers")]

@@ -7,6 +7,8 @@ using DbManager.Neo4j.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using DbManager.Data.Cache;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace WepPartDeliveryProject.Controllers
 {
@@ -39,7 +41,7 @@ namespace WepPartDeliveryProject.Controllers
 
             var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>();
 
-            var delMan = await _repositoryFactory.GetRepository<DeliveryMan>().GetNodeAsync(userId);
+            var delMan = ObjectCache<DeliveryMan>.Instance.First(h => h.Id == Guid.Parse(userId));
 
             var orders = await orderRepo.GetOrdersByStateRelatedWithNode<DeliveryMan>(delMan.Id.ToString(), (OrderStateEnum)numberOfState, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1);
 
@@ -47,7 +49,7 @@ namespace WepPartDeliveryProject.Controllers
 
             var pageEnded = ordersOut.Count() < _appSettings.CountOfItemsOnWebPage + 1;
 
-            return Ok(new { orders = ordersOut.GetRange(0, ordersOut.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : ordersOut.Count), pageEnded });
+            return Ok(new { orders = ordersOut, pageEnded });
         }
     }
 }

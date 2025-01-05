@@ -1,4 +1,5 @@
 ﻿using DbManager.Data;
+using DbManager.Data.Cache;
 using DbManager.Data.DTOs;
 using DbManager.Data.Nodes;
 using DbManager.Neo4j.Interfaces;
@@ -79,7 +80,7 @@ namespace WepPartDeliveryProject.Controllers
 
             var inputRefreshToken = Request.Cookies["X-Refresh-Token"];
 
-            var userNode = await userRepo.GetNodeAsync(userId);
+            var userNode = ObjectCache<User>.Instance.First(h => h.Id == Guid.Parse(userId));
 
             if (userNode.IsBlocked)
                 return BadRequest("Ваш аккаунт был заблокирован!");

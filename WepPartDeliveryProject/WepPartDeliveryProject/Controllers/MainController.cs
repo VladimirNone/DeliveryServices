@@ -1,20 +1,13 @@
 ﻿using AutoMapper;
-using DbManager;
 using DbManager.Data;
 using DbManager.Data.Cache;
 using DbManager.Data.DTOs;
 using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
-using DbManager.Neo4j.DataGenerator;
-using DbManager.Neo4j.Implementations;
 using DbManager.Neo4j.Interfaces;
-using DbManager.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace WepPartDeliveryProject.Controllers
 {
@@ -40,13 +33,13 @@ namespace WepPartDeliveryProject.Controllers
         public async Task<IActionResult> GetDishesForMainPage(int page = 0)
         {
             //обычному пользователю не должен быть доступен удаленный или недоступный продукт
-            var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesAsync(_appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
+            var dishes = ObjectCache<Dish>.Instance.OrderBy(h => h.Name).Skip(_appSettings.CountOfItemsOnWebPage * page).Take(_appSettings.CountOfItemsOnWebPage + 1).ToList();
 
             var pageEnded = dishes.Count < _appSettings.CountOfItemsOnWebPage + 1;
 
             PrepareDish(dishes);
 
-            return Ok(new { dishes = dishes.GetRange(0, dishes.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage : dishes.Count), pageEnded });
+            return Ok(new { dishes, pageEnded });
         }
 
         [HttpGet("getOrderStates")]
@@ -64,13 +57,13 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getDishIds")]
         public async Task<IActionResult> GetDishIds()
         {
-            return Ok((await _repositoryFactory.GetRepository<Dish>().GetNodesAsync()).Select(h => h.Id));
+            return Ok(await Task.FromResult(ObjectCache<Dish>.Instance.Select(h => h.Id)));
         }
 
         [HttpGet("getDish/{id}")]
         public async Task<IActionResult> GetDish(Guid id)
         {
-            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(id);
+            var dish = ObjectCache<Dish>.Instance.First(h => h.Id == id);
 
             var userId = Request.Cookies["X-UserId"];
             if (userId != null)
@@ -81,17 +74,17 @@ namespace WepPartDeliveryProject.Controllers
                 }
             }
 
-            return Ok(dish);
+            return Ok(await Task.FromResult(dish));
         }
 
         [HttpGet("getDishAbilityInfo/{id}")]
         public async Task<IActionResult> GetDishAbilityInfo(Guid id)
         {
-            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(id);
+            var dish = ObjectCache<Dish>.Instance.First(h => h.Id == id);
 
             var userCanAbilityToViewDish = !dish.IsDeleted && dish.IsAvailableForUser;
 
-            return Ok(userCanAbilityToViewDish);
+            return Ok(await Task.FromResult(userCanAbilityToViewDish));
         }
 
         [HttpGet("getDishesList/{category}")]
@@ -111,14 +104,18 @@ namespace WepPartDeliveryProject.Controllers
         public async Task<IActionResult> GetCart(string searchText, int page = 0)
         {
             //обычному пользователю не должен быть доступен удаленный или недоступный продукт
-            var dishes = await ((IDishRepository)_repositoryFactory.GetRepository<Dish>())
-                .SearchDishesByNameAndDescription(searchText, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
+            var dishes = ObjectCache<Dish>.Instance
+                .Where(h => !h.IsDeleted && h.IsAvailableForUser && (h.Description.ToLower().Contains(searchText) || h.Name.ToLower().Contains(searchText)))
+                .OrderBy(h => h.Name)
+                .Skip(_appSettings.CountOfItemsOnWebPage * page)
+                .Take(_appSettings.CountOfItemsOnWebPage + 1)
+                .ToList();
 
             var pageEnded = dishes.Count() < _appSettings.CountOfItemsOnWebPage + 1;
 
             PrepareDish(dishes);
 
-            return Ok(new { dishes = dishes.GetRange(0, dishes.Count > _appSettings.CountOfItemsOnWebPage ? _appSettings.CountOfItemsOnWebPage: dishes.Count), pageEnded});
+            return Ok(new { dishes, pageEnded});
         }
 
         [Authorize]
@@ -131,9 +128,9 @@ namespace WepPartDeliveryProject.Controllers
                 return BadRequest("You don't have refresh token. You need to login or signup to system");
             }
 
-            var user = _mapper.Map<ProfileUserOutDTO>(await _repositoryFactory.GetRepository<User>().GetNodeAsync(userId));
+            var user = _mapper.Map<ProfileUserOutDTO>(ObjectCache<User>.Instance.First(h=> h.Id == Guid.Parse(userId)));
 
-            return Ok(user);
+            return Ok(await Task.FromResult(user));
         }
 
         private void PrepareDish(List<Dish> dishes)
@@ -152,4 +149,3 @@ namespace WepPartDeliveryProject.Controllers
         }
     }
 }
- 

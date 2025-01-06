@@ -138,14 +138,8 @@ namespace WepPartDeliveryProject.Controllers
         {
             for (int i = 0; i < dishes.Count; i++)
             {
-                var dish = dishes[i];
-                if (dish.IsDeleted || !dish.IsAvailableForUser)
-                {
-                    dishes.Remove(dish);
-                    i--;
-                }
-                else if (dish.Description.Length > countCharInDishDescription)
-                    dish.Description = dish.Description.Substring(0, countCharInDishDescription - 3) + "...";
+                if (dishes[i].Description.Length > countCharInDishDescription)
+                    dishes[i].Description = string.Concat(dishes[i].Description.AsSpan(0, countCharInDishDescription - 3), "...");
             }
         }
     }

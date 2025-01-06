@@ -94,7 +94,7 @@ namespace WepPartDeliveryProject.Controllers
             var choicedCategory = ObjectCache<Category>.Instance.ToList().Single(h=>h.LinkName == category);
             var categoryDishes = await _repositoryFactory.GetRepository<Category>().GetRelationsOfNodesAsync<ContainsDish, Dish>(choicedCategory, orderByProperty: "Name");
 
-            var dishes = categoryDishes.Select(h => (Dish)h.NodeTo).ToList();
+            var dishes = categoryDishes.Where(h => !((Dish)h.NodeTo).IsDeleted && ((Dish)h.NodeTo).IsAvailableForUser).Select(h => (Dish)h.NodeTo).ToList();
 
             PrepareDish(dishes);
 

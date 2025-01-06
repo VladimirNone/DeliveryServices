@@ -37,6 +37,7 @@ try
                 policy
                     .WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value)
                     .WithOrigins("http://localhost:3000")
+                    .WithOrigins("http://localhost:3001")
                     //.WithHeaders(HeaderNames.ContentType, HeaderNames.Cookie)
                     .AllowAnyHeader()
                     .AllowAnyMethod()

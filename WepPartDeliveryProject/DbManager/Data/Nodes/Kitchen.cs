@@ -8,6 +8,8 @@ namespace DbManager.Data.Nodes
         public string Address { get; set; }
 
         [Neo4jIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public List<CookedBy>? PreparedOrders { get; set; }
     }
 }

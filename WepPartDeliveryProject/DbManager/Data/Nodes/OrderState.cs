@@ -1,5 +1,4 @@
 ﻿using Neo4jClient;
-using Newtonsoft.Json;
 
 namespace DbManager.Data.Nodes
 {
@@ -10,6 +9,8 @@ namespace DbManager.Data.Nodes
         public string DescriptionForClient { get; set; }
 
         [Neo4jIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public List<Order> Orders { get; set; } 
     }
 }

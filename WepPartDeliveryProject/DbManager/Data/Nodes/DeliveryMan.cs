@@ -8,6 +8,8 @@ namespace DbManager.Data.Nodes
         public int MaxWeight { get; set; }
 
         [Neo4jIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public List<DeliveredBy>? DeliveredOrders { get; set; }
     }
 }

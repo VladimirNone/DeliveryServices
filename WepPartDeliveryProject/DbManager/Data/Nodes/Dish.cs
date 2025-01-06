@@ -20,6 +20,8 @@ namespace DbManager.Data.Nodes
         public List<string> Images { get; set; }
 
         [Neo4jIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public List<OrderedDish>? Orders { get; set; }
     }
 }

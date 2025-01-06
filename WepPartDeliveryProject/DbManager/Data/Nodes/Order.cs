@@ -1,6 +1,5 @@
 ﻿using DbManager.Data.Relations;
 using Neo4jClient;
-using Newtonsoft.Json;
 
 namespace DbManager.Data.Nodes
 {
@@ -12,27 +11,37 @@ namespace DbManager.Data.Nodes
         public string PhoneNumber { get; set; }
 
         [Neo4jIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public List<HasOrderState> Story { get; set; } = new List<HasOrderState>();
 
         public string StoryJson
         {
             get
             {
-                return JsonConvert.SerializeObject(Story, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore});
+                return Newtonsoft.Json.JsonConvert.SerializeObject(Story, Newtonsoft.Json.Formatting.Indented, new Newtonsoft.Json.JsonSerializerSettings() { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore});
             }
             set
             {
-                Story = JsonConvert.DeserializeObject<List<HasOrderState>>(value, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+                Story = Newtonsoft.Json.JsonConvert.DeserializeObject<List<HasOrderState>>(value, new Newtonsoft.Json.JsonSerializerSettings() { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
             }
         }
 
         [Neo4jIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public List<OrderedDish>? OrderedObjects { get; set; }
         [Neo4jIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public DeliveredBy? DeliveredMan { get; set; }
         [Neo4jIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public Ordered Client { get; set; }
         [Neo4jIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public CookedBy? Kitchen { get; set; }
 
     }

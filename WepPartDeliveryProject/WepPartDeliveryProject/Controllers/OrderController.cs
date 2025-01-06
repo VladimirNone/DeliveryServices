@@ -160,7 +160,7 @@ namespace WepPartDeliveryProject.Controllers
                     _mapper.Map(reviewedOrder[0], preparedOrder);
                 preparedOrder.Story = _mapper.Map<List<OrderStateItemOutDTO>>(searchedOrder.Story);
 
-                return Ok(new { order = preparedOrder, orderedDishes = orderedDishes.Select(h=> new {count = h.Count, dishInfo = h.NodeTo}) });
+                return Ok(new { order = preparedOrder, orderedDishes = orderedDishes.Select(h=> new {count = h.Count, dishInfo = (Dish)h.NodeTo}) });
             }
 
             return BadRequest("Запрашиваемый заказ не доступен данному пользователю или не существует");

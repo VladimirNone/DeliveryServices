@@ -33,7 +33,12 @@ namespace WepPartDeliveryProject.Controllers
         public async Task<IActionResult> GetDishesForMainPage(int page = 0)
         {
             //обычному пользователю не должен быть доступен удаленный или недоступный продукт
-            var dishes = ObjectCache<Dish>.Instance.OrderBy(h => h.Name).Skip(_appSettings.CountOfItemsOnWebPage * page).Take(_appSettings.CountOfItemsOnWebPage + 1).ToList();
+            var dishes = ObjectCache<Dish>.Instance
+                .Where(h => !h.IsDeleted && h.IsAvailableForUser)
+                .OrderBy(h => h.Name)
+                .Skip(_appSettings.CountOfItemsOnWebPage * page)
+                .Take(_appSettings.CountOfItemsOnWebPage + 1)
+                .ToList();
 
             var pageEnded = dishes.Count < _appSettings.CountOfItemsOnWebPage + 1;
 

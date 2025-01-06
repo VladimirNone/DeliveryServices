@@ -1,16 +1,17 @@
 ﻿using Neo4jClient;
-using Newtonsoft.Json;
 
 namespace DbManager.Data
 {
     public class Relation<TFrom, TTo> : IRelation where TFrom : class, INode where TTo : class, INode
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         private TFrom? _nodeFrom;
         private TTo? _nodeTo;
 
         [Neo4jIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public INode NodeFrom
         {
             get => _nodeFrom;
@@ -22,6 +23,8 @@ namespace DbManager.Data
         }
 
         [Neo4jIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public INode NodeTo
         {
             get => _nodeTo;

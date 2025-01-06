@@ -8,6 +8,6 @@ namespace DbManager.Data
 {
     public abstract class Node : INode
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
     }
 }

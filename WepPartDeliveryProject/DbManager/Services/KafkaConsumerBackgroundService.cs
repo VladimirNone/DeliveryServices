@@ -9,7 +9,7 @@ namespace DbManager.Services
     public class KafkaConsumerBackgroundService : BackgroundService
     {
         private IConsumer<string, string> _consumerBuilder;
-        private readonly string _containerEventsTopic;
+        private readonly string _containerTopic;
         private readonly ILogger<KafkaConsumerBackgroundService> _logger;
         private readonly DeliveryHealthCheck _deliveryHealthCheck;
         private readonly QueryKafkaWorker _queryKafkaWorker;
@@ -25,7 +25,7 @@ namespace DbManager.Services
                 Acks = Acks.All,
             };
             this._consumerBuilder = new ConsumerBuilder<string, string>(consumerConfig).Build();
-            this._containerEventsTopic = kafkaSettings.ContainerEventsTopic ?? "ContainerEvents";
+            this._containerTopic = queryKafkaWorker is OrderQueryKafkaWorker ? kafkaSettings.ContainerOrdersTopic : kafkaSettings.ContainerEventsTopic;
             this._logger = logger;
             this._queryKafkaWorker = queryKafkaWorker;
             this._deliveryHealthCheck = deliveryHealthCheck;
@@ -45,8 +45,8 @@ namespace DbManager.Services
                 {
                     cancellationToken.WaitHandle.WaitOne(200);
                 }
-                this._logger.LogInformation($"KafkaConsumerBackgroundService subscribe to {this._containerEventsTopic}");
-                this._consumerBuilder.Subscribe(this._containerEventsTopic);
+                this._logger.LogInformation($"KafkaConsumerBackgroundService subscribe to {this._containerTopic}");
+                this._consumerBuilder.Subscribe(this._containerTopic);
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     try
@@ -54,7 +54,7 @@ namespace DbManager.Services
                         var consume = _consumerBuilder.Consume(cancellationToken);
                         if(consume != null)
                         {
-                            if(consume.Topic == this._containerEventsTopic)
+                            if(consume.Topic == this._containerTopic)
                             {
                                 this._queryKafkaWorker.AddToQueue(consume);
                             }

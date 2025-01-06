@@ -1,6 +1,8 @@
 using DbManager;
 using DbManager.AppSettings;
 using DbManager.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using NLog;
 using NLog.Web;
 using System.Text.Json.Serialization;
@@ -48,13 +50,21 @@ try
     services.AddOptions<KafkaSettings>().Bind(configuration.GetSection("KafkaSettings"));
 
     services.AddDbInfrastructure(ServiceRegistration.DatabaseProvider.Neo4j);
-    services.AddSingleton<DeliveryHealthCheck>();
+    services.AddSingleton<DeliveryHealthCheck>(provider => new DeliveryHealthCheck() { StartupCompleted = true });
     services.AddHealthChecks()
         .AddCheck<GraphHealthCheck>(nameof(GraphHealthCheck), tags: ["live"])
         .AddCheck<DeliveryHealthCheck>(nameof(DeliveryHealthCheck), tags: ["ready"]);
 
-    services.AddSingleton<QueryKafkaWorker, ObjectCasheQueryKafkaWorker>();
-    services.AddHostedService<KafkaConsumerBackgroundService>();
+    services.AddSingleton<QueryKafkaWorker, OrderQueryKafkaWorker>();
+    services.AddHostedService(factory =>
+    {
+        var queryKafkaWorker = factory.GetRequiredService<QueryKafkaWorker>();
+        var deliveryHealthCheck = factory.GetRequiredService<DeliveryHealthCheck>();
+        var logger = factory.GetRequiredService<ILogger<KafkaConsumerBackgroundService>>();
+        var kafkaOptions = factory.GetRequiredService<IOptions<KafkaSettings>>();
+
+        return new KafkaConsumerBackgroundService(queryKafkaWorker, deliveryHealthCheck, logger, kafkaOptions);
+    });
 
     var app = builder.Build();
 

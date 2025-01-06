@@ -28,7 +28,7 @@ namespace DbManager.Services
 
         public override void AddToQueue(ConsumeResult<string, string> consumeResult)
         {
-            this.AddToQueue(consumeResult);
+            base.AddToQueue(consumeResult);
             this._orderCounter.Add(1);
         }
 
@@ -50,15 +50,7 @@ namespace DbManager.Services
                         using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(ObjectCasheQueryKafkaWorker), System.Diagnostics.ActivityKind.Consumer, parentContext.ActivityContext);
 
                         var kafkaChangeOrderEvent = Newtonsoft.Json.JsonConvert.DeserializeObject<KafkaChangeOrderEvent>(consumeResult.Message.Value);
-                        //Получаем тип объекта
-                        var objectType = kafkaChangeOrderEvent.TypeObject;
 
-                        if (objectType != typeof(Order))
-                        {
-                            activity?.AddException(new Exception($"Topic contains non {nameof(Order)} objects"));
-                            this._orderCounter.Add(-1);
-                            continue;
-                        }
                         activity?.AddEvent(new System.Diagnostics.ActivityEvent("Start catch dublicate Order"));
                         var order = kafkaChangeOrderEvent.Order;
                         //TODO: add adding and searching dublicate by key of order
@@ -67,18 +59,22 @@ namespace DbManager.Services
                         activity?.AddEvent(new System.Diagnostics.ActivityEvent($"Start execute method: {kafkaChangeOrderEvent.MethodName}"));
                         switch (kafkaChangeOrderEvent.MethodName)
                         {
-                            case KafkaChangeCacheEvent.AddMethodName:
+                            case KafkaChangeOrderEvent.AddMethodName:
                                 // Вызываем метод "Add" с необходимыми параметрами
                                 this._orderRepository.AddNodeAsync(order).Wait();
                                 break;
-                            case KafkaChangeCacheEvent.UpdateMethodName:
+                            case KafkaChangeOrderEvent.UpdateMethodName:
                                 // Вызываем метод "Add" с необходимыми параметрами
                                 this._orderRepository.UpdateNodeAsync(order).Wait();
                                 break;
-                            case KafkaChangeCacheEvent.TryRemoveMethodName:
-                                throw new ArgumentException($"KafkaChangeCacheEvent.MethodName with value \"{kafkaChangeOrderEvent.MethodName}\" can't be processed for order");
+                            case KafkaChangeOrderEvent.RelateNodesMethodName:
+                                // Вызываем метод "Add" с необходимыми параметрами
+                                this._orderRepository.RelateNodesAsync(kafkaChangeOrderEvent.Relation).Wait();
+                                break;
+                            case KafkaChangeOrderEvent.TryRemoveMethodName:
+                                throw new ArgumentException($"KafkaChangeOrderEvent.MethodName with value \"{kafkaChangeOrderEvent.MethodName}\" can't be processed for order");
                             default:
-                                throw new ArgumentException($"KafkaChangeCacheEvent.MethodName with value \"{kafkaChangeOrderEvent.MethodName}\" can't be processed");
+                                throw new ArgumentException($"KafkaChangeOrderEvent.MethodName with value \"{kafkaChangeOrderEvent.MethodName}\" can't be processed");
                         }
                         activity?.AddEvent(new System.Diagnostics.ActivityEvent($"Method {kafkaChangeOrderEvent.MethodName} were executed"));
                         this._orderCounter.Add(-1);

@@ -12,9 +12,4 @@ namespace DbManager.Data.Kafka
         public const string UpdateMethodName = nameof(ObjectCache<INode>.Update);
         public const string TryRemoveMethodName = nameof(ObjectCache<INode>.TryRemove);
     }
-
-    public class KafkaChangeOrderEvent : KafkaChangeCacheEvent
-    {
-        public Order Order { get; set; }
-    }
 }

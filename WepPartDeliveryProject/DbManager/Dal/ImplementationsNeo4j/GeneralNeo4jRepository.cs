@@ -182,7 +182,7 @@ namespace DbManager.Neo4j.Implementations
             {
                 throw new Exception("NodeFromId or NodeToId is null. Method RelateNodesAsync where TRelation is " + typeof(TRelation));
             }
-            var typeNodeFrom = typeof(TRelation).BaseType.GenericTypeArguments[0];
+            var typeNodeFrom = relation.GetType().BaseType.GenericTypeArguments[0];
             var direction = GetDirection(relation.GetType().Name, "relation", typeNodeFrom == typeof(TNode));
 
             if (relation.Id == Guid.Empty)
@@ -210,7 +210,7 @@ namespace DbManager.Neo4j.Implementations
             using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(UpdateRelationNodesAsync), System.Diagnostics.ActivityKind.Client);
             activity?.SetTag("provider", "neo4j");
 
-            var typeNodeFrom = typeof(TRelation).BaseType.GenericTypeArguments[0];
+            var typeNodeFrom = updatedRelation.GetType().BaseType.GenericTypeArguments[0];
             var direction = GetDirection(updatedRelation.GetType().Name, "relation", typeNodeFrom == typeof(TNode));
 
             var cypher = _dbContext.Cypher

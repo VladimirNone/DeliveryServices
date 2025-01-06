@@ -65,7 +65,7 @@ namespace DbManager.Services
             }
         }
 
-        public async Task<bool> ProduceOrderAsync(Order order, string methodName)
+        public async Task<bool> ProduceOrderAsync(KafkaChangeOrderEvent kafkaChangeOrderEvent)
         {
             if (!this._deliveryHealthCheck.StartupCompleted)
             {
@@ -74,10 +74,9 @@ namespace DbManager.Services
             try
             {
                 using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(ProduceOrderAsync), ActivityKind.Producer);
-                activity?.SetTag("node.type", order.GetType().Name);
+                activity?.SetTag("node.type", kafkaChangeOrderEvent.Order?.GetType().Name ?? kafkaChangeOrderEvent.RelationType?.Name);
 
-                var kafkaObjectCacheEvent = new KafkaChangeOrderEvent() { MethodName = methodName, TypeObject = order.GetType(), Order = order };
-                var message = new Message<string, string>() { Key = order.Id.ToString(), Value = JsonConvert.SerializeObject(kafkaObjectCacheEvent) };
+                var message = new Message<string, string>() { Key = kafkaChangeOrderEvent.Order?.Id.ToString() ?? kafkaChangeOrderEvent.Relation.Id.ToString(), Value = JsonConvert.SerializeObject(kafkaChangeOrderEvent) };
 
                 if (activity != null)
                     Propagators.DefaultTextMapPropagator.Inject(new PropagationContext(activity.Context, Baggage.Current), message.Headers ??= new Headers(), (headers, key, value) => headers.Add(key, Encoding.UTF8.GetBytes(value)));

@@ -6,6 +6,7 @@ using DbManager.Neo4j.DataGenerator;
 using DbManager.Neo4j.Implementations;
 using DbManager.Neo4j.Interfaces;
 using DbManager.Services;
+using DbManager.Services.Kafka;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Instrumentation.AspNetCore;
@@ -51,6 +52,7 @@ namespace DbManager
 
         public static void AddNeo4jRepositoryInfrastructure(this IServiceCollection services)
         {
+            services.AddSingleton<IOrderService, OrderService>();
             services.AddSingleton<IRepositoryFactory, RepositoryFactory>();
             // This is the registration for custom repository class
             services.AddTransient<IGeneralRepository<Order>, OrderRepository>();
@@ -62,6 +64,7 @@ namespace DbManager
 
         public static void AddKafkaRepositoryInfrastructure(this IServiceCollection services)
         {
+            services.AddSingleton<IOrderService, OrderKafkaService>();
             services.AddSingleton<IRepositoryFactory, KafkaRepositoryFactory>();
             // This is the registration for custom repository class
             services.AddTransient<IGeneralRepository<Order>, OrderKafkaRepository>();

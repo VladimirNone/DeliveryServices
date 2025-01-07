@@ -3,7 +3,7 @@ using DbManager.Data;
 using DbManager.Data.Cache;
 using DbManager.Data.Kafka;
 using DbManager.Neo4j.Implementations;
-using DbManager.Services;
+using DbManager.Services.Kafka;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;

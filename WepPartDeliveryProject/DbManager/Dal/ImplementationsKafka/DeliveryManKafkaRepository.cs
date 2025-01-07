@@ -1,5 +1,5 @@
 ﻿using DbManager.Neo4j.Implementations;
-using DbManager.Services;
+using DbManager.Services.Kafka;
 
 namespace DbManager.Dal.ImplementationsKafka
 {

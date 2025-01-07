@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using DbManager;
 using DbManager.Data;
 using DbManager.Data.DTOs;
 using DbManager.Data.Nodes;
@@ -9,13 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using DbManager.Data.Relations;
-using AutoMapper;
-using DbManager.Data;
-using System.Xml.Linq;
-using Microsoft.Extensions.Options;
 using DbManager.Data.Cache;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using DbManager.Services;
 
 namespace WepPartDeliveryProject.Controllers
 {
@@ -28,9 +22,9 @@ namespace WepPartDeliveryProject.Controllers
         private readonly ApplicationSettings _appSettings;
         private readonly IMapper _mapper;
         private readonly JwtService _jwtService;
-        private readonly Instrumentation _instrumentation;
+        private readonly IOrderService _orderService;
 
-        public OrderController(IRepositoryFactory repositoryFactory, IMapper mapper, JwtService jwtService, Instrumentation instrumentation, IOptions<ApplicationSettings> appSettingsOptions)
+        public OrderController(IRepositoryFactory repositoryFactory, IMapper mapper, JwtService jwtService, IOrderService orderService, IOptions<ApplicationSettings> appSettingsOptions)
         {
             // Fetch settings object from configuration
             _appSettings = appSettingsOptions.Value;
@@ -38,7 +32,7 @@ namespace WepPartDeliveryProject.Controllers
             _repositoryFactory = repositoryFactory;
             _mapper = mapper;
             _jwtService = jwtService;
-            _instrumentation = instrumentation;
+            _orderService = orderService;
         }
 
         [AllowAnonymous]
@@ -65,28 +59,7 @@ namespace WepPartDeliveryProject.Controllers
             if (res.Count == 0)
                 return BadRequest("При оформлении заказа, в корзине отсутсвовали продукты");
 
-            var dishes = ObjectCache<Dish>.Instance.Where(h => res.Keys.Contains(h.Id.ToString())).ToList();
-
-            var order = new Order() { 
-                SumWeight = dishes.Sum(h=>h.Weight), 
-                Price = dishes.Sum(h => h.Price), 
-                DeliveryAddress = inputData.DeliveryAddress, 
-                PhoneNumber = inputData.PhoneNumber };
-
-            var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>();
-
-            await orderRepo.AddNodeAsync(order);
-
-            var kitchens = await _repositoryFactory.GetRepository<Kitchen>().GetNodesAsync();
-            var randomKitchen = kitchens[new Random().Next(0, kitchens.Count)];
-            //var randomKitchen = await _repositoryFactory.GetRepository<Kitchen>().GetNodeAsync("82e5e232-1987-4dcd-bd3a-8841e3f7707b");
-
-
-            var deliveryMen = await _repositoryFactory.GetRepository<DeliveryMan>().GetNodesAsync();
-            var randomdelMan = deliveryMen[new Random().Next(0, deliveryMen.Count)];
-            //var randomdelMan = await _repositoryFactory.GetRepository<DeliveryMan>().GetNodeAsync("7ac11adb-3631-4e01-af74-eeeb7287a034");
-
-            await orderRepo.CreateOrderRelationInDB(order, userId, dishes, randomKitchen, randomdelMan, res, inputData.Comment);
+            await this._orderService.PlaceAnOrder(userId, res, inputData.Comment, inputData.PhoneNumber, inputData.DeliveryAddress);
 
             return Ok();
         }
@@ -95,21 +68,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpPost("changeCountOrderedDish")]
         public async Task<IActionResult> ChangeCountOrderedDish(ManipulateOrderDataInDTO inputData)
         {
-            var order = await _repositoryFactory.GetRepository<Order>().GetNodeAsync(inputData.OrderId);
-
-            var dish = ObjectCache<Dish>.Instance.First(h => h.Id == Guid.Parse(inputData.DishId));
-
-            var orderedDish = await _repositoryFactory.GetRepository<Dish>().GetRelationBetweenTwoNodesAsync<OrderedDish, Order>(dish, order);
-
-            order.Price -= orderedDish.Count * dish.Price;
-
-            orderedDish.Count = (int)inputData.NewCount;
-
-            order.Price += orderedDish.Count * dish.Price;
-
-            await _repositoryFactory.GetRepository<Order>().UpdateNodeAsync(order);
-
-            await _repositoryFactory.GetRepository<Order>().UpdateRelationNodesAsync(orderedDish);
+            await this._orderService.ChangeCountOrderedDish(inputData.OrderId, inputData.DishId, (int)inputData.NewCount);
 
             return Ok();
         }
@@ -177,17 +136,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpPost("cancelOrderedDish")]
         public async Task<IActionResult> CancelOrderedDish(ManipulateOrderDataInDTO inputData)
         {
-            var order = await _repositoryFactory.GetRepository<Order>().GetNodeAsync(inputData.OrderId);
-
-            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(inputData.DishId);
-
-            var orderedDish = await _repositoryFactory.GetRepository<Dish>().GetRelationBetweenTwoNodesAsync<OrderedDish, Order>(dish, order);
-
-            order.Price -= orderedDish.Count * dish.Price;
-
-            await _repositoryFactory.GetRepository<Order>().UpdateNodeAsync(order);
-
-            await _repositoryFactory.GetRepository<Order>().DeleteRelationOfNodesAsync<OrderedDish, Dish>(order, dish);
+            await this._orderService.CancelOrderedDish(inputData.OrderId, inputData.DishId);
 
             return Ok();
         }
@@ -196,20 +145,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpPost("cancelOrder")]
         public async Task<IActionResult> CancelOrder(ManipulateOrderDataInDTO inputData)
         {
-            var orderRepo = _repositoryFactory.GetRepository<Order>();
-
-            var order = await orderRepo.GetNodeAsync(inputData.OrderId);
-            var orderHasState = order.Story.Last();
-            var orderState = ObjectCache<OrderState>.Instance.Single(h => h.Id == orderHasState.NodeToId);
-
-            await orderRepo.DeleteRelationOfNodesAsync<HasOrderState, OrderState>(order, orderState);
-
-            var cancelState = ObjectCache<OrderState>.Instance.First(h => h.NumberOfStage == (int)OrderStateEnum.Cancelled);
-            var relationCancel = new HasOrderState() { Comment = inputData.ReasonOfCancel, NodeFromId = order.Id, NodeToId = cancelState.Id, TimeStartState = DateTime.Now };
-
-            order.Story.Add(relationCancel);
-            await orderRepo.RelateNodesAsync(relationCancel);
-            await orderRepo.UpdateNodeAsync(order);
+            await this._orderService.CancelOrder(inputData.OrderId, inputData.ReasonOfCancel);
 
             return Ok();
         }
@@ -218,11 +154,10 @@ namespace WepPartDeliveryProject.Controllers
         [HttpPost("moveToNextStage")]
         public async Task<IActionResult> MoveToNextStage(ManipulateOrderDataInDTO inputData)
         {
-            var orderRepo = (IOrderRepository) _repositoryFactory.GetRepository<Order>();
-            var newHasOrderState = await orderRepo.MoveOrderToNextStage(inputData.OrderId, "Изменено администрацией");
+            var newHasOrderState = await this._orderService.MoveOrderToNextStage(inputData.OrderId, "Изменено администрацией");
 
-            if(newHasOrderState != null){
-                return Ok(_mapper.Map<OrderStateItemOutDTO>(newHasOrderState));
+            if(newHasOrderState){
+                return Ok(newHasOrderState);
             }
             return BadRequest("Заказ находится на финальной стадии и его состояние не может перейти на следующую стадию");
         }
@@ -231,8 +166,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpPost("moveToPreviousStage")]
         public async Task<IActionResult> MoveToPreviousStage(ManipulateOrderDataInDTO inputData)
         {
-            var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>();
-            if (await orderRepo.MoveOrderToPreviousStage(inputData.OrderId))
+            if (await this._orderService.MoveOrderToPreviousStage(inputData.OrderId))
                 return Ok();
             return BadRequest("Заказ находится на начальной стадии и его состояние не может перейти на предыдущую стадию");
         }

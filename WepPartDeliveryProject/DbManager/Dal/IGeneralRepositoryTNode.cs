@@ -84,6 +84,15 @@ namespace DbManager.Dal
             where TRelatedNode : INode;
 
         /// <summary>
+        /// Delete relation using nodes ids
+        /// </summary>
+        /// <typeparam name="TRelation">The type of relation</typeparam>
+        /// <param name="relation">The relation contained two ids of nodes</param>
+        /// <returns></returns>
+        Task DeleteRelationOfNodesAsync<TRelation>(TRelation relation)
+            where TRelation : IRelation;
+
+        /// <summary>
         /// Get related nodes as List
         /// </summary>
         /// <typeparam name="TRelation">The type of searched relation</typeparam>

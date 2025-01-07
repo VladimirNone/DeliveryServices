@@ -2,7 +2,7 @@
 using DbManager.Dal;
 using DbManager.Data;
 using DbManager.Neo4j.Interfaces;
-using DbManager.Services;
+using DbManager.Services.Kafka;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

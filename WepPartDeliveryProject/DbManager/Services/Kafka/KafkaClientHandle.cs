@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DbManager.Services
+namespace DbManager.Services.Kafka
 {
     /// <summary>
     ///     Wraps a Confluent.Kafka.IProducer instance, and allows for basic
@@ -31,10 +31,10 @@ namespace DbManager.Services
         {
             var kafkaSettings = kafkaOptions.Value;
             var conf = new ProducerConfig { BootstrapServers = kafkaSettings.BootstrapServers, };
-            this.kafkaProducer = new ProducerBuilder<byte[], byte[]>(conf).Build();
+            kafkaProducer = new ProducerBuilder<byte[], byte[]>(conf).Build();
         }
 
-        public Handle Handle { get => this.kafkaProducer.Handle; }
+        public Handle Handle { get => kafkaProducer.Handle; }
 
         public void Dispose()
         {

@@ -21,12 +21,9 @@ namespace DbManager.Neo4j.Interfaces
             where TNode : INode;
         Task<List<Order>> GetOrdersByStateRelatedWithNode<TNode>(Guid nodeId, Guid orderStateId, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
             where TNode : INode;
-        Task<HasOrderState?> MoveOrderToNextStage(string orderId, string comment);
-        Task<bool> MoveOrderToPreviousStage(string orderId);
         Task<List<(string, double, int)>> GetOrderPriceAndCountStatistic();
         Task<List<(string, int, int)>> GetCountFinishedOrderAndClientsStatistic();
         Task<List<(string, List<Order>)>> GetCancelledOrderGroupedByMonthStatistic();
         Task<List<(Kitchen, int, int)>> GetCountOrdersAndOrderedDishesForEveryKitchenStatistic();
-        Task CreateOrderRelationInDB(Order order, string? userId, List<Dish> dishes, Kitchen kitchen, DeliveryMan deliveryMan, Dictionary<string, int> countOfDishes, string? comment);
     }
 }

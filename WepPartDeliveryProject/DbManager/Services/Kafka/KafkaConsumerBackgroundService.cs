@@ -4,7 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DbManager.Services
+namespace DbManager.Services.Kafka
 {
     public class KafkaConsumerBackgroundService : BackgroundService
     {
@@ -24,11 +24,11 @@ namespace DbManager.Services
                 AutoOffsetReset = AutoOffsetReset.Latest,
                 Acks = Acks.All,
             };
-            this._consumerBuilder = new ConsumerBuilder<string, string>(consumerConfig).Build();
-            this._containerTopic = queryKafkaWorker is OrderQueryKafkaWorker ? kafkaSettings.ContainerOrdersTopic : kafkaSettings.ContainerEventsTopic;
-            this._logger = logger;
-            this._queryKafkaWorker = queryKafkaWorker;
-            this._deliveryHealthCheck = deliveryHealthCheck;
+            _consumerBuilder = new ConsumerBuilder<string, string>(consumerConfig).Build();
+            _containerTopic = queryKafkaWorker is OrderQueryKafkaWorker ? kafkaSettings.ContainerOrdersTopic : kafkaSettings.ContainerEventsTopic;
+            _logger = logger;
+            _queryKafkaWorker = queryKafkaWorker;
+            _deliveryHealthCheck = deliveryHealthCheck;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -41,34 +41,34 @@ namespace DbManager.Services
             try
             {
                 //не подписываемся на топик пока не разогреется текущий сервис
-                while (!this._deliveryHealthCheck.StartupCompleted) 
+                while (!_deliveryHealthCheck.StartupCompleted)
                 {
                     cancellationToken.WaitHandle.WaitOne(200);
                 }
-                this._logger.LogInformation($"KafkaConsumerBackgroundService subscribe to {this._containerTopic}");
-                this._consumerBuilder.Subscribe(this._containerTopic);
+                _logger.LogInformation($"KafkaConsumerBackgroundService subscribe to {_containerTopic}");
+                _consumerBuilder.Subscribe(_containerTopic);
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     try
                     {
                         var consume = _consumerBuilder.Consume(cancellationToken);
-                        if(consume != null)
+                        if (consume != null)
                         {
-                            if(consume.Topic == this._containerTopic)
+                            if (consume.Topic == _containerTopic)
                             {
-                                this._queryKafkaWorker.AddToQueue(consume);
+                                _queryKafkaWorker.AddToQueue(consume);
                             }
                         }
                     }
                     catch (OperationCanceledException ex)
                     {
-                        this._logger.LogCritical(ex.ToString());
+                        _logger.LogCritical(ex.ToString());
                         throw;
                     }
                     catch (ConsumeException e)
                     {
                         // Consumer errors should generally be ignored (or logged) unless fatal.
-                        this._logger.LogCritical($"Consume error: {e.Error.Reason}. Stacktrace: {e}");
+                        _logger.LogCritical($"Consume error: {e.Error.Reason}. Stacktrace: {e}");
 
                         if (e.Error.IsFatal)
                         {
@@ -80,7 +80,7 @@ namespace DbManager.Services
             }
             catch (Exception ex)
             {
-                this._logger.LogCritical(ex.ToString());
+                _logger.LogCritical(ex.ToString());
                 throw;
             }
         }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DbManager.Services
+namespace DbManager.Services.Kafka
 {
     /// <summary>
     ///     Leverages the injected KafkaClientHandle instance to allow
@@ -25,8 +25,8 @@ namespace DbManager.Services
         ///     via the returned Task. Use this method of producing if you would
         ///     like to await the result before flow of execution continues.
         /// <summary>
-        public Task<DeliveryResult<K,V>> ProduceAsync(string topic, Message<K, V> message)
-            => this.kafkaHandle.ProduceAsync(topic, message);
+        public Task<DeliveryResult<K, V>> ProduceAsync(string topic, Message<K, V> message)
+            => kafkaHandle.ProduceAsync(topic, message);
 
         /// <summary>
         ///     Asynchronously produce a message and expose delivery information
@@ -35,9 +35,9 @@ namespace DbManager.Services
         ///     handle delivery information out-of-band.
         /// </summary>
         public void Produce(string topic, Message<K, V> message, Action<DeliveryReport<K, V>> deliveryHandler = null)
-            => this.kafkaHandle.Produce(topic, message, deliveryHandler);
+            => kafkaHandle.Produce(topic, message, deliveryHandler);
 
         public void Flush(TimeSpan timeout)
-            => this.kafkaHandle.Flush(timeout);
+            => kafkaHandle.Flush(timeout);
     }
 }

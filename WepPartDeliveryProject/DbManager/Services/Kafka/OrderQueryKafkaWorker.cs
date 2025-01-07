@@ -4,24 +4,27 @@ using DbManager.Data.Nodes;
 using DbManager.Neo4j.Implementations;
 using DbManager.Neo4j.Interfaces;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using OpenTelemetry.Context.Propagation;
 using System.Diagnostics.Metrics;
 using System.Text;
 
-namespace DbManager.Services
+namespace DbManager.Services.Kafka
 {
     public class OrderQueryKafkaWorker : QueryKafkaWorker
     {
         private readonly ILogger<OrderQueryKafkaWorker> _logger;
         private readonly OrderRepository _orderRepository;
         private readonly Instrumentation _instrumentation;
+        private readonly IOrderService _orderService;
         private UpDownCounter<long> _orderCounter { get; }
 
-        public OrderQueryKafkaWorker(IRepositoryFactory repositoryFactory, Instrumentation instrumentation, ILogger<OrderQueryKafkaWorker> logger) : base()
+        public OrderQueryKafkaWorker(IRepositoryFactory repositoryFactory, IOrderService orderService, Instrumentation instrumentation, ILogger<OrderQueryKafkaWorker> logger) : base()
         {
             this._logger = logger;
             this._orderRepository = (OrderRepository)repositoryFactory.GetRepository<Order>();
 
+            this._orderService = orderService;
             this._instrumentation = instrumentation;
             this._orderCounter = instrumentation.Meter.CreateUpDownCounter<long>("order.events", description: "The number of events to save order to database."); ;
         }
@@ -36,7 +39,7 @@ namespace DbManager.Services
         {
             try
             {
-                while (!this._cancellationTokenSource.IsCancellationRequested)
+                while (!_cancellationTokenSource.IsCancellationRequested)
                 {
                     ConsumeResult<string, string> consumeResult = null;
                     try
@@ -51,28 +54,65 @@ namespace DbManager.Services
 
                         var kafkaChangeOrderEvent = Newtonsoft.Json.JsonConvert.DeserializeObject<KafkaChangeOrderEvent>(consumeResult.Message.Value);
 
-                        activity?.AddEvent(new System.Diagnostics.ActivityEvent("Start catch dublicate Order"));
                         var order = kafkaChangeOrderEvent.Order;
-                        //TODO: add adding and searching dublicate by key of order
-                        activity?.AddEvent(new System.Diagnostics.ActivityEvent("Finish catch dublicate Order"));
-                        /*---------------------------------------------------------------------------*/
+
                         activity?.AddEvent(new System.Diagnostics.ActivityEvent($"Start execute method: {kafkaChangeOrderEvent.MethodName}"));
                         switch (kafkaChangeOrderEvent.MethodName)
                         {
                             case KafkaChangeOrderEvent.AddMethodName:
-                                // Вызываем метод "Add" с необходимыми параметрами
                                 this._orderRepository.AddNodeAsync(order).Wait();
                                 break;
                             case KafkaChangeOrderEvent.UpdateMethodName:
-                                // Вызываем метод "Add" с необходимыми параметрами
                                 this._orderRepository.UpdateNodeAsync(order).Wait();
-                                break;
-                            case KafkaChangeOrderEvent.RelateNodesMethodName:
-                                // Вызываем метод "Add" с необходимыми параметрами
-                                this._orderRepository.RelateNodesAsync(kafkaChangeOrderEvent.Relation).Wait();
                                 break;
                             case KafkaChangeOrderEvent.TryRemoveMethodName:
                                 throw new ArgumentException($"KafkaChangeOrderEvent.MethodName with value \"{kafkaChangeOrderEvent.MethodName}\" can't be processed for order");
+                            case KafkaChangeOrderEvent.RelateNodesMethodName:
+                                this._orderRepository.RelateNodesAsync(kafkaChangeOrderEvent.Relation).Wait();
+                                break;
+                            case KafkaChangeOrderEvent.UpdateRelationNodesMethodName:
+                                this._orderRepository.UpdateRelationNodesAsync(kafkaChangeOrderEvent.Relation).Wait();
+                                break;
+                            case KafkaChangeOrderEvent.DeleteRelationNodesMethodName:
+                                this._orderRepository.DeleteRelationOfNodesAsync(kafkaChangeOrderEvent.Relation).Wait();
+                                break;
+                            case KafkaChangeOrderEvent.CancelOrderMethodName:
+                                {
+                                    (string orderId, string reason) = Newtonsoft.Json.JsonConvert.DeserializeObject<ValueTuple<string, string>>(((JObject)kafkaChangeOrderEvent.TupleMethodParams).ToString());
+                                    this._orderService.CancelOrder(orderId, reason).Wait();
+                                    break;
+                                }
+                            case KafkaChangeOrderEvent.CancelOrderedDishMethodName:
+                                {
+                                    (string orderId, string dishId) = Newtonsoft.Json.JsonConvert.DeserializeObject<ValueTuple<string, string>>(((JObject)kafkaChangeOrderEvent.TupleMethodParams).ToString());
+                                    this._orderService.CancelOrderedDish(orderId, dishId).Wait();
+                                    break;
+                                }
+                            case KafkaChangeOrderEvent.ChangeCountOrderedDishMethodName:
+                                {
+                                    (string orderId, string dishId, int count) = Newtonsoft.Json.JsonConvert.DeserializeObject<ValueTuple<string, string,int>>(((JObject)kafkaChangeOrderEvent.TupleMethodParams).ToString());
+                                    this._orderService.ChangeCountOrderedDish(orderId, dishId, count).Wait();
+                                    break;
+                                }
+                            case KafkaChangeOrderEvent.MoveOrderToNextStageMethodName:
+                                {
+                                    (string orderId, string comment) = Newtonsoft.Json.JsonConvert.DeserializeObject<ValueTuple<string, string>>(((JObject)kafkaChangeOrderEvent.TupleMethodParams).ToString());
+                                    this._orderService.MoveOrderToNextStage(orderId, comment).Wait();
+                                    break;
+                                }
+                            case KafkaChangeOrderEvent.MoveOrderToPreviousStageMethodName:
+                                {
+                                    string orderId = (string)kafkaChangeOrderEvent.TupleMethodParams;
+                                    this._orderService.MoveOrderToPreviousStage(orderId).Wait();
+                                    break;
+                                }
+                            case KafkaChangeOrderEvent.PlaceAnOrderMethodName:
+                                {
+                                    (string userId, Dictionary<string, int> dishesCounts, string comment, string phoneNumber, string deliveryAddress) 
+                                        = Newtonsoft.Json.JsonConvert.DeserializeObject<ValueTuple<string, Dictionary<string, int>, string, string, string>>(((JObject)kafkaChangeOrderEvent.TupleMethodParams).ToString());
+                                    this._orderService.PlaceAnOrder(userId, dishesCounts, comment, phoneNumber, deliveryAddress).Wait();
+                                    break;
+                                }
                             default:
                                 throw new ArgumentException($"KafkaChangeOrderEvent.MethodName with value \"{kafkaChangeOrderEvent.MethodName}\" can't be processed");
                         }
@@ -89,7 +129,7 @@ namespace DbManager.Services
                         if (consumeResult != null)
                         {
                             //в теории возможно ситуация, когда мы добавили объект и тут же его обновили/удалили или обновили и после удалили, однако события были обработаны в другом порядке
-                            this.AddToQueue(consumeResult);
+                            AddToQueue(consumeResult);
                         }
                         this._logger.LogError(ex.ToString());
                     }

@@ -335,6 +335,28 @@ namespace DbManager.Neo4j.Implementations
             await cypher.ExecuteWithoutResultsAsync();
         }
 
+        public virtual async Task DeleteRelationOfNodesAsync<TRelation>(TRelation relation)
+            where TRelation : IRelation
+        {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(DeleteRelationOfNodesAsync), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
+            var direction = GetDirection(relation.GetType().Name, "relation");
+
+            var cypher = _dbContext.Cypher
+                .Match($"(node {{Id: $id}}){direction}(relatedNode {{Id: $relatedNodeId}})")
+                .Delete("relation")
+                .WithParams(new
+                {
+                    id = relation.NodeFromId,
+                    relatedNodeId = relation.NodeToId,
+                });
+
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            await cypher.ExecuteWithoutResultsAsync();
+        }
+
         public async Task<List<TNode>> GetNodesWithoutRelation<TRelation>(int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
         {
             using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetNodesWithoutRelation), System.Diagnostics.ActivityKind.Client);

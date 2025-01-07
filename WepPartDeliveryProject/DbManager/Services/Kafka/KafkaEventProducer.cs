@@ -12,7 +12,7 @@ using OpenTelemetry.Context.Propagation;
 using System.Diagnostics;
 using System.Text;
 
-namespace DbManager.Services
+namespace DbManager.Services.Kafka
 {
     public class KafkaEventProducer
     {
@@ -27,24 +27,24 @@ namespace DbManager.Services
         public KafkaEventProducer(KafkaDependentProducer<string, string> kafkaProducer, IOptions<KafkaSettings> kafkaOptions, DeliveryHealthCheck deliveryHealthCheck, ILogger<KafkaEventProducer> logger,
             Instrumentation instrumentation)
         {
-            this._kafkaSettings = kafkaOptions.Value;
-            this._eventTopic = this._kafkaSettings.ContainerEventsTopic ?? "ContainerEvents";
-            this._orderTopic = this._kafkaSettings.ContainerOrdersTopic ?? "ContainerOrders";
-            this._kafkaProducer = kafkaProducer;
-            this._deliveryHealthCheck = deliveryHealthCheck;
-            this._logger = logger;
-            this._instrumentation = instrumentation;
+            _kafkaSettings = kafkaOptions.Value;
+            _eventTopic = _kafkaSettings.ContainerEventsTopic ?? "ContainerEvents";
+            _orderTopic = _kafkaSettings.ContainerOrdersTopic ?? "ContainerOrders";
+            _kafkaProducer = kafkaProducer;
+            _deliveryHealthCheck = deliveryHealthCheck;
+            _logger = logger;
+            _instrumentation = instrumentation;
         }
 
         public async Task<bool> ProduceEventAsync(INode node, string methodName)
         {
-            if (!this._deliveryHealthCheck.StartupCompleted)
+            if (!_deliveryHealthCheck.StartupCompleted)
             {
                 return false;
             }
             try
             {
-                using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(ProduceEventAsync), ActivityKind.Producer);
+                using var activity = _instrumentation.ActivitySource.StartActivity(nameof(ProduceEventAsync), ActivityKind.Producer);
                 activity?.SetTag("node.type", node.GetType().Name);
 
                 var kafkaObjectCacheEvent = new KafkaChangeCacheEvent() { MethodName = methodName, TypeObject = node.GetType() };
@@ -53,47 +53,50 @@ namespace DbManager.Services
                 if (activity != null)
                     Propagators.DefaultTextMapPropagator.Inject(new PropagationContext(activity.Context, Baggage.Current), message.Headers ??= new Headers(), (headers, key, value) => headers.Add(key, Encoding.UTF8.GetBytes(value)));
 
-                var result = await this._kafkaProducer.ProduceAsync(this._eventTopic, message);
-                this.HandleDeliveryResult(activity, result);
+                var result = await _kafkaProducer.ProduceAsync(_eventTopic, message);
+                HandleDeliveryResult(activity, result);
 
                 return true;
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex.ToString());
+                _logger.LogError(ex.ToString());
                 return false;
             }
         }
 
         public async Task<bool> ProduceOrderAsync(KafkaChangeOrderEvent kafkaChangeOrderEvent)
         {
-            if (!this._deliveryHealthCheck.StartupCompleted)
+            if (!_deliveryHealthCheck.StartupCompleted)
             {
                 return false;
             }
             try
             {
-                using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(ProduceOrderAsync), ActivityKind.Producer);
+                using var activity = _instrumentation.ActivitySource.StartActivity(nameof(ProduceOrderAsync), ActivityKind.Producer);
                 activity?.SetTag("node.type", kafkaChangeOrderEvent.Order?.GetType().Name ?? kafkaChangeOrderEvent.RelationType?.Name);
 
-                var message = new Message<string, string>() { Key = kafkaChangeOrderEvent.Order?.Id.ToString() ?? kafkaChangeOrderEvent.Relation.Id.ToString(), Value = JsonConvert.SerializeObject(kafkaChangeOrderEvent) };
+                var message = new Message<string, string>() { 
+                    Key = kafkaChangeOrderEvent.Order?.Id.ToString() ?? kafkaChangeOrderEvent.Relation?.Id.ToString() ?? Guid.Empty.ToString(), 
+                    Value = JsonConvert.SerializeObject(kafkaChangeOrderEvent) 
+                };
 
                 if (activity != null)
                     Propagators.DefaultTextMapPropagator.Inject(new PropagationContext(activity.Context, Baggage.Current), message.Headers ??= new Headers(), (headers, key, value) => headers.Add(key, Encoding.UTF8.GetBytes(value)));
 
-                var result = await this._kafkaProducer.ProduceAsync(this._orderTopic, message);
-                this.HandleDeliveryResult(activity, result);
+                var result = await _kafkaProducer.ProduceAsync(_orderTopic, message);
+                HandleDeliveryResult(activity, result);
 
                 return true;
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex.ToString());
+                _logger.LogError(ex.ToString());
                 return false;
             }
         }
 
-        private void HandleDeliveryResult(Activity activity, DeliveryResult<string, string> deliveryResult) 
+        private void HandleDeliveryResult(Activity activity, DeliveryResult<string, string> deliveryResult)
         {
             activity?.SetTag("kafka.topic", deliveryResult.Topic);
             activity?.SetTag("kafka.partition", deliveryResult.Partition.Value);

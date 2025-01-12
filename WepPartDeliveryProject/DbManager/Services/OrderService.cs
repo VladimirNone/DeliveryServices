@@ -124,12 +124,13 @@ namespace DbManager.Services
             await _repositoryFactory.GetRepository<Order>().UpdateRelationNodesAsync(orderedDish);
         }
 
-        public async Task PlaceAnOrder(string userId, Dictionary<string, int> dishesCounts, string comment, string phoneNumber, string deliveryAddress)
+        public async Task PlaceAnOrder(string orderId, string userId, Dictionary<string, int> dishesCounts, string comment, string phoneNumber, string deliveryAddress)
         {
             var dishes = ObjectCache<Dish>.Instance.Where(h => dishesCounts.Keys.Contains(h.Id.ToString())).ToList();
 
             var order = new Order()
             {
+                Id = Guid.Parse(orderId),
                 SumWeight = dishes.Sum(h => h.Weight),
                 Price = dishes.Sum(h => h.Price),
                 DeliveryAddress = deliveryAddress,

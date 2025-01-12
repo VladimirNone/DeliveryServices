@@ -59,9 +59,10 @@ namespace WepPartDeliveryProject.Controllers
             if (res.Count == 0)
                 return BadRequest("При оформлении заказа, в корзине отсутсвовали продукты");
 
-            await this._orderService.PlaceAnOrder(userId, res, inputData.Comment, inputData.PhoneNumber, inputData.DeliveryAddress);
+            var orderId = Guid.NewGuid();
+            await this._orderService.PlaceAnOrder(orderId.ToString(), userId, res, inputData.Comment, inputData.PhoneNumber, inputData.DeliveryAddress);
 
-            return Ok();
+            return Ok(orderId);
         }
 
         [Authorize(Roles = "Admin")]

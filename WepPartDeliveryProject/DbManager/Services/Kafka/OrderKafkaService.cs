@@ -63,9 +63,9 @@ namespace DbManager.Services.Kafka
             return true;
         }
 
-        public async Task PlaceAnOrder(string userId, Dictionary<string, int> dishesCounts, string comment, string phoneNumber, string deliveryAddress)
+        public async Task PlaceAnOrder(string orderId, string userId, Dictionary<string, int> dishesCounts, string comment, string phoneNumber, string deliveryAddress)
         {
-            await this._kafkaProducer.ProduceOrderAsync(new KafkaChangeOrderEvent() { MethodName = KafkaChangeOrderEvent.PlaceAnOrderMethodName, TupleMethodParams = (userId, dishesCounts, comment, phoneNumber, deliveryAddress) });
+            await this._kafkaProducer.ProduceOrderAsync(new KafkaChangeOrderEvent() { MethodName = KafkaChangeOrderEvent.PlaceAnOrderMethodName, TupleMethodParams = (orderId, userId, dishesCounts, comment, phoneNumber, deliveryAddress) });
         }
     }
 }

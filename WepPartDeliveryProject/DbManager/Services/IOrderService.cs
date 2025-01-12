@@ -1,5 +1,4 @@
-﻿using DbManager.Data.Relations;
-
+﻿
 namespace DbManager.Services
 {
     public interface IOrderService
@@ -9,6 +8,6 @@ namespace DbManager.Services
         Task CancelOrderedDish(string orderId, string dishId);
         Task CancelOrder(string orderId, string reasonOfCancel);
         Task ChangeCountOrderedDish(string orderId, string dishId, int count);
-        Task PlaceAnOrder(string userId, Dictionary<string, int> dishesCounts, string comment, string phoneNumber, string deliveryAddress);
+        Task PlaceAnOrder(string orderId, string userId, Dictionary<string, int> dishesCounts, string comment, string phoneNumber, string deliveryAddress);
     }
 }

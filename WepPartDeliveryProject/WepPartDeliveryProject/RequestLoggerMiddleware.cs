@@ -37,7 +37,7 @@ namespace WepPartDeliveryProject
             if (request.Body.CanSeek)
                 request.Body.Position = 0;
 
-            return $"{request.Scheme}://{request.Host}{request.Path}{WebUtility.UrlDecode(request.QueryString.ToString())} {bodyAsText}";
+            return $"{request.Method} {request.Scheme}://{request.Host}{request.Path}{WebUtility.UrlDecode(request.QueryString.ToString())} {bodyAsText}";
         }
 
     }

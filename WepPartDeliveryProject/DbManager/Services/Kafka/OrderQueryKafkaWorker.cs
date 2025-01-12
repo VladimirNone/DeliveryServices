@@ -108,9 +108,9 @@ namespace DbManager.Services.Kafka
                                 }
                             case KafkaChangeOrderEvent.PlaceAnOrderMethodName:
                                 {
-                                    (string userId, Dictionary<string, int> dishesCounts, string comment, string phoneNumber, string deliveryAddress) 
-                                        = Newtonsoft.Json.JsonConvert.DeserializeObject<ValueTuple<string, Dictionary<string, int>, string, string, string>>(((JObject)kafkaChangeOrderEvent.TupleMethodParams).ToString());
-                                    this._orderService.PlaceAnOrder(userId, dishesCounts, comment, phoneNumber, deliveryAddress).Wait();
+                                    (string orderId, string userId, Dictionary<string, int> dishesCounts, string comment, string phoneNumber, string deliveryAddress) 
+                                        = Newtonsoft.Json.JsonConvert.DeserializeObject<ValueTuple<string, string, Dictionary<string, int>, string, string, string>>(((JObject)kafkaChangeOrderEvent.TupleMethodParams).ToString());
+                                    this._orderService.PlaceAnOrder(orderId, userId, dishesCounts, comment, phoneNumber, deliveryAddress).Wait();
                                     break;
                                 }
                             default:

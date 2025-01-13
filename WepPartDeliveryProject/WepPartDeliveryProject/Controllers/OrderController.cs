@@ -81,7 +81,7 @@ namespace WepPartDeliveryProject.Controllers
 
             await orderRepo.CreateOrderRelationInDB(order, userId, dishes, randomKitchen, randomdelMan, res, inputData.Comment);
 
-            return Ok();
+            return Ok(order.Id);
         }
 
         [Authorize(Roles = "Admin")]

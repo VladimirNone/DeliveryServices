@@ -60,6 +60,8 @@ namespace DbManager.Services.Kafka
 
                             var order = kafkaChangeOrderEvent.Order;
 
+                            this._logger.LogInformation($"Processing MethodName={kafkaChangeOrderEvent.MethodName}");
+
                             activity?.AddEvent(new System.Diagnostics.ActivityEvent($"Start execute method: {kafkaChangeOrderEvent.MethodName}"));
                             switch (kafkaChangeOrderEvent.MethodName)
                             {

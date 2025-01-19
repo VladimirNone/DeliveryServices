@@ -9,5 +9,7 @@
         public string ContainerEventsTopic { get; set; }
 
         public string ContainerOrdersTopic { get; set; }
+
+        public int MaxCountProcessedOrdersThreads { get; set; } = 100;
     }
 }

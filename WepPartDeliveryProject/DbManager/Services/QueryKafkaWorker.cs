@@ -12,6 +12,10 @@ namespace DbManager.Services
         protected QueryKafkaWorker()
         {
             this._workThread = new Thread(this.WorkFunction) { Name = this.GetType().Name };
+        }
+
+        protected virtual void StartWorker()
+        {
             this._workThread.Start();
         }
 

@@ -27,6 +27,8 @@ namespace DbManager.Services.Kafka
 
             _instrumentation = instrumentation;
             _cacheEventCounter = instrumentation.Meter.CreateUpDownCounter<long>("cache.events", description: "The number of events for changing object cache on cluster.");
+
+            this.StartWorker();
         }
 
         public override void AddToQueue(ConsumeResult<string, string> consumeResult)

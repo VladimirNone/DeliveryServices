@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using OpenTelemetry.Context.Propagation;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Text;
 using WepPartDeliveryProject;
@@ -25,7 +26,7 @@ namespace DbManager.Services.Kafka
         private int _processedOrderThreads = 0;
         private KafkaSettings _kafkaSettings;
 
-        public OrderQueryKafkaWorker(IRepositoryFactory repositoryFactory, IOrderService orderService, Instrumentation instrumentation, ILogger<OrderQueryKafkaWorker> logger, IOptions<KafkaSettings> applicationSettings) : base()
+        public OrderQueryKafkaWorker(IRepositoryFactory repositoryFactory, IOrderService orderService, Instrumentation instrumentation, ILogger<OrderQueryKafkaWorker> logger, IOptions<KafkaSettings> kafkaSettings) : base()
         {
             this._logger = logger;
             this._orderRepository = (OrderRepository)repositoryFactory.GetRepository<Order>();
@@ -34,7 +35,9 @@ namespace DbManager.Services.Kafka
             this._instrumentation = instrumentation;
             this._orderCounter = instrumentation.Meter.CreateUpDownCounter<long>("order.events", description: "The number of events to save order to database.");
             this._processedOrderCounter = instrumentation.Meter.CreateUpDownCounter<int>("order.process.events", description: "The number of processed order events.");
-            this._kafkaSettings = applicationSettings.Value;
+            this._kafkaSettings = kafkaSettings.Value;
+
+            this.StartWorker();
         }
 
         public override void AddToQueue(ConsumeResult<string, string> consumeResult)
@@ -43,13 +46,14 @@ namespace DbManager.Services.Kafka
             this._orderCounter.Add(1);
         }
 
-        protected override async void WorkFunction()
+        protected override void WorkFunction()
         {
             try
             {
                 while (!_cancellationTokenSource.IsCancellationRequested)
                 {
                     //если прямо сейчас работает MaxCountProcessedOrdersThreads потоков, то пропускаем выполнение, т.к. пул потоков не резиновый
+                    //по какой-то причине идет работа дальше не взирая на условие
                     if (this._processedOrderThreads >= this._kafkaSettings.MaxCountProcessedOrdersThreads)
                         continue;
 
@@ -59,13 +63,7 @@ namespace DbManager.Services.Kafka
                     if (!this._queue.TryDequeue(out consumeResult))
                         continue;
 
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                    Task.Run(() => ProcessOrderEvent(consumeResult))
-                        .ContinueWith(t => { 
-                            Interlocked.Decrement(ref this._processedOrderThreads);
-                            this._processedOrderCounter.Add(-1);
-                        });
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                    Task.Run(() => ProcessOrderEvent(consumeResult));
                 }
             }
             catch (ThreadInterruptedException)
@@ -175,6 +173,11 @@ namespace DbManager.Services.Kafka
                     AddToQueue(consumeResult);
                 }
                 this._logger.LogError(ex.ToString());
+            }
+            finally
+            {
+                Interlocked.Decrement(ref this._processedOrderThreads);
+                this._processedOrderCounter.Add(-1);
             }
         }
     }

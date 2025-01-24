@@ -146,8 +146,7 @@ namespace WepPartDeliveryProject.Controllers
                     return BadRequest("You don't have refresh token. You need to login or signup to system");
                 }
 
-                var ordereds = await _repositoryFactory.GetRepository<Client>().GetRelationsOfNodesAsync<Ordered, Order>(userId);
-                searchedOrder = (Order)ordereds.SingleOrDefault(h => h.NodeToId.ToString() == orderId)?.NodeTo;
+                searchedOrder = await ((IClientRepository)_repositoryFactory.GetRepository<Client>()).GetClientOrder(userId, orderId);
             }
 
             if (searchedOrder != null)

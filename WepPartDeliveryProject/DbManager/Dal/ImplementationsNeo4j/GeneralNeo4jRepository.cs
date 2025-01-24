@@ -170,14 +170,15 @@ namespace DbManager.Neo4j.Implementations
             {
                 throw new Exception("NodeFromId or NodeToId is null. Method RelateNodesAsync where TRelation is " + typeof(TRelation));
             }
-            var typeNodeFrom = typeof(TRelation).BaseType.GenericTypeArguments[0];
+            var typeNodeFrom = relation.GetType().BaseType.GenericTypeArguments[0];
+            var typeNodeTo = relation.GetType().BaseType.GenericTypeArguments[1];
             var direction = GetDirection(relation.GetType().Name, "relation", typeNodeFrom == typeof(TNode));
 
             if (relation.Id == Guid.Empty)
                 relation.Id = Guid.NewGuid();
 
             var cypher = _dbContext.Cypher
-                .Match($"(node {{Id: $entityId}}), (otherNode {{Id: $otherNodeId}})")
+                .Match($"(node:{typeNodeFrom.Name} {{Id: $entityId}}), (otherNode:{typeNodeTo.Name} {{Id: $otherNodeId}})")
                 .Create($"(node){direction}(otherNode)")
                 .Set("relation=$newRelation")
                 .WithParams(new
@@ -198,11 +199,12 @@ namespace DbManager.Neo4j.Implementations
             using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(UpdateRelationNodesAsync), System.Diagnostics.ActivityKind.Client);
             activity?.SetTag("provider", "neo4j");
 
-            var typeNodeFrom = typeof(TRelation).BaseType.GenericTypeArguments[0];
+            var typeNodeFrom = updatedRelation.GetType().BaseType.GenericTypeArguments[0];
+            var typeNodeTo = updatedRelation.GetType().BaseType.GenericTypeArguments[1];
             var direction = GetDirection(updatedRelation.GetType().Name, "relation", typeNodeFrom == typeof(TNode));
 
             var cypher = _dbContext.Cypher
-                .Match($"(node {{Id: $id}}){direction}(relatedNode {{Id: $relatedNodeId}})")
+                .Match($"(node:{typeNodeFrom.Name} {{Id: $id}}){direction}(relatedNode:{typeNodeTo.Name} {{Id: $relatedNodeId}})")
                 .Set("relation=$updatedRelation")
                 .WithParams(new
                 {
@@ -467,9 +469,7 @@ namespace DbManager.Neo4j.Implementations
         /// <returns>String with directed relation</returns>
         protected string GetDirection(string nameRelation, string? relationInstanceName = "", bool? relationInEntity = null)
         {
-            string direction = "-[]-";
-            if (!string.IsNullOrEmpty(nameRelation))
-                direction = $"-[{relationInstanceName}:{nameRelation.ToUpper()}]-";
+            string direction = string.IsNullOrEmpty(nameRelation) ? "-[]-" : $"-[{relationInstanceName}:{nameRelation.ToUpper()}]-";
 
             if (relationInEntity == null)
                 return direction;

@@ -3,6 +3,7 @@ using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Neo4j.Interfaces;
 using Neo4jClient;
+using Neo4jClient.Cypher;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,33 @@ namespace DbManager.Neo4j.Implementations
     {
         public ClientRepository(BoltGraphClientFactory boltGraphClientFactory, Instrumentation instrumentation) : base(boltGraphClientFactory, instrumentation)
         {
+        }
+
+        public async Task<Order> GetClientOrder(string userId, string orderId)
+        {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(GetClientOrder), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
+            var direction = GetDirection(typeof(Ordered).Name, "relation");
+            var typeNodeFrom = typeof(Ordered).BaseType.GenericTypeArguments[0];
+
+            var cypher = _dbContext.Cypher
+                .Match($"(node:{typeof(User).Name} {{Id: $userId}}){direction}(relatedNode:{typeof(Order).Name} {{Id: $orderId}})")
+                .WithParams(new
+                {
+                    userId,
+                    orderId,
+                })
+                .Return(relatedNode => relatedNode.As<Order>());
+
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            var res = await cypher.ResultsAsync;
+
+            if (res.Count() != 1)
+                throw new Exception($"Count of nodes with such Id don't equels 1. Type: {typeof(Order).Name}");
+
+            return res.First();
         }
 
         public async Task<List<(Client, double, int)>> GetTopClientBySumPriceOrderStatistic(int topCount)

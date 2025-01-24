@@ -10,6 +10,7 @@ namespace DbManager.Neo4j.Interfaces
 {
     public interface IClientRepository : IGeneralRepository<Client>
     {
+        public Task<Order> GetClientOrder(string userId, string orderId);
         public Task<List<(Client, double, int)>> GetTopClientBySumPriceOrderStatistic(int topCount);
     }
 }

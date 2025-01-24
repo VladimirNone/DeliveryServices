@@ -2,6 +2,7 @@
 using DbManager.AppSettings;
 using DbManager.Data.Kafka;
 using DbManager.Data.Nodes;
+using DbManager.Data.Relations;
 using DbManager.Neo4j.Implementations;
 using DbManager.Neo4j.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -23,7 +24,6 @@ namespace DbManager.Services.Kafka
         private readonly IOrderService _orderService;
         private UpDownCounter<long> _orderCounter { get; }
         private UpDownCounter<int> _processedOrderCounter { get; }
-        private int _processedOrderThreads = 0;
         private KafkaSettings _kafkaSettings;
 
         public OrderQueryKafkaWorker(IRepositoryFactory repositoryFactory, IOrderService orderService, Instrumentation instrumentation, ILogger<OrderQueryKafkaWorker> logger, IOptions<KafkaSettings> kafkaSettings) : base()
@@ -52,11 +52,6 @@ namespace DbManager.Services.Kafka
             {
                 while (!_cancellationTokenSource.IsCancellationRequested)
                 {
-                    //если прямо сейчас работает MaxCountProcessedOrdersThreads потоков, то пропускаем выполнение, т.к. пул потоков не резиновый
-                    //по какой-то причине идет работа дальше не взирая на условие
-                    if (this._processedOrderThreads >= this._kafkaSettings.MaxCountProcessedOrdersThreads)
-                        continue;
-
                     ConsumeResult<string, string> consumeResult = null;
 
                     //Если в очереди что-то появилось, то забираем сообщение и парсим его
@@ -83,7 +78,6 @@ namespace DbManager.Services.Kafka
                 //note: render userId via ${scopeproperty:orderId}
                 using (this._logger.BeginScope(new[] { new KeyValuePair<string, object>("orderId", consumeResult.Message.Key) }))
                 {
-                    Interlocked.Increment(ref this._processedOrderThreads);
                     this._processedOrderCounter.Add(1);
 
                     var parentContext = Propagators.DefaultTextMapPropagator.Extract(default, consumeResult.Message.Headers, (headers, key) => headers.TryGetLastBytes(key, out var headerBytes) ? [Encoding.UTF8.GetString(headerBytes)] : []);
@@ -100,49 +94,59 @@ namespace DbManager.Services.Kafka
                     switch (kafkaChangeOrderEvent.MethodName)
                     {
                         case KafkaChangeOrderEvent.AddMethodName:
+                            activity?.AddTag("orderId", order.Id);
                             this._orderRepository.AddNodeAsync(order).Wait();
                             break;
                         case KafkaChangeOrderEvent.UpdateMethodName:
+                            activity?.AddTag("orderId", order.Id);
                             this._orderRepository.UpdateNodeAsync(order).Wait();
                             break;
                         case KafkaChangeOrderEvent.TryRemoveMethodName:
                             throw new ArgumentException($"KafkaChangeOrderEvent.MethodName with value \"{kafkaChangeOrderEvent.MethodName}\" can't be processed for order");
                         case KafkaChangeOrderEvent.RelateNodesMethodName:
+                            activity?.AddTag("relationId", kafkaChangeOrderEvent.Relation.Id);
                             this._orderRepository.RelateNodesAsync(kafkaChangeOrderEvent.Relation).Wait();
                             break;
                         case KafkaChangeOrderEvent.UpdateRelationNodesMethodName:
+                            activity?.AddTag("relationId", kafkaChangeOrderEvent.Relation.Id);
                             this._orderRepository.UpdateRelationNodesAsync(kafkaChangeOrderEvent.Relation).Wait();
                             break;
                         case KafkaChangeOrderEvent.DeleteRelationNodesMethodName:
+                            activity?.AddTag("relationId", kafkaChangeOrderEvent.Relation.Id);
                             this._orderRepository.DeleteRelationOfNodesAsync(kafkaChangeOrderEvent.Relation).Wait();
                             break;
                         case KafkaChangeOrderEvent.CancelOrderMethodName:
                             {
                                 (string orderId, string reason) = Newtonsoft.Json.JsonConvert.DeserializeObject<ValueTuple<string, string>>(((JObject)kafkaChangeOrderEvent.TupleMethodParams).ToString());
+                                activity?.AddTag("orderId", orderId);
                                 this._orderService.CancelOrder(orderId, reason).Wait();
                                 break;
                             }
                         case KafkaChangeOrderEvent.CancelOrderedDishMethodName:
                             {
                                 (string orderId, string dishId) = Newtonsoft.Json.JsonConvert.DeserializeObject<ValueTuple<string, string>>(((JObject)kafkaChangeOrderEvent.TupleMethodParams).ToString());
+                                activity?.AddTag("orderId", orderId);
                                 this._orderService.CancelOrderedDish(orderId, dishId).Wait();
                                 break;
                             }
                         case KafkaChangeOrderEvent.ChangeCountOrderedDishMethodName:
                             {
                                 (string orderId, string dishId, int count) = Newtonsoft.Json.JsonConvert.DeserializeObject<ValueTuple<string, string, int>>(((JObject)kafkaChangeOrderEvent.TupleMethodParams).ToString());
+                                activity?.AddTag("orderId", orderId);
                                 this._orderService.ChangeCountOrderedDish(orderId, dishId, count).Wait();
                                 break;
                             }
                         case KafkaChangeOrderEvent.MoveOrderToNextStageMethodName:
                             {
                                 (string orderId, string comment) = Newtonsoft.Json.JsonConvert.DeserializeObject<ValueTuple<string, string>>(((JObject)kafkaChangeOrderEvent.TupleMethodParams).ToString());
+                                activity?.AddTag("orderId", orderId);
                                 this._orderService.MoveOrderToNextStage(orderId, comment).Wait();
                                 break;
                             }
                         case KafkaChangeOrderEvent.MoveOrderToPreviousStageMethodName:
                             {
                                 string orderId = (string)kafkaChangeOrderEvent.TupleMethodParams;
+                                activity?.AddTag("orderId", orderId);
                                 this._orderService.MoveOrderToPreviousStage(orderId).Wait();
                                 break;
                             }
@@ -150,6 +154,7 @@ namespace DbManager.Services.Kafka
                             {
                                 (string orderId, string userId, Dictionary<string, int> dishesCounts, string comment, string phoneNumber, string deliveryAddress)
                                     = Newtonsoft.Json.JsonConvert.DeserializeObject<ValueTuple<string, string, Dictionary<string, int>, string, string, string>>(((JObject)kafkaChangeOrderEvent.TupleMethodParams).ToString());
+                                activity?.AddTag("orderId", orderId);
                                 this._orderService.PlaceAnOrder(orderId, userId, dishesCounts, comment, phoneNumber, deliveryAddress).Wait();
                                 break;
                             }
@@ -176,7 +181,6 @@ namespace DbManager.Services.Kafka
             }
             finally
             {
-                Interlocked.Decrement(ref this._processedOrderThreads);
                 this._processedOrderCounter.Add(-1);
             }
         }

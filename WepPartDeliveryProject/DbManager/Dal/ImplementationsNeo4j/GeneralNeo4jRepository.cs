@@ -1,9 +1,16 @@
-﻿using Confluent.Kafka;
-using DbManager.Dal;
+﻿using DbManager.Dal;
 using DbManager.Data;
 using DbManager.Data.Kafka;
 using Neo4jClient;
-using Neo4jClient.Cypher;
+
+/*Индексы для БД:
+CREATE INDEX index_dish_id FOR (n:Dish) ON (n.Id);
+CREATE INDEX index_order_id FOR (n:Order) ON (n.Id);
+CREATE INDEX index_deliveryman_id FOR (n:DeliveryMan) ON (n.Id);
+CREATE INDEX index_kitchen_id FOR (n:Kitchen) ON (n.Id);
+CREATE INDEX index_kitchenworker_id FOR (n:KitchenWorker) ON (n.Id);
+CREATE INDEX index_client_id FOR (n:Client) ON (n.Id);
+CREATE INDEX index_admin_id FOR (n:Admin) ON (n.Id);*/
 
 namespace DbManager.Neo4j.Implementations
 {
@@ -183,13 +190,14 @@ namespace DbManager.Neo4j.Implementations
                 throw new Exception("NodeFromId or NodeToId is null. Method RelateNodesAsync where TRelation is " + typeof(TRelation));
             }
             var typeNodeFrom = relation.GetType().BaseType.GenericTypeArguments[0];
+            var typeNodeTo = relation.GetType().BaseType.GenericTypeArguments[1];
             var direction = GetDirection(relation.GetType().Name, "relation", typeNodeFrom == typeof(TNode));
 
             if (relation.Id == Guid.Empty)
                 relation.Id = Guid.NewGuid();
 
             var cypher = _dbContext.Cypher
-                .Match($"(node {{Id: $entityId}}), (otherNode {{Id: $otherNodeId}})")
+                .Match($"(node:{typeNodeFrom.Name} {{Id: $entityId}}), (otherNode:{typeNodeTo.Name} {{Id: $otherNodeId}})")
                 .Create($"(node){direction}(otherNode)")
                 .Set("relation=$newRelation")
                 .WithParams(new
@@ -211,10 +219,11 @@ namespace DbManager.Neo4j.Implementations
             activity?.SetTag("provider", "neo4j");
 
             var typeNodeFrom = updatedRelation.GetType().BaseType.GenericTypeArguments[0];
+            var typeNodeTo = updatedRelation.GetType().BaseType.GenericTypeArguments[1];
             var direction = GetDirection(updatedRelation.GetType().Name, "relation", typeNodeFrom == typeof(TNode));
 
             var cypher = _dbContext.Cypher
-                .Match($"(node {{Id: $id}}){direction}(relatedNode {{Id: $relatedNodeId}})")
+                .Match($"(node:{typeNodeFrom.Name} {{Id: $id}}){direction}(relatedNode:{typeNodeTo.Name} {{Id: $relatedNodeId}})")
                 .Set("relation=$updatedRelation")
                 .WithParams(new
                 {
@@ -341,10 +350,12 @@ namespace DbManager.Neo4j.Implementations
             using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(DeleteRelationOfNodesAsync), System.Diagnostics.ActivityKind.Client);
             activity?.SetTag("provider", "neo4j");
 
+            var typeNodeFrom = relation.GetType().BaseType.GenericTypeArguments[0];
+            var typeNodeTo = relation.GetType().BaseType.GenericTypeArguments[1];
             var direction = GetDirection(relation.GetType().Name, "relation");
 
             var cypher = _dbContext.Cypher
-                .Match($"(node {{Id: $id}}){direction}(relatedNode {{Id: $relatedNodeId}})")
+                .Match($"(node:{typeNodeFrom.Name} {{Id: $id}}){direction}(relatedNode:{typeNodeTo.Name} {{Id: $relatedNodeId}})")
                 .Delete("relation")
                 .WithParams(new
                 {
@@ -501,9 +512,7 @@ namespace DbManager.Neo4j.Implementations
         /// <returns>String with directed relation</returns>
         protected string GetDirection(string nameRelation, string? relationInstanceName = "", bool? relationInEntity = null)
         {
-            string direction = "-[]-";
-            if (!string.IsNullOrEmpty(nameRelation))
-                direction = $"-[{relationInstanceName}:{nameRelation.ToUpper()}]-";
+            string direction = string.IsNullOrEmpty(nameRelation) ? "-[]-" : $"-[{relationInstanceName}:{nameRelation.ToUpper()}]-";
 
             if (relationInEntity == null)
                 return direction;

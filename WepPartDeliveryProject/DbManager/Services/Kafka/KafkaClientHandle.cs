@@ -30,7 +30,14 @@ namespace DbManager.Services.Kafka
         public KafkaClientHandle(IOptions<KafkaSettings> kafkaOptions)
         {
             var kafkaSettings = kafkaOptions.Value;
-            var conf = new ProducerConfig { BootstrapServers = kafkaSettings.BootstrapServers, };
+            var conf = new ProducerConfig 
+            { 
+                BootstrapServers = kafkaSettings.BootstrapServers,
+                LingerMs = 1, // Минимальная задержка перед отправкой пакета
+                BatchSize = 4000, // Меньший размер пакета
+                Acks = Acks.Leader, // Ждем подтверждение только от лидера
+                CompressionType = CompressionType.None // Без сжатия
+            };
             kafkaProducer = new ProducerBuilder<byte[], byte[]>(conf).Build();
         }
 

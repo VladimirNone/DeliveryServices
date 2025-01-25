@@ -58,6 +58,8 @@ namespace DbManager.Services.Kafka
                     if (!this._queue.TryDequeue(out consumeResult))
                         continue;
 
+                    this._orderCounter.Add(-1);
+
                     Task.Run(() => ProcessOrderEvent(consumeResult));
                 }
             }
@@ -162,7 +164,6 @@ namespace DbManager.Services.Kafka
                             throw new ArgumentException($"KafkaChangeOrderEvent.MethodName with value \"{kafkaChangeOrderEvent.MethodName}\" can't be processed");
                     }
                     activity?.AddEvent(new System.Diagnostics.ActivityEvent($"Method {kafkaChangeOrderEvent.MethodName} were executed"));
-                    this._orderCounter.Add(-1);
                 }
 
             }

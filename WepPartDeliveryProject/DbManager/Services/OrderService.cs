@@ -149,9 +149,6 @@ namespace DbManager.Services
             var randomDelMan = deliveryMen[new Random().Next(0, deliveryMen.Count)];
             //var randomdelMan = await _repositoryFactory.GetRepository<DeliveryMan>().GetNodeAsync("7ac11adb-3631-4e01-af74-eeeb7287a034");
 
-            if (userId != null)
-                await orderRepo.RelateNodesAsync(new Ordered() { NodeFromId = Guid.Parse(userId), NodeTo = order });
-
             foreach (var dish in dishes)
             {
                 await orderRepo.RelateNodesAsync(new OrderedDish() { NodeFrom = order, NodeTo = dish, Count = dishesCounts[dish.Id.ToString()] });
@@ -167,6 +164,9 @@ namespace DbManager.Services
             order.Story.Add(relationCancel);
             await orderRepo.RelateNodesAsync(relationCancel);
             await orderRepo.UpdateNodeAsync(order);
+
+            if (userId != null)
+                await orderRepo.RelateNodesAsync(new Ordered() { NodeFromId = Guid.Parse(userId), NodeTo = order });
         }
     }
 }

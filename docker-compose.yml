@@ -144,6 +144,40 @@ services:
       - "./WepPartDeliveryProject/WepPartDeliveryProject/client_app/public/:/app/client_app/public/"
       - "./WepPartDeliveryProject/certs/localhost.pfx:/app/localhost.pfx"
 
+  authservice:
+    build: 
+      context: ./WepPartDeliveryProject
+      dockerfile: ./AuthService/Dockerfile
+      args:
+        BUILD_CONFIGURATION: Debug
+    environment:
+      SSL_CERT_FILE: /bundle/localhost.pfx
+
+      AllowedHosts: "*"
+
+      Neo4jSettings__Neo4jConnection: bolt://c0008.corp.ekassir.com:7687
+      Neo4jSettings__Neo4jUser: neo4j
+      Neo4jSettings__Neo4jPassword: 123456sa
+      Neo4jSettings__Neo4jDatabase: neo4j
+
+      ApplicationSettings__JwtSecretKey: 1super_security_key11super_security_key11super_security_key11super_security_key11super_security_key11super_security_key1
+
+      JsonSerializer: System.Text
+      ASPNETCORE_ENVIRONMENT: Development
+      ServiceName: orderworker
+      UseTracingExporter: otlp
+      UseMetricsExporter: otlp
+      HistogramAggregation: explicit
+
+      Otlp__Endpoint: http://c0008.corp.ekassir.com:4317
+
+      AspNetCoreInstrumentation__RecordException: true
+
+      OTEL_TRACES_SAMPLER: parentbased_traceidratio
+      OTEL_TRACES_SAMPLER_ARG: 0,1
+      OTEL_METRIC_EXPORT_INTERVAL: 60000
+      OTEL_METRIC_EXPORT_TIMEOUT: 30000
+
   neo4j:
     image: bitnami/neo4j:latest
     environment:

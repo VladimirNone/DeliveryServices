@@ -1,13 +1,12 @@
-﻿using AutoMapper.Configuration.Annotations;
-using DbManager.Data.DTOs;
-using DbManager.Neo4j.Interfaces;
+﻿using DbManager.Data.DTOs;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using WepPartDeliveryProject;
+
+namespace DbManager.Services;
 
 public class JwtService
 {
@@ -15,7 +14,6 @@ public class JwtService
 
     public JwtService(IOptions<ApplicationSettings> appSettingsOptions)
     {
-        // Fetch settings object from configuration
         _appSettings = appSettingsOptions.Value;
     }
 

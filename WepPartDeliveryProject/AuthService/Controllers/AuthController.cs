@@ -1,12 +1,10 @@
 ﻿using DbManager.Data;
-using DbManager.Data.Cache;
 using DbManager.Data.DTOs;
 using DbManager.Data.Nodes;
 using DbManager.Neo4j.Interfaces;
 using DbManager.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace WepPartDeliveryProject.Controllers
 {

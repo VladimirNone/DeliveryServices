@@ -15,11 +15,14 @@ namespace DbManager
             this.ActivitySource = new ActivitySource(ActivitySourceName, version);
             this.Meter = new Meter(MeterName, version);
             this.CacheEventCounter = this.Meter.CreateUpDownCounter<long>("cache.events", description: "The number of events for changing object cache on cluster.");
+            this.DatabaseOperationCounter = this.Meter.CreateCounter<long>("database.operations", description: "The number of operations completed on database.");
         }
 
         public ActivitySource ActivitySource { get; }
 
         public UpDownCounter<long> CacheEventCounter { get; }
+
+        public Counter<long> DatabaseOperationCounter { get; }
 
         public void Dispose()
         {

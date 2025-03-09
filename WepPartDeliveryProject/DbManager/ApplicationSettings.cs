@@ -1,4 +1,4 @@
-﻿namespace WepPartDeliveryProject
+﻿namespace DbManager
 {
     public class ApplicationSettings
     {

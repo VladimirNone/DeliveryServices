@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
+using DbManager;
+using DbManager.Data;
 using DbManager.Data.DTOs;
 using DbManager.Data.Nodes;
-using DbManager.Data.Relations;
-using DbManager.Data;
 using DbManager.Neo4j.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

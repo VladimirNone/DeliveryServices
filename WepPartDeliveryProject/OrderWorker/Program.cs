@@ -8,7 +8,6 @@ using NLog;
 using NLog.Web;
 using System.Text;
 using System.Text.Json.Serialization;
-using WepPartDeliveryProject;
 
 var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 try
@@ -112,9 +111,6 @@ try
     }
     else
     {
-        // Логирование запросов
-        app.UseRequestLogger();
-
         app.UseSwagger();
         app.UseSwaggerUI(options =>
         {

@@ -1,15 +1,13 @@
-﻿
-using DbManager;
-using DbManager.Data.Nodes;
+﻿using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Helpers;
 using DbManager.Neo4j.DataGenerator;
-using DbManager.Neo4j.Implementations;
 using DbManager.Neo4j.Interfaces;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Neo4jClient;
 
-namespace WepPartDeliveryProject.BackgroundServices
+namespace DbManager.BackgroundServices
 {
     public class StartupBackgroundService : BackgroundService
     {

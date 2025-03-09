@@ -5,12 +5,13 @@ using DbManager.Data.DTOs;
 using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Neo4j.Interfaces;
+using DbManager.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
-namespace WepPartDeliveryProject.Controllers
+namespace DbManager.Controllers
 {
     [Authorize]
     [Route("[controller]")]

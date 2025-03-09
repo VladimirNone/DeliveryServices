@@ -36,7 +36,7 @@ namespace DbManager
 
         private void GraphClient_OperationCompleted(object sender, OperationCompletedEventArgs e)
         {
-            this._instrumentation.CacheEventCounter.Add(1);
+            this._instrumentation.DatabaseOperationCounter.Add(1);
             this._logger.LogTrace(Regex.Replace(e.QueryText.Replace("\\r\\n", " "), @"PasswordHash:\s*\[.*?\]", "PasswordHash: [*]", RegexOptions.Singleline));
         }
     }

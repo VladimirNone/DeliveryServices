@@ -25,6 +25,8 @@ namespace DbManager.Neo4j.Interfaces
         Task<List<User>> SearchUsersByIdAndLogin(string searchText, int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
 
         Task<List<(User, List<string>)>> SearchUsersByIdAndLoginForAdmin(string searchText, int? skipCount = null, int? limitCount = null, params string[] orderByProperty);
+
+        Task UpdateRefreshTokenAsync(User user);
     }
 }
 

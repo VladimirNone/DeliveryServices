@@ -57,7 +57,7 @@ namespace WepPartDeliveryProject.Controllers
                 user.RefreshToken = Guid.NewGuid();
                 user.RefreshTokenCreated = DateTime.Now;
 
-                await _repositoryFactory.GetRepository<User>().UpdateNodesPropertiesAsync(user);
+                await ((IUserRepository)_repositoryFactory.GetRepository<User>()).UpdateRefreshTokenAsync(user);
 
                 AddCookieDataToResponse(user.RefreshToken.ToString(), user.Id.ToString());
 
@@ -88,10 +88,6 @@ namespace WepPartDeliveryProject.Controllers
                 var userRoles = await userRepo.GetUserRoles(userId);
 
                 var jwtTokenInfo = _jwtService.GenerateAccessJwtToken(userId, userRoles);
-
-                userNode.RefreshTokenCreated = DateTime.Now;
-
-                await userRepo.UpdateNodesPropertiesAsync(userNode);
 
                 AddCookieDataToResponse(userNode.RefreshToken.ToString());
                 

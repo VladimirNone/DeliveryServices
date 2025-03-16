@@ -12,6 +12,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["AuthService/AuthService.csproj", "AuthService/"]
+COPY ["DbManager/DbManager.csproj", "DbManager/"]
 RUN dotnet restore "./AuthService/AuthService.csproj"
 COPY . .
 WORKDIR "/src/AuthService"

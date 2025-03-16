@@ -6,11 +6,11 @@ namespace DbManager.Services
     {
         public byte[] GetPasswordHash(string salt, string password)
         {
-            var argon2 = new Argon2i(password.Select(h => ((byte)h)).ToArray());
-            argon2.Salt = salt.Select(h => ((byte)h)).ToArray();
-            argon2.DegreeOfParallelism = 16;
+            var argon2 = new Argon2i(password.Select(h => (byte)h).ToArray());
+            argon2.Salt = salt.Select(h => (byte)h).ToArray();
+            argon2.DegreeOfParallelism = 8;
             argon2.MemorySize = 4096;
-            argon2.Iterations = 40;
+            argon2.Iterations = 20;
 
             var hash = argon2.GetBytes(128);
 

@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbManager", "DbManager\DbMa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderWorker", "OrderWorker\OrderWorker.csproj", "{B8E01BCE-A380-4255-B6AB-F44582B0DA78}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthService", "AuthService\AuthService.csproj", "{6E9020B4-DD5A-4B5F-9E34-44EE1D01BF4F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{B8E01BCE-A380-4255-B6AB-F44582B0DA78}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B8E01BCE-A380-4255-B6AB-F44582B0DA78}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B8E01BCE-A380-4255-B6AB-F44582B0DA78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E9020B4-DD5A-4B5F-9E34-44EE1D01BF4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E9020B4-DD5A-4B5F-9E34-44EE1D01BF4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E9020B4-DD5A-4B5F-9E34-44EE1D01BF4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E9020B4-DD5A-4B5F-9E34-44EE1D01BF4F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

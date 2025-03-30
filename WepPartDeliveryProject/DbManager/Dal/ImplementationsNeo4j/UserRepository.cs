@@ -139,5 +139,27 @@ namespace DbManager.Neo4j.Implementations
 
             return (await cypher.ResultsAsync).ToList();
         }
+
+        public async Task UpdateRefreshTokenAsync(User user)
+        {
+            using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(UpdateRefreshTokenAsync), System.Diagnostics.ActivityKind.Client);
+            activity?.SetTag("provider", "neo4j");
+
+            var query = _dbContext.Cypher
+                .Match($"(updateNode:{typeof(User).Name} {{Id: $id}})");
+
+            query = query.Set($"updateNode.{nameof(User.RefreshToken)} = ${nameof(User.RefreshToken)}, updateNode.{nameof(User.RefreshTokenCreated)} = ${nameof(User.RefreshTokenCreated)}");
+
+            var cypher = query.WithParams(new
+            {
+                id = user.Id,
+                user.RefreshToken,
+                user.RefreshTokenCreated,
+            });
+
+            activity?.SetTag("cypher.query", cypher.Query.QueryText);
+
+            await cypher.ExecuteWithoutResultsAsync();
+        }
     }
 }

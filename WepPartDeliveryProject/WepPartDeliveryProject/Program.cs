@@ -101,8 +101,8 @@ try
         });
 
     services.AddHostedService<StartupBackgroundService>();
-    services.AddSingleton<QueryKafkaWorker, ObjectCasheQueryKafkaWorker>();
-    services.AddHostedService<KafkaConsumerBackgroundService>();
+    //services.AddSingleton<QueryKafkaWorker, ObjectCacheQueryKafkaWorker>();
+    //services.AddHostedService<KafkaConsumerBackgroundService>();
 
     var app = builder.Build();
 

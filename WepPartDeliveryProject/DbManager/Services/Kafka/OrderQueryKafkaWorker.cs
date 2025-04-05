@@ -84,7 +84,7 @@ namespace DbManager.Services.Kafka
 
                     var parentContext = Propagators.DefaultTextMapPropagator.Extract(default, consumeResult.Message.Headers, (headers, key) => headers.TryGetLastBytes(key, out var headerBytes) ? [Encoding.UTF8.GetString(headerBytes)] : []);
                     //Возможно имеет смысл сделать линком, т.к. все ноды будут читать и обновлять контейнеры
-                    using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(ObjectCasheQueryKafkaWorker), System.Diagnostics.ActivityKind.Consumer, parentContext.ActivityContext);
+                    using var activity = this._instrumentation.ActivitySource.StartActivity(nameof(ObjectCacheQueryKafkaWorker), System.Diagnostics.ActivityKind.Consumer, parentContext.ActivityContext);
 
                     var kafkaChangeOrderEvent = Newtonsoft.Json.JsonConvert.DeserializeObject<KafkaChangeOrderEvent>(consumeResult.Message.Value);
 

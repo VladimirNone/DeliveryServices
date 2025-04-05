@@ -60,7 +60,7 @@ try
     services.AddHostedService<StartupBackgroundService>();
 
     services.AddKeyedSingleton<QueryKafkaWorker, OrderQueryKafkaWorker>("order");
-    services.AddKeyedSingleton<QueryKafkaWorker, ObjectCasheQueryKafkaWorker>("container");
+    //services.AddKeyedSingleton<QueryKafkaWorker, ObjectCacheQueryKafkaWorker>("container");
 
     services.AddHostedService(factory =>
     {
@@ -72,7 +72,7 @@ try
         return new KafkaConsumerBackgroundService(queryKafkaWorker, deliveryHealthCheck, logger, kafkaOptions);
     });
 
-    services.AddHostedService(factory =>
+/*    services.AddHostedService(factory =>
     {
         var queryKafkaWorker = factory.GetRequiredKeyedService<QueryKafkaWorker>("container");
         var deliveryHealthCheck = factory.GetRequiredService<DeliveryHealthCheck>();
@@ -80,7 +80,7 @@ try
         var kafkaOptions = factory.GetRequiredService<IOptions<KafkaSettings>>();
 
         return new KafkaConsumerBackgroundService(queryKafkaWorker, deliveryHealthCheck, logger, kafkaOptions);
-    });
+    });*/
 
 
     var app = builder.Build();

@@ -12,15 +12,15 @@ using System.Text;
 
 namespace DbManager.Services.Kafka
 {
-    public class ObjectCasheQueryKafkaWorker : QueryKafkaWorker
+    public class ObjectCacheQueryKafkaWorker : QueryKafkaWorker
     {
         private readonly ConcurrentDictionary<Type, ObjectCasheInfo> objectCachers = new ConcurrentDictionary<Type, ObjectCasheInfo>();
-        private readonly ILogger<ObjectCasheQueryKafkaWorker> _logger;
+        private readonly ILogger<ObjectCacheQueryKafkaWorker> _logger;
         private readonly IRepositoryFactory _repositoryFactory;
         private readonly Instrumentation _instrumentation;
         private UpDownCounter<long> _cacheEventCounter { get; }
 
-        public ObjectCasheQueryKafkaWorker(IRepositoryFactory repositoryFactory, Instrumentation instrumentation, ILogger<ObjectCasheQueryKafkaWorker> logger) : base()
+        public ObjectCacheQueryKafkaWorker(IRepositoryFactory repositoryFactory, Instrumentation instrumentation, ILogger<ObjectCacheQueryKafkaWorker> logger) : base()
         {
             _logger = logger;
             _repositoryFactory = repositoryFactory;
@@ -52,7 +52,7 @@ namespace DbManager.Services.Kafka
 
                         var parentContext = Propagators.DefaultTextMapPropagator.Extract(default, consumeResult.Message.Headers, (headers, key) => headers.TryGetLastBytes(key, out var headerBytes) ? [Encoding.UTF8.GetString(headerBytes)] : []);
                         //Возможно имеет смысл сделать линком, т.к. все ноды будут читать и обновлять контейнеры
-                        using var activity = _instrumentation.ActivitySource.StartActivity(nameof(ObjectCasheQueryKafkaWorker), System.Diagnostics.ActivityKind.Consumer, parentContext.ActivityContext);
+                        using var activity = _instrumentation.ActivitySource.StartActivity(nameof(ObjectCacheQueryKafkaWorker), System.Diagnostics.ActivityKind.Consumer, parentContext.ActivityContext);
 
                         var kafkaChangeCacheEvent = Newtonsoft.Json.JsonConvert.DeserializeObject<KafkaChangeCacheEvent>(consumeResult.Message.Value);
                         //Получаем тип объекта
@@ -119,7 +119,7 @@ namespace DbManager.Services.Kafka
             }
             catch (ThreadInterruptedException)
             {
-                _logger.LogError($"{nameof(ObjectCasheQueryKafkaWorker)} was interrupted.");
+                _logger.LogError($"{nameof(ObjectCacheQueryKafkaWorker)} was interrupted.");
             }
             catch (Exception ex)
             {

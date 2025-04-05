@@ -41,7 +41,7 @@ namespace WepPartDeliveryProject.Controllers
 
             var orderRepo = (IOrderRepository)_repositoryFactory.GetRepository<Order>();
 
-            var delMan = ObjectCache<DeliveryMan>.Instance.First(h => h.Id == Guid.Parse(userId));
+            var delMan = await _repositoryFactory.GetRepository<DeliveryMan>().GetNodeAsync(userId);
 
             var orders = await orderRepo.GetOrdersByStateRelatedWithNode<DeliveryMan>(delMan.Id.ToString(), (OrderStateEnum)numberOfState, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1);
 

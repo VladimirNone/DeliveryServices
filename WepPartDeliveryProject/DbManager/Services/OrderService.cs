@@ -109,7 +109,7 @@ namespace DbManager.Services
 
             var order = await _repositoryFactory.GetRepository<Order>().GetNodeAsync(orderId);
 
-            var dish = ObjectCache<Dish>.Instance.First(h => h.Id == Guid.Parse(dishId));
+            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(new Guid(dishId));
 
             var orderedDish = await _repositoryFactory.GetRepository<Dish>().GetRelationBetweenTwoNodesAsync<OrderedDish, Order>(dish, order);
 
@@ -126,7 +126,7 @@ namespace DbManager.Services
 
         public async Task PlaceAnOrder(string orderId, string userId, Dictionary<string, int> dishesCounts, string comment, string phoneNumber, string deliveryAddress)
         {
-            var dishes = ObjectCache<Dish>.Instance.Where(h => dishesCounts.Keys.Contains(h.Id.ToString())).ToList();
+            var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesByPropertyAsync("Id", dishesCounts.Keys.ToArray());
 
             var order = new Order()
             {

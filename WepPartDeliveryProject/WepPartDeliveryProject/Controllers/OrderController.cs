@@ -42,8 +42,8 @@ namespace WepPartDeliveryProject.Controllers
             var jsonData = Request.Cookies["cartDishes"];
 
             var res = jsonData != null ? JsonConvert.DeserializeObject<Dictionary<string, int>>(jsonData) : new Dictionary<string, int>();
-
-            var dishes = ObjectCache<Dish>.Instance.Where(h => res.Keys.Contains(h.Id.ToString()));
+            
+            var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesByPropertyAsync("Id", res.Keys.ToArray());
 
             return Ok(dishes);
         }

@@ -33,12 +33,7 @@ namespace WepPartDeliveryProject.Controllers
         public async Task<IActionResult> GetDishesForMainPage(int page = 0)
         {
             //обычному пользователю не должен быть доступен удаленный или недоступный продукт
-            var dishes = ObjectCache<Dish>.Instance
-                .Where(h => !h.IsDeleted && h.IsAvailableForUser)
-                .OrderBy(h => h.Name)
-                .Skip(_appSettings.CountOfItemsOnWebPage * page)
-                .Take(_appSettings.CountOfItemsOnWebPage + 1)
-                .ToList();
+            var dishes = await _repositoryFactory.GetRepository<Dish>().GetNodesAsync(_appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
 
             var pageEnded = dishes.Count < _appSettings.CountOfItemsOnWebPage + 1;
 
@@ -62,13 +57,13 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getDishIds")]
         public async Task<IActionResult> GetDishIds()
         {
-            return Ok(await Task.FromResult(ObjectCache<Dish>.Instance.Select(h => h.Id)));
+            return Ok((await _repositoryFactory.GetRepository<Dish>().GetNodesAsync()).Select(h => h.Id));
         }
 
         [HttpGet("getDish/{id}")]
         public async Task<IActionResult> GetDish(Guid id)
         {
-            var dish = ObjectCache<Dish>.Instance.First(h => h.Id == id);
+            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(id);
 
             if (dish.IsDeleted || !dish.IsAvailableForUser)
             {
@@ -81,7 +76,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getDishAbilityInfo/{id}")]
         public async Task<IActionResult> GetDishAbilityInfo(Guid id)
         {
-            var dish = ObjectCache<Dish>.Instance.First(h => h.Id == id);
+            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(id);
 
             var userCanAbilityToViewDish = !dish.IsDeleted && dish.IsAvailableForUser;
 
@@ -105,12 +100,8 @@ namespace WepPartDeliveryProject.Controllers
         public async Task<IActionResult> GetCart(string searchText, int page = 0)
         {
             //обычному пользователю не должен быть доступен удаленный или недоступный продукт
-            var dishes = ObjectCache<Dish>.Instance
-                .Where(h => !h.IsDeleted && h.IsAvailableForUser && (h.Description.ToLower().Contains(searchText.ToLower()) || h.Name.ToLower().Contains(searchText.ToLower())))
-                .OrderBy(h => h.Name)
-                .Skip(_appSettings.CountOfItemsOnWebPage * page)
-                .Take(_appSettings.CountOfItemsOnWebPage + 1)
-                .ToList();
+            var dishes = await ((IDishRepository)_repositoryFactory.GetRepository<Dish>())
+                .SearchDishesByNameAndDescription(searchText, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
 
             var pageEnded = dishes.Count() < _appSettings.CountOfItemsOnWebPage + 1;
 

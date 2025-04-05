@@ -57,12 +57,12 @@ namespace WepPartDeliveryProject.BackgroundServices
                                         this._configuration.GetSection("ClientAppSettings:DirectoryWithDishImages")?.Value);
                 this._logger.LogInformation("Finish prepare dishes");
 
-                ObjectCache<Dish>.Instance.AddList(await this._repoFactory.GetRepository<Dish>().GetNodesAsync());
+/*                ObjectCache<Dish>.Instance.AddList(await this._repoFactory.GetRepository<Dish>().GetNodesAsync());
                 ObjectCache<DeliveryMan>.Instance.AddList(await this._repoFactory.GetRepository<DeliveryMan>().GetNodesAsync());
                 ObjectCache<Kitchen>.Instance.AddList(await this._repoFactory.GetRepository<Kitchen>().GetNodesAsync());
                 ObjectCache<KitchenWorker>.Instance.AddList(await this._repoFactory.GetRepository<KitchenWorker>().GetNodesAsync());
                 ObjectCache<Client>.Instance.AddList(await this._repoFactory.GetRepository<Client>().GetNodesAsync());
-                ObjectCache<Admin>.Instance.AddList(await this._repoFactory.GetRepository<Admin>().GetNodesAsync());
+                ObjectCache<Admin>.Instance.AddList(await this._repoFactory.GetRepository<Admin>().GetNodesAsync());*/
                 this._logger.LogInformation("Finish loading containers");
             });
             this._deliveryHealthCheck.StartupCompleted = true;

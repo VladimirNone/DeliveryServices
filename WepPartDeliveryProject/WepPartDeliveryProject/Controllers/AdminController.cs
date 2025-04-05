@@ -52,12 +52,8 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getDishes")]
         public async Task<IActionResult> GetDishes(string searchText = "", int page = 0)
         {
-            var dishes = ObjectCache<Dish>.Instance
-                .Where(h => h.Description.ToLower().Contains(searchText) || h.Name.ToLower().Contains(searchText))
-                .OrderBy(h => h.Name)
-                .Skip(_appSettings.CountOfItemsOnWebPage * page)
-                .Take(_appSettings.CountOfItemsOnWebPage + 1)
-                .ToList();
+            var dishes = await ((IDishRepository)_repositoryFactory.GetRepository<Dish>())
+                .SearchDishesByNameAndDescription(searchText, _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "Name");
 
             var pageEnded = dishes.Count() < _appSettings.CountOfItemsOnWebPage + 1;
 
@@ -67,7 +63,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getDish/{id}")]
         public async Task<IActionResult> GetDish(Guid id)
         {
-            var dish = ObjectCache<Dish>.Instance.First(h => h.Id == id);
+            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(id);
             var dishCategory = await _repositoryFactory.GetRepository<Dish>().GetRelationsOfNodesAsync<ContainsDish, Category>(dish);
 
             return Ok(new { dish, category = dishCategory.First().NodeFrom });
@@ -160,7 +156,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpPost("changeDeleteStatusOfDish")]
         public async Task<IActionResult> ChangeDeleteStatusOfDish([FromBody] ManipulateDishDataInDTO inputData)
         {
-            var dish = ObjectCache<Dish>.Instance.First(h => h.Id == inputData.Id);
+            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(inputData.Id.ToString());
             if (dish == null)
             {
                 return BadRequest("Данные о блюде не обнаружены");
@@ -175,7 +171,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpPost("changeVisibleStatusOfDish")]
         public async Task<IActionResult> ChangeVisibleStatusOfDish([FromBody] ManipulateDishDataInDTO inputData)
         {
-            var dish = ObjectCache<Dish>.Instance.First(h => h.Id == inputData.Id);
+            var dish = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(inputData.Id.ToString());
             if (dish == null)
             {
                 return BadRequest("Данные о блюде не обнаружены");
@@ -191,7 +187,7 @@ namespace WepPartDeliveryProject.Controllers
         public async Task<IActionResult> ChangeDish([FromForm] ManipulateDishDataInDTO inputData)
         {
             var dishRepo = _repositoryFactory.GetRepository<Dish>();
-            var dishToChange = ObjectCache<Dish>.Instance.First(h => h.Id == inputData.Id);
+            var dishToChange = await _repositoryFactory.GetRepository<Dish>().GetNodeAsync(inputData.Id.ToString());
             if (dishToChange == null)
             {
                 return BadRequest("Данные о блюде не обнаружены");

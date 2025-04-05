@@ -1,18 +1,17 @@
 services:
-  zookeeper:
-    image: wurstmeister/zookeeper
+  frontsrv:
+    build: 
+      context: ./WepPartDeliveryProject/WepPartDeliveryProject/client_app
+      dockerfile: ./Dockerfile
     ports:
-      - "2181:2181"
-      
-  kafka:
-    image: wurstmeister/kafka
-    ports:
-      - "9092:9092"
+      - '3000:3000' # Port used for the http protocol.
     environment:
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-    depends_on:
-      - zookeeper
+      - SSL_CERT_FILE=/bundle/localhost.cer
+      - NEXT_PUBLIC_HOME_API=https://host.docker.internal:8081
+      - NODE_TLS_REJECT_UNAUTHORIZED="0"
+    volumes: 
+      - "./WepPartDeliveryProject/WepPartDeliveryProject/client_app/.env:/app/.env"
+      - "./WepPartDeliveryProject/certs/localhost.cer:/bundle/localhost.cer"
 
   deliverysrv:
     build: 
@@ -20,12 +19,130 @@ services:
       dockerfile: ./WepPartDeliveryProject/Dockerfile
       args:
         BUILD_CONFIGURATION: Debug
+    environment:
+      SSL_CERT_FILE: /bundle/localhost.pfx
+
+      KafkaSettings__BootstrapServers: c0008.corp.ekassir.com:9092
+      KafkaSettings__GroupId: test_group_id
+      KafkaSettings__ContainerEventsTopic: ContainerEvents
+
+      AllowedHosts: "*"
+
+      Neo4jSettings__Neo4jConnection: bolt://c0008.corp.ekassir.com:7687
+      Neo4jSettings__Neo4jUser: neo4j
+      Neo4jSettings__Neo4jPassword: 123456sa
+      Neo4jSettings__Neo4jDatabase: neo4j
+
+      ApplicationSettings__CountOfItemsOnWebPage: 8
+      ApplicationSettings__JwtSecretKey: 1super_security_key11super_security_key11super_security_key11super_security_key11super_security_key11super_security_key1
+      ApplicationSettings__GenerateData: false
+
+      ClientAppSettings__ClientAppApi: https://f69b-185-97-201-110.ngrok-free.app
+      ClientAppSettings__PathToPublicSourceDirecroty: e:\\Programs\\DeliveryServices\\WepPartDeliveryProject\\WepPartDeliveryProject\\client_app\\public\\
+      ClientAppSettings__DirectoryWithDishImages: dishes
+
+      JsonSerializer: System.Text
+      ASPNETCORE_ENVIRONMENT: Development
+      ServiceName: otel-test
+      UseTracingExporter: otlp
+      UseMetricsExporter: otlp
+      HistogramAggregation: explicit
+
+      Otlp__Endpoint: http://c0008.corp.ekassir.com:4317
+
+      AspNetCoreInstrumentation__RecordException: true
+
+      OTEL_TRACES_SAMPLER: parentbased_traceidratio
+      OTEL_TRACES_SAMPLER_ARG: 0,1
+      OTEL_METRIC_EXPORT_INTERVAL: 60000
+      OTEL_METRIC_EXPORT_TIMEOUT: 30000
+
     ports:
       - '8080:8080' # Port used for the http protocol.
       - '8081:8081' # Port used for the https protocol.
     volumes: 
       - "./WepPartDeliveryProject/WepPartDeliveryProject/appsettings.json:/app/appsettings.json"
       - "./WepPartDeliveryProject/WepPartDeliveryProject/client_app/public/:/app/client_app/public/"
+      - "./WepPartDeliveryProject/certs/localhost.pfx:/app/localhost.pfx"
+
+  orderworker:
+    build: 
+      context: ./WepPartDeliveryProject
+      dockerfile: ./OrderWorker/Dockerfile
+      args:
+        BUILD_CONFIGURATION: Debug
+    environment:
+      SSL_CERT_FILE: /bundle/localhost.pfx
+
+      KafkaSettings__BootstrapServers: c0008.corp.ekassir.com:9092
+      KafkaSettings__GroupId: order_group_id
+      KafkaSettings__ContainerEventsTopic: ContainerEvents
+      KafkaSettings__ContainerOrdersTopic: ContainerOrders
+
+      AllowedHosts: "*"
+
+      Neo4jSettings__Neo4jConnection: bolt://c0008.corp.ekassir.com:7687
+      Neo4jSettings__Neo4jUser: neo4j
+      Neo4jSettings__Neo4jPassword: 123456sa
+      Neo4jSettings__Neo4jDatabase: neo4j
+
+      JsonSerializer: System.Text
+      ASPNETCORE_ENVIRONMENT: Development
+      ServiceName: orderworker
+      UseTracingExporter: otlp
+      UseMetricsExporter: otlp
+      HistogramAggregation: explicit
+
+      Otlp__Endpoint: http://c0008.corp.ekassir.com:4317
+
+      AspNetCoreInstrumentation__RecordException: true
+
+      OTEL_TRACES_SAMPLER: parentbased_traceidratio
+      OTEL_TRACES_SAMPLER_ARG: 0,1
+      OTEL_METRIC_EXPORT_INTERVAL: 60000
+      OTEL_METRIC_EXPORT_TIMEOUT: 30000
+
+    ports:
+      - '8080:8080' # Port used for the http protocol.
+      - '8081:8081' # Port used for the https protocol.
+    volumes: 
+      - "./WepPartDeliveryProject/WepPartDeliveryProject/appsettings.json:/app/appsettings.json"
+      - "./WepPartDeliveryProject/WepPartDeliveryProject/client_app/public/:/app/client_app/public/"
+      - "./WepPartDeliveryProject/certs/localhost.pfx:/app/localhost.pfx"
+
+  authservice:
+    build: 
+      context: ./WepPartDeliveryProject
+      dockerfile: ./AuthService/Dockerfile
+      args:
+        BUILD_CONFIGURATION: Debug
+    environment:
+      SSL_CERT_FILE: /bundle/localhost.pfx
+
+      AllowedHosts: "*"
+
+      Neo4jSettings__Neo4jConnection: bolt://c0008.corp.ekassir.com:7687
+      Neo4jSettings__Neo4jUser: neo4j
+      Neo4jSettings__Neo4jPassword: 123456sa
+      Neo4jSettings__Neo4jDatabase: neo4j
+
+      ApplicationSettings__JwtSecretKey: 1super_security_key11super_security_key11super_security_key11super_security_key11super_security_key11super_security_key1
+
+      JsonSerializer: System.Text
+      ASPNETCORE_ENVIRONMENT: Development
+      ServiceName: orderworker
+      UseTracingExporter: otlp
+      UseMetricsExporter: otlp
+      HistogramAggregation: explicit
+
+      Otlp__Endpoint: http://c0008.corp.ekassir.com:4317
+
+      AspNetCoreInstrumentation__RecordException: true
+
+      OTEL_TRACES_SAMPLER: parentbased_traceidratio
+      OTEL_TRACES_SAMPLER_ARG: 0,1
+      OTEL_METRIC_EXPORT_INTERVAL: 60000
+      OTEL_METRIC_EXPORT_TIMEOUT: 30000
 
   neo4j:
     image: bitnami/neo4j:latest
@@ -40,3 +157,4 @@ services:
 
 volumes:
   neo4j_data:
+  zookeeper_data:

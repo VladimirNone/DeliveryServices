@@ -33,7 +33,7 @@ try
             policy =>
             {
                 policy
-                    .WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi").Value)
+                    .WithOrigins(configuration.GetSection("ClientAppSettings:ClientAppApi")?.Value ?? "http://localhost:3002")
                     .WithOrigins("http://localhost:3000")
                     .WithOrigins("http://localhost:3001")
                     //.WithHeaders(HeaderNames.ContentType, HeaderNames.Cookie)
@@ -120,8 +120,6 @@ try
     }
 
     app.UseCors();
-
-    app.UseStaticFiles();
 
     app.UseHealthChecks("/health");
 

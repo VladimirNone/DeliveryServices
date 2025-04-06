@@ -1,7 +1,7 @@
 ﻿using Confluent.Kafka;
 using DbManager.AppSettings;
 using DbManager.Data;
-using DbManager.Data.Cache;
+
 using DbManager.Data.Kafka;
 using DbManager.Data.Nodes;
 using Microsoft.Extensions.Logging;

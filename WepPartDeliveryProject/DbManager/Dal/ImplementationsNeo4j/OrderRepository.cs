@@ -1,10 +1,7 @@
 ﻿using DbManager.Data;
-using DbManager.Data.Cache;
-using DbManager.Data.Kafka;
 using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Neo4j.Interfaces;
-using DbManager.Services;
 
 namespace DbManager.Neo4j.Implementations
 {
@@ -17,13 +14,13 @@ namespace DbManager.Neo4j.Implementations
         public async Task<List<Order>> GetOrdersByStateRelatedWithNode<TNode>(string nodeId, string nameOfState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
             where TNode : INode
         {
-            return await GetOrdersByStateRelatedWithNode<TNode>(Guid.Parse(nodeId), ObjectCache<OrderState>.Instance.Single(h=>h.NameOfState == nameOfState).Id, skipCount, limitCount, orderByProperty);
+            return await GetOrdersByStateRelatedWithNode<TNode>(Guid.Parse(nodeId), OrderState.OrderStatesFromDb.Single(h=>h.NameOfState == nameOfState).Id, skipCount, limitCount, orderByProperty);
         }
 
         public async Task<List<Order>> GetOrdersByStateRelatedWithNode<TNode>(string nodeId, OrderStateEnum orderState, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)
             where TNode : INode
         {
-            return await GetOrdersByStateRelatedWithNode<TNode>(Guid.Parse(nodeId), ObjectCache<OrderState>.Instance.Single(h => (OrderStateEnum)h.NumberOfStage == orderState).Id, skipCount, limitCount, orderByProperty);
+            return await GetOrdersByStateRelatedWithNode<TNode>(Guid.Parse(nodeId), OrderState.OrderStatesFromDb.Single(h => (OrderStateEnum)h.NumberOfStage == orderState).Id, skipCount, limitCount, orderByProperty);
         }
 
         public async Task<List<Order>> GetOrdersByStateRelatedWithNode<TNode>(Guid nodeId, Guid orderStateId, int? skipCount = null, int? limitCount = null, params string[] orderByProperty)

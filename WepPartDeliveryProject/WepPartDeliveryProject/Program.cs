@@ -2,7 +2,6 @@ using DbManager;
 using DbManager.AppSettings;
 using DbManager.Mapper;
 using DbManager.Services;
-using DbManager.Services.Kafka;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using NLog;

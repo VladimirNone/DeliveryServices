@@ -9,7 +9,7 @@ namespace DbManager.Data.Cache
 
         public event EventHandler<ResolveItemEventArgs<T, Guid>> ResolveItem;
 
-        private static object _accessRoot = new object ();
+        private static readonly object _accessRoot = new object();
 
         public static Dictionary<Type, object> Instances;
 

@@ -1,5 +1,5 @@
 ﻿using DbManager.Data;
-using DbManager.Data.Cache;
+
 using DbManager.Data.Kafka;
 using DbManager.Data.Nodes;
 using DbManager.Neo4j.Interfaces;
@@ -38,7 +38,7 @@ namespace DbManager.Services.Kafka
 
             var order = await orderRepo.GetNodeAsync(Guid.Parse(orderId));
             var orderHasState = order.Story.Last();
-            var orderState = ObjectCache<OrderState>.Instance.Single(h => h.Id == orderHasState.NodeToId);
+            var orderState = OrderState.OrderStatesFromDb.Single(h => h.Id == orderHasState.NodeToId);
 
             //Если заказ был отменен или завершен, то ничего не произойдет
             if ((OrderStateEnum)orderState.NumberOfStage == OrderStateEnum.Cancelled || (OrderStateEnum)orderState.NumberOfStage == OrderStateEnum.Finished)
@@ -54,7 +54,7 @@ namespace DbManager.Services.Kafka
 
             var order = await orderRepo.GetNodeAsync(Guid.Parse(orderId));
             var orderHasState = order.Story.Last();
-            var orderState = ObjectCache<OrderState>.Instance.Single(h => h.Id == orderHasState.NodeToId);
+            var orderState = OrderState.OrderStatesFromDb.Single(h => h.Id == orderHasState.NodeToId);
             //Если заказ только попал в очередь
             if ((OrderStateEnum)orderState.NumberOfStage == OrderStateEnum.InQueue)
                 return false;

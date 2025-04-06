@@ -6,6 +6,7 @@ namespace DbManager.Data.Nodes
 {
     public class Category : Node, INode
     {
+        public static List<Category> CategoriesFromDb { get; set; }
         public string Name { get; set; }
         public string? Description { get; set; }
         public string LinkName { get; set; }

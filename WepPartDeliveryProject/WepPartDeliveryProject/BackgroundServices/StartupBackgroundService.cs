@@ -1,14 +1,11 @@
 ﻿
 using DbManager;
-using DbManager.Data.Cache;
 using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Helpers;
 using DbManager.Neo4j.DataGenerator;
-using DbManager.Neo4j.Implementations;
 using DbManager.Neo4j.Interfaces;
 using Microsoft.Extensions.Options;
-using Neo4jClient;
 
 namespace WepPartDeliveryProject.BackgroundServices
 {
@@ -48,9 +45,6 @@ namespace WepPartDeliveryProject.BackgroundServices
                     await this._generatorService.GenerateAll();
                     this._logger.LogInformation("Finish generate data");
                 }
-                this._logger.LogInformation("Start loading containers");
-                ObjectCache<Category>.Instance.AddList(await this._repoFactory.GetRepository<Category>().GetNodesAsync());
-                ObjectCache<OrderState>.Instance.AddList(await this._repoFactory.GetRepository<OrderState>().GetNodesAsync());
 
                 this._logger.LogInformation("Start prepare dishes");
                 await this.PrepareDishes( this._configuration.GetSection("ClientAppSettings:PathToPublicSourceDirecroty")?.Value, 
@@ -76,7 +70,11 @@ namespace WepPartDeliveryProject.BackgroundServices
             var categoryRepo = this._repoFactory.GetRepository<Category>();
             var dishRepo = this._repoFactory.GetRepository<Dish>();
 
-            foreach (var category in ObjectCache<Category>.Instance.ToList())
+            OrderState.OrderStatesFromDb = await this._repoFactory.GetRepository<OrderState>().GetNodesAsync();
+
+            Category.CategoriesFromDb = await categoryRepo.GetNodesAsync();
+
+            foreach (var category in Category.CategoriesFromDb)
             {
                 var categoryDishes = (await categoryRepo.GetRelationsOfNodesAsync<ContainsDish, Dish>(category)).Select(h => (Dish)h.NodeTo);
 

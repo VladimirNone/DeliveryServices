@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using DbManager.Data;
-using DbManager.Data.Cache;
+
 using DbManager.Data.DTOs;
 using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
@@ -45,13 +45,13 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getOrderStates")]
         public IActionResult GetOrderStates()
         {
-            return Ok(_mapper.Map<List<OrderStateItemOutDTO>>(ObjectCache<OrderState>.Instance.ToList()));
+            return Ok(_mapper.Map<List<OrderStateItemOutDTO>>(OrderState.OrderStatesFromDb));
         }
 
         [HttpGet("getCategoriesList")]
         public IActionResult GetCategoriesList()
         {
-            return Ok(ObjectCache<Category>.Instance.ToList());
+            return Ok(Category.CategoriesFromDb);
         }
 
         [HttpGet("getDishIds")]
@@ -86,7 +86,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getDishesList/{category}")]
         public async Task<IActionResult> GetDishesList(string category)
         {
-            var choicedCategory = ObjectCache<Category>.Instance.ToList().Single(h=>h.LinkName == category);
+            var choicedCategory = Category.CategoriesFromDb.Single(h=>h.LinkName == category);
             var categoryDishes = await _repositoryFactory.GetRepository<Category>().GetRelationsOfNodesAsync<ContainsDish, Dish>(choicedCategory, orderByProperty: "Name");
 
             var dishes = categoryDishes.Where(h => !((Dish)h.NodeTo).IsDeleted && ((Dish)h.NodeTo).IsAvailableForUser).Select(h => (Dish)h.NodeTo).ToList();

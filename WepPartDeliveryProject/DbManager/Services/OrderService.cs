@@ -1,5 +1,4 @@
-﻿using DbManager.Data.Cache;
-using DbManager.Data;
+﻿using DbManager.Data;
 using DbManager.Data.Nodes;
 using DbManager.Data.Relations;
 using DbManager.Neo4j.Interfaces;
@@ -24,7 +23,7 @@ namespace DbManager.Services
 
             var order = await orderRepo.GetNodeAsync(Guid.Parse(orderId));
             var orderHasState = order.Story.Last();
-            var orderState = ObjectCache<OrderState>.Instance.Single(h => h.Id == orderHasState.NodeToId);
+            var orderState = OrderState.OrderStatesFromDb.Single(h => h.Id == orderHasState.NodeToId);
             //Если заказ был отменен или завершен, то ничего не произойдет
             if ((OrderStateEnum)orderState.NumberOfStage == OrderStateEnum.Cancelled || (OrderStateEnum)orderState.NumberOfStage == OrderStateEnum.Finished)
                 return false;
@@ -34,7 +33,7 @@ namespace DbManager.Services
             {
                 Comment = comment,
                 NodeFromId = order.Id,
-                NodeToId = ObjectCache<OrderState>.Instance.Single(h => h.NumberOfStage == orderState.NumberOfStage * 2).Id,
+                NodeToId = OrderState.OrderStatesFromDb.Single(h => h.NumberOfStage == orderState.NumberOfStage * 2).Id,
                 TimeStartState = DateTime.Now
             };
 
@@ -42,7 +41,7 @@ namespace DbManager.Services
             await orderRepo.RelateNodesAsync(newOrderState);
             await orderRepo.UpdateNodeAsync(order);
 
-            newOrderState.NodeTo = ObjectCache<OrderState>.Instance.Single(h => h.NumberOfStage == orderState.NumberOfStage * 2);
+            newOrderState.NodeTo = OrderState.OrderStatesFromDb.Single(h => h.NumberOfStage == orderState.NumberOfStage * 2);
 
             return true;
         }
@@ -54,7 +53,7 @@ namespace DbManager.Services
 
             var order = await orderRepo.GetNodeAsync(Guid.Parse(orderId));
             var orderHasState = order.Story.Last();
-            var orderState = ObjectCache<OrderState>.Instance.Single(h => h.Id == orderHasState.NodeToId);
+            var orderState = OrderState.OrderStatesFromDb.Single(h => h.Id == orderHasState.NodeToId);
             //Если заказ только попал в очередь
             if ((OrderStateEnum)orderState.NumberOfStage == OrderStateEnum.InQueue)
                 return false;
@@ -91,11 +90,11 @@ namespace DbManager.Services
 
             var order = await orderRepo.GetNodeAsync(orderId);
             var orderHasState = order.Story.Last();
-            var orderState = ObjectCache<OrderState>.Instance.Single(h => h.Id == orderHasState.NodeToId);
+            var orderState = OrderState.OrderStatesFromDb.Single(h => h.Id == orderHasState.NodeToId);
 
             await orderRepo.DeleteRelationOfNodesAsync<HasOrderState, OrderState>(order, orderState);
 
-            var cancelState = ObjectCache<OrderState>.Instance.First(h => h.NumberOfStage == (int)OrderStateEnum.Cancelled);
+            var cancelState = OrderState.OrderStatesFromDb.First(h => h.NumberOfStage == (int)OrderStateEnum.Cancelled);
             var relationCancel = new HasOrderState() { Comment = reasonOfCancel, NodeFromId = order.Id, NodeToId = cancelState.Id, TimeStartState = DateTime.Now };
 
             order.Story.Add(relationCancel);
@@ -158,7 +157,7 @@ namespace DbManager.Services
 
             await orderRepo.RelateNodesAsync(new DeliveredBy() { NodeFrom = randomDelMan, NodeTo = order });
 
-            var firstState = ObjectCache<OrderState>.Instance.First(h => h.NumberOfStage == (int)OrderStateEnum.InQueue);
+            var firstState = OrderState.OrderStatesFromDb.First(h => h.NumberOfStage == (int)OrderStateEnum.InQueue);
             var relationCancel = new HasOrderState() { Comment = comment, NodeFromId = order.Id, NodeToId = firstState.Id, TimeStartState = DateTime.Now };
 
             order.Story.Add(relationCancel);

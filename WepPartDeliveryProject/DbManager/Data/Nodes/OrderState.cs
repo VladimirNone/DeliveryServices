@@ -4,6 +4,7 @@ namespace DbManager.Data.Nodes
 {
     public class OrderState : Node, INode
     {
+        public static List<OrderState> OrderStatesFromDb { get; set; }
         public int NumberOfStage { get; set; }
         public string NameOfState { get; set; }
         public string DescriptionForClient { get; set; }

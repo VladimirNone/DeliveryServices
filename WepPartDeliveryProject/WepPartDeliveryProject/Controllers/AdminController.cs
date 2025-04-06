@@ -38,7 +38,7 @@ namespace WepPartDeliveryProject.Controllers
         [HttpGet("getOrders")]
         public async Task<IActionResult> GetOrders(int page = 0, int numberOfState = 1)
         {
-            var orderRelations = await _repositoryFactory.GetRepository<OrderState>().GetRelationsOfNodesAsync<HasOrderState, Order>(ObjectCache<OrderState>.Instance.First(h=>h.NumberOfStage == numberOfState), _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "TimeStartState");
+            var orderRelations = await _repositoryFactory.GetRepository<OrderState>().GetRelationsOfNodesAsync<HasOrderState, Order>(OrderState.OrderStatesFromDb.First(h=>h.NumberOfStage == numberOfState), _appSettings.CountOfItemsOnWebPage * page, _appSettings.CountOfItemsOnWebPage + 1, "TimeStartState");
 
             var orders = orderRelations.Select(h => (Order)h.NodeFrom).ToList();
 
@@ -193,7 +193,7 @@ namespace WepPartDeliveryProject.Controllers
                 return BadRequest("Данные о блюде не обнаружены");
             }
 
-            var category = ObjectCache<Category>.Instance.SingleOrDefault(h => h.Id.ToString() == inputData.CategoryId);
+            var category = Category.CategoriesFromDb.SingleOrDefault(h => h.Id.ToString() == inputData.CategoryId);
 
             var curDishCategory = await dishRepo.GetRelationsOfNodesAsync<ContainsDish, Category>(dishToChange);
 
@@ -223,7 +223,7 @@ namespace WepPartDeliveryProject.Controllers
             var dishRepo = _repositoryFactory.GetRepository<Dish>();
             var dish = _mapper.Map<Dish>(inputData);
             dish.Images = new List<string>();
-            var category = ObjectCache<Category>.Instance.SingleOrDefault(h => h.Id.ToString() == inputData.CategoryId);
+            var category = Category.CategoriesFromDb.SingleOrDefault(h => h.Id.ToString() == inputData.CategoryId);
 
             await dishRepo.AddNodeAsync(dish);
             await dishRepo.RelateNodesAsync(new ContainsDish() { NodeFrom = category, NodeTo = dish});

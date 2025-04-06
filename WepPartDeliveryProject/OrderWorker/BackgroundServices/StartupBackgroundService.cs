@@ -28,14 +28,15 @@ namespace OrderWorker.BackgroundServices
                 using var activity = this._instrumentation.ActivitySource.StartActivity($"{nameof(StartupBackgroundService)}");
 
                 this._logger.LogInformation("Start loading containers");
-                ObjectCache<Category>.Instance.AddList(await this._repoFactory.GetRepository<Category>().GetNodesAsync());
-                ObjectCache<OrderState>.Instance.AddList(await this._repoFactory.GetRepository<OrderState>().GetNodesAsync());
-/*                ObjectCache<Dish>.Instance.AddList(await this._repoFactory.GetRepository<Dish>().GetNodesAsync());
-                ObjectCache<DeliveryMan>.Instance.AddList(await this._repoFactory.GetRepository<DeliveryMan>().GetNodesAsync());
-                ObjectCache<Kitchen>.Instance.AddList(await this._repoFactory.GetRepository<Kitchen>().GetNodesAsync());
-                ObjectCache<KitchenWorker>.Instance.AddList(await this._repoFactory.GetRepository<KitchenWorker>().GetNodesAsync());
-                ObjectCache<Client>.Instance.AddList(await this._repoFactory.GetRepository<Client>().GetNodesAsync());
-                ObjectCache<Admin>.Instance.AddList(await this._repoFactory.GetRepository<Admin>().GetNodesAsync());*/
+                OrderState.OrderStatesFromDb = await this._repoFactory.GetRepository<OrderState>().GetNodesAsync();
+
+                Category.CategoriesFromDb = await this._repoFactory.GetRepository<Category>().GetNodesAsync();
+                /*                ObjectCache<Dish>.Instance.AddList(await this._repoFactory.GetRepository<Dish>().GetNodesAsync());
+                                ObjectCache<DeliveryMan>.Instance.AddList(await this._repoFactory.GetRepository<DeliveryMan>().GetNodesAsync());
+                                ObjectCache<Kitchen>.Instance.AddList(await this._repoFactory.GetRepository<Kitchen>().GetNodesAsync());
+                                ObjectCache<KitchenWorker>.Instance.AddList(await this._repoFactory.GetRepository<KitchenWorker>().GetNodesAsync());
+                                ObjectCache<Client>.Instance.AddList(await this._repoFactory.GetRepository<Client>().GetNodesAsync());
+                                ObjectCache<Admin>.Instance.AddList(await this._repoFactory.GetRepository<Admin>().GetNodesAsync());*/
                 this._logger.LogInformation("Finish loading containers");
             });
             this._deliveryHealthCheck.StartupCompleted = true;

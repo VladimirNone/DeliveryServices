@@ -84,6 +84,12 @@ try
 
     app.MapControllers();
 
+    // Configure OpenTelemetry Prometheus AspNetCore middleware scrape endpoint if enabled.
+    if (metricsExporter.Equals("prometheus", StringComparison.OrdinalIgnoreCase))
+    {
+        app.UseOpenTelemetryPrometheusScrapingEndpoint();
+    }
+
     app.Run();
 }
 catch (Exception exception)

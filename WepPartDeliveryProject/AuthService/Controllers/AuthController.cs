@@ -15,12 +15,14 @@ namespace WepPartDeliveryProject.Controllers
         private readonly IRepositoryFactory _repositoryFactory;
         private readonly IPasswordService _pswService;
         private readonly JwtService _jwtService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IRepositoryFactory repositoryFactory, IPasswordService passwordService, JwtService jwtService)
+        public AuthController(IRepositoryFactory repositoryFactory, IPasswordService passwordService, JwtService jwtService, ILogger<AuthController> logger)
         {
             _repositoryFactory = repositoryFactory;
             _pswService = passwordService;
             _jwtService = jwtService;
+            _logger = logger;
         }
 
         private void AddCookieDataToResponse(string RefreshToken, string? userId = null)
@@ -42,6 +44,7 @@ namespace WepPartDeliveryProject.Controllers
             var users = await _repositoryFactory.GetRepository<User>().GetNodesByPropertyAsync("Login", new[] { data.Login });
             if(users.Count != 1)
             {
+                _logger.LogInformation("Вы ввели не верный логин");
                 return BadRequest("Вы ввели не верный логин");
             }
 
@@ -49,21 +52,27 @@ namespace WepPartDeliveryProject.Controllers
 
             if (user.IsBlocked)
             {
+                _logger.LogInformation("Login Ваш аккаунт был заблокирован!");
                 return BadRequest("Ваш аккаунт был заблокирован!");
             }
 
             if(_pswService.CheckPassword(data.Login, data.Password, user.PasswordHash.ToArray()))
             {
-                user.RefreshToken = Guid.NewGuid();
-                user.RefreshTokenCreated = DateTime.Now;
+                if(user.RefreshTokenCreated.AddDays(60) < DateTime.Now)
+                {
+                    _logger.LogInformation($"попали сюда, хотя не должны. {user.RefreshTokenCreated}");
+                    user.RefreshToken = Guid.NewGuid();
+                    user.RefreshTokenCreated = DateTime.Now;
 
-                await ((IUserRepository)_repositoryFactory.GetRepository<User>()).UpdateRefreshTokenAsync(user);
+                    await ((IUserRepository)_repositoryFactory.GetRepository<User>()).UpdateRefreshTokenAsync(user);
+                }
 
                 AddCookieDataToResponse(user.RefreshToken.ToString(), user.Id.ToString());
 
                 return Ok();
             }
 
+            _logger.LogInformation($"попали сюда, хотя не должны. Не проверился пароль");
             return Unauthorized("Вы ввели не верный логин или пароль");
         }
 
@@ -74,14 +83,21 @@ namespace WepPartDeliveryProject.Controllers
 
             var userId = Request.Cookies["X-UserId"];
             if (userId == null)
+            {
+                _logger.LogInformation("У вас отсутсвует refresh token. Вам необходимо авторизоваться или зарегистрироваться.");
                 return BadRequest("У вас отсутсвует refresh token. Вам необходимо авторизоваться или зарегистрироваться.");
+            }
+
 
             var inputRefreshToken = Request.Cookies["X-Refresh-Token"];
 
             var userNode = await userRepo.GetNodeAsync(userId);
 
             if (userNode.IsBlocked)
-                return BadRequest("Ваш аккаунт был заблокирован!");
+            {
+                _logger.LogInformation("RefreshAccessToken Ваш аккаунт был заблокирован!");
+                return BadRequest("Ваш аккаунт был заблокирован!"); 
+            }
 
             if (inputRefreshToken == userNode.RefreshToken.ToString() && userNode.RefreshTokenCreated.AddDays(60) > DateTime.Now)
             {
@@ -94,6 +110,7 @@ namespace WepPartDeliveryProject.Controllers
                 return Ok(jwtTokenInfo);
             }
 
+            _logger.LogInformation("You refresh token don't work. You need to login or signup to system");
             return BadRequest("You refresh token don't work. You need to login or signup to system");
         }
 

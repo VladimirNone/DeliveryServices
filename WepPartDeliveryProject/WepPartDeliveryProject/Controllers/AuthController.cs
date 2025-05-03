@@ -55,10 +55,13 @@ namespace WepPartDeliveryProject.Controllers
 
             if(_pswService.CheckPassword(data.Login, data.Password, user.PasswordHash.ToArray()))
             {
-                user.RefreshToken = Guid.NewGuid();
-                user.RefreshTokenCreated = DateTime.Now;
+                if(user.RefreshTokenCreated.AddDays(60) > DateTime.Now)
+                {
+                    user.RefreshToken = Guid.NewGuid();
+                    user.RefreshTokenCreated = DateTime.Now;
 
-                await ((IUserRepository)_repositoryFactory.GetRepository<User>()).UpdateRefreshTokenAsync(user);
+                    await ((IUserRepository)_repositoryFactory.GetRepository<User>()).UpdateRefreshTokenAsync(user);
+                }
 
                 AddCookieDataToResponse(user.RefreshToken.ToString(), user.Id.ToString());
 
